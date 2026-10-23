@@ -1,0 +1,19 @@
+# Libraries used by the shared foundation (installed together in a clean venv, Python 3.14.7).
+# We prefer a library over hand-written code: metrics=ranx, split=scikit-learn, groups=scipy,
+# config=omegaconf, ingredient parsing=ingredient-parser-nlp, plurals=inflect, download=pooch.
+# Each owner appends their own pinned dependencies after testing them:
+#   Person 1: rank-bm25 (BM25)
+#   Person 2: sentence-transformers, torch (CPU), fastapi, uvicorn, joblib
+#   Person 3: training-only extras go to requirements-train.txt
+numpy==2.5.3
+pandas==3.0.5
+pydantic==2.13.5
+PyYAML==6.0.3
+omegaconf==2.4.0
+scikit-learn==1.9.1
+scipy==1.18.1
+ranx==0.3.21
+ingredient-parser-nlp==2.9.1
+inflect==7.6.0
+pooch==1.9.0
+mlflow==3.17.2

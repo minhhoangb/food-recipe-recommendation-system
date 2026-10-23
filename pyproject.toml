@@ -1,0 +1,25 @@
+[project]
+name = "food-recipe-recommendation-system"
+version = "0.1.0"
+description = "Ingredient-based recipe retrieval on RecipeNLG (MDS301 group project)"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+    "slow: needs the real processed data under data/processed",
+]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+extend-exclude = ["notebooks"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["E501"]
+"scripts/**" = ["E402"]
