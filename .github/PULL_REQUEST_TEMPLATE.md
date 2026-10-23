@@ -12,4 +12,4 @@
 
 - [ ] Commit messages follow `<type>: <description>` (feat, fix, docs, test, refactor, chore)
 - [ ] No model files, embeddings, raw CSV or secrets committed
-- [ ] Numbers I quote in docs/report come from a run record, not from memory
+- [ ] Numbers I quote in docs/report come from an MLflow run, not from memory

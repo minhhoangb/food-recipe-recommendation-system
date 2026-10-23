@@ -5,8 +5,6 @@ paths:
   # Raw CSV is never modified. Override with env RECIPENLG_RAW or --raw-path.
   raw_csv: data/raw/RecipeNLG_dataset.csv
   processed_dir: data/processed
-  models_dir: models
-  runs_dir: reports/runs
 
 data:
   profile: main              # main | pilot (which processed folder consumers read)
@@ -34,9 +32,3 @@ artifacts:
   # Filled in by the data owner after uploading dist/processed-<id>.zip (see scripts/).
   url: ""
   sha256: ""
-
-api:
-  max_ingredients: 50
-  max_ingredient_chars: 100
-  max_top_k: 20
-  max_batch: 20

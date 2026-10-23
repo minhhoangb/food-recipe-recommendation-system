@@ -77,7 +77,7 @@ class SearchHit:
 
 @runtime_checkable
 class Retriever(Protocol):
-    """Every model (jaccard, tfidf, bm25, lsa, minilm_*) exposes exactly this.
+    """Every model (tfidf-reference, tfidf, bm25, lsa, minilm_*) exposes exactly this.
 
     Rules (checked by tests/contract_utils.py):
       * input are already-normalised ingredients (use src.normalize.normalize_ingredients);

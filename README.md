@@ -2,7 +2,7 @@
 
 Type the ingredients you have, get recipes that use them, with what you already have and what is still missing. Ingredient-list retrieval on the RecipeNLG corpus (English only), comparing TF-IDF / BM25 / LSA baselines with a pretrained and a fine-tuned `all-MiniLM-L6-v2` encoder, served by a FastAPI app with a small web UI.
 
-> Status: the shared foundation (data, contracts, metrics, tooling) is done. Sections marked **TODO(owner)** are filled in by their owner as the work lands. Do not put numbers here that do not come from a run record.
+> Status: the shared foundation (data, contracts, metrics, tooling) is done. Sections marked **TODO(owner)** are filled in by their owner as the work lands. Do not put numbers here that do not come from an MLflow run.
 
 ## Team
 
@@ -17,11 +17,11 @@ Type the ingredients you have, get recipes that use them, with what you already 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate          # Windows; Linux/macOS: source .venv/bin/activate
-pip install -r requirements-dev.txt
+pip install -r requirements.txt
 python -m pytest
 ```
 
-Python 3.11 or 3.12 is recommended for the model work. Serving and training dependencies are added to `requirements.txt` / `requirements-train.txt` by their owners after testing (**TODO(owner)**).
+Python 3.11 or 3.12 is recommended for the model work. Serving and training dependencies are appended to `requirements.txt` by their owners after testing (**TODO(owner)**).
 
 ## Dataset
 
@@ -56,7 +56,7 @@ Current sizes are in `data/processed/<profile>/dataset_manifest.json`.
 
 ## Experiment results (Master Comparison Table)
 
-**TODO(Person 1)**: filled from `reports/runs/` after the frozen final evaluation.
+**TODO(Person 1)**: filled from the MLflow runs after the frozen final evaluation.
 
 ## API usage
 
@@ -80,9 +80,9 @@ data/processed/ corpus.jsonl, splits.json, queries.jsonl, qrels.jsonl, manifest 
 fe/             static web UI                                (Person 2)
 models/         serving bundles (git-ignored)
 notebooks/      00_colab_bootstrap.ipynb, EDA, fine-tuning
-reports/        figures, runs/ (JSON run records), final report
+reports/        figures, final report
 scripts/        verify_data.py, package_artifacts.py, fetch_artifacts.py
-src/            contracts, config, normalize, preprocess, data_collection, queries, reference
+src/            contracts, config, utils, normalize, preprocess, data_collection, queries, reference
 tests/          pytest suite, tests/fixtures (hand-written, not RecipeNLG)
 ```
 

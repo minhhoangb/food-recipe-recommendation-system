@@ -26,7 +26,7 @@ Data is built once by the data owner. Everyone else only reads it. Never regener
 | --- | --- |
 | Person 1 | `src/features.py`, `src/pipeline.py`, `src/baseline.py`, `src/evaluate.py`, EDA notebooks, comparison and error analysis, manual labels |
 | Person 2 | `src/embeddings.py`, `src/retrieval.py`, `src/predict.py`, `src/benchmark.py`, `api/`, `fe/`, `Dockerfile`, `docker-compose.yml`, README run/API/Docker sections |
-| Person 3 | `src/build_pairs.py`, `src/finetune.py`, `src/train.py`, MLflow registry/aliases, `src/monitor.py`, Colab fine-tune notebook, `requirements-train.txt` |
+| Person 3 | `src/build_pairs.py`, `src/finetune.py`, `src/train.py`, MLflow registry/aliases, `src/monitor.py`, Colab fine-tune notebook |
 | Shared (needs both other reviews) | `src/contracts.py`, `src/config.py`, `src/normalize.py`, `configs/*`, `src/data_collection.py`, `src/queries.py`, `src/preprocess.py` |
 
 A shared file may be edited by anyone through a PR that the two other members approve. If a change alters data output (normalization, sampling, splits), the data owner rebuilds and republishes the artifacts, and the PR says so.
@@ -47,7 +47,7 @@ git config core.hooksPath .githooks
 ```bash
 python -m venv .venv
 .venv\Scripts\activate            # Windows (Linux/macOS: source .venv/bin/activate)
-pip install -r requirements-dev.txt
+pip install -r requirements.txt
 python -m pytest
 python scripts/verify_data.py
 ```
@@ -57,6 +57,6 @@ Python 3.11 or 3.12 is recommended for the model/serving work (torch, sentence-t
 ## Rules that protect the results
 
 - A model may only be *fit* on `train`. `validation` is for tuning. `test` is read once, after the configuration is frozen.
-- Quote only numbers that come from a run record (`reports/runs/*.json` or MLflow). Mark simulated or fixture results as such.
+- Quote only numbers that come from an MLflow run. Mark simulated or fixture results as such.
 - Fixtures are for tests. Never show fixture output as a result.
 - Do not commit raw CSV, embeddings, model weights, or large indexes.

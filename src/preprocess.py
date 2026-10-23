@@ -13,18 +13,6 @@ from src.normalize import normalize_ingredients
 _SPACES = re.compile(r"\s+")
 _NON_ALNUM = re.compile(r"[^a-z0-9]+")
 
-DROP_REASONS = (
-    "missing_field",
-    "malformed_ingredients",
-    "malformed_directions",
-    "malformed_ner",
-    "empty_title",
-    "empty_directions",
-    "missing_link",
-    "ingredient_count_out_of_range",
-    "exact_duplicate",
-)
-
 
 def parse_str_list(value: Any) -> list[str] | None:
     """Parse a stringified list of strings. Returns None if missing or malformed.
