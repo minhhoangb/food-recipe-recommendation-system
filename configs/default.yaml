@@ -1,0 +1,34 @@
+# Default profile (main corpus). configs/pilot.yaml overrides a few keys.
+seed: 42
+
+paths:
+  # Raw CSV is never modified. Override with env RECIPENLG_RAW or --raw-path.
+  raw_csv: data/raw/RecipeNLG_dataset.csv
+  processed_dir: data/processed
+
+data:
+  profile: main              # main | pilot (which processed folder consumers read)
+  n_main: 50000              # target recipes after validity filter + exact dedup
+  n_pilot: 5000              # first n_pilot of the main selection (nested subset)
+  candidate_factor: 2.0      # oversample before filters; auto-increased if too few survive
+  chunk_rows: 200000
+  min_ingredients: 2         # normalised ingredients per recipe
+  max_ingredients: 40
+  test_fraction: 0.20        # outer split by group
+  validation_fraction: 0.08  # ~10% of outer train => ~72/8/20 overall
+
+queries:
+  min_recipe_ingredients: 3  # shorter recipes are skipped for query generation
+  min_query_size: 2
+  max_query_size: 6
+  common_df_threshold: 0.02  # ingredients in >2% of recipes are "common"; a query needs >=1 non-common
+  # Caps per split: [main, pilot]
+  caps:
+    train: {main: 5000, pilot: 1000}
+    validation: {main: 500, pilot: 200}
+    test: {main: 1000, pilot: 300}
+
+artifacts:
+  # Filled in by the data owner after uploading dist/processed-<id>.zip (see scripts/).
+  url: ""
+  sha256: ""

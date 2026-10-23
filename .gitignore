@@ -5,16 +5,17 @@ __pycache__/
 venv/
 .ipynb_checkpoints/
 .env
+.pytest_cache/
+.ruff_cache/
 
-# Data & models (large) - keep the folders, ignore the contents
+# Data, models and generated files stay out of git (keep the folders)
 data/*
 !data/.gitkeep
 models/*
 !models/.gitkeep
-
-# Node (fe)
-node_modules/
 dist/
+mlruns/
+*.db
 
 # OS / IDE
 .DS_Store

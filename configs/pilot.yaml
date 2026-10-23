@@ -1,0 +1,3 @@
+# Pilot profile: merged over default.yaml. Consumers read data/processed/pilot.
+data:
+  profile: pilot
