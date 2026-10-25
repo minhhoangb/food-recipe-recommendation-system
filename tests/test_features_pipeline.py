@@ -51,8 +51,10 @@ def test_feature_pipeline_fit_transform_and_pickle(built_fixture, tmp_path):
 
     joblib.dump(pipeline, tmp_path / "features.joblib")
     again = joblib.load(tmp_path / "features.joblib").transform(frame)
-    assert np.allclose(features.toarray() if hasattr(features, "toarray") else features,
-                       again.toarray() if hasattr(again, "toarray") else again)
+    assert np.allclose(
+        features.toarray() if hasattr(features, "toarray") else features,
+        again.toarray() if hasattr(again, "toarray") else again,
+    )
 
 
 def test_feature_pipeline_scaling_uses_train_statistics(built_fixture):
