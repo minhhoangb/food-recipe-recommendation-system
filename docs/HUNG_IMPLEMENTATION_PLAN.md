@@ -163,21 +163,42 @@ on `dev` yet. `src/build_pairs.py`, `src/finetune.py`, `src/train.py` belong to 
 
 ## F. Acceptance checklist
 
-- [ ] `python -m src.embeddings --config configs/pilot.yaml` creates a bundle
-- [ ] E04 and E05 document formats unit-tested
-- [ ] embeddings shape/dtype/finite/L2-norm/id-order tests pass
-- [ ] truncation count reported with `max_seq_length=128`
-- [ ] bundle validates against `BundleManifest`
-- [ ] `DenseRetriever` passes `assert_retriever_contract`
-- [ ] bad hash / dim mismatch / id mismatch / missing file -> specific errors
-- [ ] corpus never re-encoded at load
-- [ ] CPU cold-load time measured
-- [ ] E04 + E05 evaluated with ranx (recall@5, recall@10, mrr@10)
-- [ ] 2 MLflow runs with params, metrics, encode duration, RAM
-- [ ] comparison table with real numbers
-- [ ] clean venv install + green pytest
-- [ ] README updated
-- [ ] `models/` stays git-ignored
+- [x] `python -m src.embeddings --config configs/pilot.yaml` creates a bundle
+- [x] E04 and E05 document formats unit-tested
+- [x] embeddings shape/dtype/finite/L2-norm/id-order tests pass
+- [x] truncation count reported with `max_seq_length=128` (E04: 1, E05: 1)
+- [x] bundle validates against `BundleManifest`
+- [x] `DenseRetriever` passes `assert_retriever_contract` (fake encoder and real E04 bundle)
+- [x] bad hash / dim mismatch / id mismatch / missing file -> specific errors
+- [x] corpus never re-encoded at load
+- [x] CPU cold-load time measured (E04: 16.8 s, E05: 5.2 s, model weights warm on second run)
+- [x] E04 + E05 evaluated with ranx (recall@5, recall@10, mrr@10) on pilot/validation (200 queries)
+- [x] 2 MLflow runs with params, metrics, encode duration, RAM
+- [x] comparison table with real numbers (`reports/e04_e05_pilot.md`)
+- [x] clean venv install + green pytest (120 passed, 2 skipped)
+- [x] README updated
+- [x] `models/` stays git-ignored (two local bundles, untracked)
+- [x] `data/processed/` verified with `scripts/verify_data.py` ([pilot] OK, [main] OK)
+
+## G. Execution log (real commands and outputs)
+
+- `python -m venv .venv` + `pip install -r requirements.txt` -> base requirements installed.
+- `pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu`,
+  `pip install sentence-transformers==5.1.2`, `pip install psutil` -> versions pinned in
+  `requirements.txt` (torch 2.9.1+cpu, sentence-transformers 5.1.2, psutil 7.2.2).
+- MiniLM cold load on CPU -> `loaded 384 256` (dim 384; default 256, clamped to 128 in code).
+- RecipeNLG mirror check -> `SandhyaKilari/RecipeNLG_dataset` and `Mahimas/recipenlg` host the
+  identical 2 294 981 083-byte CSV; downloaded at ~3 MB/s to `data/raw/` (git-ignored).
+- `python -m src.data_collection --raw-path data/raw/RecipeNLG_dataset.csv --config configs/pilot.yaml`
+  -> pilot {5000 recipes, 1500 queries} and main {50000 recipes, 6500 queries}; drop reasons
+  {ingredient_count_out_of_range: 180, exact_duplicate: 180}.
+- `python scripts/verify_data.py` -> `[pilot] OK`, `[main] OK`.
+- `python -m src.embeddings --config configs/pilot.yaml --mode ingredients`
+  -> `models/minilm_pretrained-E04-pilot-37e8411f`, 5000 docs, dim 384, truncated 1, 21.6 s.
+- `python -m src.embeddings --config configs/pilot.yaml --mode title_ingredients`
+  -> `models/minilm_pretrained-E05-pilot-37e8411f`, 5000 docs, dim 384, truncated 1, 27.8 s.
+- `python -m src.evaluation --mode both --config configs/pilot.yaml --split validation
+  --out reports/e04_e05_pilot.md` -> table below; MLflow runs recorded (see section 8 of the final report).
 
 ---
 
