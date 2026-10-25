@@ -33,7 +33,7 @@ A shared file may be edited by anyone through a PR that the two other members ap
 
 ## Git
 
-- One feature branch per task (`feature/<owner>-<topic>`), merged into `main` by pull request with at least one reviewer who is not the author. `main` must always run (`python -m pytest` green).
+- One feature branch per task, named after the feature (`feature/<topic>`, e.g. `feature/baselines-evaluation`), merged into `main` by pull request with at least one reviewer who is not the author. `main` must always run (`python -m pytest` green).
 - Commit messages: `<type>: <description>` with type in `feat fix docs test refactor chore perf ci data exp`. Enable the check once per clone:
 
 ```bash
