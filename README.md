@@ -23,6 +23,30 @@ python -m pytest
 
 Python 3.11 or 3.12 is recommended for the model work. Serving and training dependencies are appended to `requirements.txt` by their owners after testing (**TODO(owner)**).
 
+### CPU-only torch (needed for the MiniLM encoder)
+
+`requirements.txt` pins `torch` and `sentence-transformers`. On Linux the default `torch`
+wheel bundles CUDA; to keep the environment small and CPU-only, install torch from the CPU
+index **before** the rest of the requirements:
+
+```bash
+pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu
+pip install -r requirements.txt
+```
+
+On Windows and macOS the default torch wheel is already CPU-only, so `pip install -r
+requirements.txt` is enough. Everything in this project runs on CPU; CUDA is never
+required. Google Colab works the same way:
+
+```bash
+%pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu
+%pip install -r requirements.txt
+```
+
+The first run downloads the pretrained weights (~90 MB) into the Hugging Face cache; after
+that the pipeline is offline. `src/embeddings.py` and `src/retrieval.py` never ask for
+CUDA (`device="cpu"`), so Colab's CPU runtime is enough.
+
 ## Dataset
 
 - **RecipeNLG** (Bien et al., INLG 2020), about 2.23 million recipes, 7 columns: `title, ingredients, directions, link, source, NER` plus an index. Project page: https://recipenlg.cs.put.poznan.pl/ (also mirrored on Kaggle). Read the dataset's own terms of use before redistributing anything; this repository does not redistribute the raw file and no licence has been assumed here.
@@ -54,6 +78,62 @@ Current sizes are in `data/processed/<profile>/dataset_manifest.json`.
 
 **TODO(Person 1/2/3)**: preprocessing/feature description, model list (E01-E10), tuning, results. Interfaces are fixed in `src/contracts.py` (`Retriever.search(ingredients, top_k) -> list[SearchHit]`).
 
+### Pretrained MiniLM encoder and dense retriever (Person 2)
+
+`src/embeddings.py` encodes the corpus with `sentence-transformers/all-MiniLM-L6-v2` on CPU,
+in batches, with `max_seq_length=128` and L2-normalised vectors. Two document
+representations are supported:
+
+| Mode | Label | Embedded text |
+| --- | --- | --- |
+| `ingredients` | E04 | `"garlic, rice, olive oil"` |
+| `title_ingredients` | E05 | `"Garlic Chicken. Ingredients: garlic, rice, olive oil"` |
+
+```bash
+# E04 bundle -> models/minilm_pretrained-E04-pilot-<corpus-sha8>/
+python -m src.embeddings --config configs/pilot.yaml --mode ingredients
+# E05 bundle
+python -m src.embeddings --config configs/pilot.yaml --mode title_ingredients
+```
+
+Each bundle holds `embeddings.npy` (float32, one row per recipe, L2-normalised),
+`recipe_ids.json` (the same order) and `manifest.json` (a `BundleManifest` plus the
+embedding mode, `max_seq_length`, the truncated-document count and the measured encode
+time). The bundles live under `models/` and are **not** committed to git.
+
+`src/retrieval.py` loads a bundle and searches it by cosine similarity
+(`sentence_transformers.util.semantic_search` over normalised vectors). The corpus is
+never re-encoded: only the query goes through the model. Results follow the Retriever
+contract: at most `top_k` hits, score descending, ties broken by `recipe_id` ascending.
+
+```python
+from src.retrieval import DenseRetriever
+
+retriever = DenseRetriever.from_bundle("models/minilm_pretrained-E04-pilot-<sha8>")
+for hit in retriever.search(["chicken", "rice"], 5):
+    print(hit.recipe_id, hit.score)
+```
+
+Loading a bundle verifies every invariant the manifest declares (file hashes, recipe id
+order, vector count, embedding dimension, normalisation) and raises a `BundleError` that
+names the broken invariant.
+
+### E04 / E05 evaluation
+
+`src/evaluation.py` embeds (or reuses a bundle), retrieves and scores the validation split
+with `ranx` (Recall@5, Recall@10, MRR@10), then logs the run to MLflow with the model,
+the embedding mode, the corpus id, the measured encode time, the CPU cold-load time and
+the peak RAM.
+
+```bash
+python -m src.evaluation --mode both --config configs/pilot.yaml --split validation
+python -m src.evaluation --mode both --split validation --out reports/e04_e05_pilot.md
+```
+
+MLflow runs are stored in `mlflow.db` (git-ignored); open them with `mlflow ui`. Person 1's
+`src/evaluate.py` owns the shared baseline evaluation; the metric conventions are the ones
+locked in `tests/test_ranking_metrics.py`.
+
 ## Experiment results (Master Comparison Table)
 
 **TODO(Person 1)**: filled from the MLflow runs after the frozen final evaluation.
@@ -83,7 +163,9 @@ notebooks/      00_colab_bootstrap.ipynb, EDA, fine-tuning
 reports/        figures, final report
 scripts/        verify_data.py, package_artifacts.py, fetch_artifacts.py
 src/            contracts, config, utils, normalize, preprocess, data_collection, queries, reference
+                embeddings, retrieval, evaluation, memory    (Person 2)
 tests/          pytest suite, tests/fixtures (hand-written, not RecipeNLG)
+docs/           implementation plans per owner
 ```
 
 ## Reproducibility

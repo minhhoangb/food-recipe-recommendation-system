@@ -14,6 +14,15 @@ ranx==0.3.21
 ingredient-parser-nlp==2.9.1
 inflect==7.6.0
 pooch==1.9.0
+psutil==7.2.2
 mlflow==3.17.2
 pytest==9.1.1
 ruff==0.17.0
+
+# Person 2 (Hưng): pretrained MiniLM encoder + dense retrieval.
+# torch is the CPU build; install it from the CPU index (see README, Installation):
+#   pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu
+# The line below installs the default (CUDA) wheel on Linux; the CPU index is only needed
+# when the CUDA build is not wanted. On Windows/macOS the default torch wheel is CPU-only.
+torch==2.9.1
+sentence-transformers==5.1.2
