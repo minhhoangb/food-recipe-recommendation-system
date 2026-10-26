@@ -146,9 +146,53 @@ locked in `tests/test_ranking_metrics.py`.
 
 **TODO(Person 2)**: `docker build`, `docker compose up --build`, health check.
 
+### Fine-tuning and training pipeline (Person 3)
+
+`src/build_pairs.py` builds training pairs and hard negatives from `data/processed/<profile>/`.
+`src/finetune.py` fine-tunes `sentence-transformers/all-MiniLM-L6-v2` with `MultipleNegativesRankingLoss`.
+`src/train.py` orchestrates the complete workflow:
+
+```bash
+# 1. Build training pairs/triplets
+python -m src.build_pairs --config configs/pilot.yaml --split train --mode ingredients --negatives
+
+# 2. Fine-tune model directly
+python -m src.finetune --config configs/pilot.yaml --epochs 1 --batch-size 16
+
+# 3. Or run the full end-to-end training, bundle creation, evaluation, and MLflow logging:
+python -m src.train --config configs/pilot.yaml --epochs 1 --batch-size 16 --promote
+```
+
+### Production API & Model Monitoring (Person 3)
+
+`src/monitor.py` parses `RequestLogRecord` entries from `logs/requests.jsonl` to compute request throughput, error rates, p90/p95/p99 latency, zero-hit rate, and vocabulary drift:
+
+```bash
+python -m src.monitor --log-path logs/requests.jsonl --out reports/monitoring_report.md --mlflow
+```
+
+## Experiment results (Master Comparison Table)
+
+**TODO(Person 1)**: filled from the MLflow runs after the frozen final evaluation.
+
+## API usage
+
+**TODO(Person 2)**: endpoints `GET /health`, `GET /model-info`, `POST /predict`, `POST /batch-predict`, curl and Python examples. Request/response schemas are already defined in `src/contracts.py`.
+
+## Docker
+
+**TODO(Person 2)**: `docker build`, `docker compose up --build`, health check.
+
 ## MLflow
 
-**TODO(Person 3)**: launching the UI, experiments, registry (`staging` / `production`).
+MLflow tracks all baseline runs, pretrained evaluations, and fine-tuning experiments under `mlflow.db`:
+
+```bash
+# Launch the MLflow UI
+mlflow ui --backend-store-uri sqlite:///mlflow.db
+```
+
+Experiments are recorded in `recipe-retrieval`. Serving bundles are saved as artifacts, and fine-tuned models are registered in the MLflow Model Registry under `minilm_finetuned` with aliases (`staging`, `production`).
 
 ## Repository structure
 
@@ -159,11 +203,12 @@ data/raw/       original CSV, never modified (git-ignored)
 data/processed/ corpus.jsonl, splits.json, queries.jsonl, qrels.jsonl, manifest per profile
 fe/             static web UI                                (Person 2)
 models/         serving bundles (git-ignored)
-notebooks/      00_colab_bootstrap.ipynb, EDA, fine-tuning
-reports/        figures, final report
+notebooks/      00_colab_bootstrap.ipynb, 01_finetune_colab.ipynb, EDA
+reports/        figures, final report, monitoring_report.md
 scripts/        verify_data.py, package_artifacts.py, fetch_artifacts.py
 src/            contracts, config, utils, normalize, preprocess, data_collection, queries, reference
                 embeddings, retrieval, evaluation, memory    (Person 2)
+                build_pairs, finetune, train, monitor        (Person 3)
 tests/          pytest suite, tests/fixtures (hand-written, not RecipeNLG)
 docs/           implementation plans per owner
 ```
@@ -173,5 +218,5 @@ docs/           implementation plans per owner
 - Seed 42 everywhere; `configs/default.yaml` holds every data parameter and is hashed into each manifest.
 - `python -m src.data_collection` reproduces the processed files exactly (hashes are in the manifest; `tests/test_data_collection.py::test_build_is_reproducible` checks it on a fixture).
 - `python -m pytest` runs offline in seconds. Tests that read the real processed data skip themselves if it is absent.
-- Training from scratch (`python src/train.py`) and CPU fallback: **TODO(Person 3)**.
+- Training from scratch: run `python -m src.train --config configs/pilot.yaml`. Runs on CPU by default; automatically leverages CUDA when available (e.g. on Colab GPU).
 - Collaboration rules and file ownership: [CONTRIBUTING.md](CONTRIBUTING.md).
