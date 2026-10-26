@@ -47,6 +47,9 @@ def evaluate_retriever(
         run[query["query_id"]] = {hit.recipe_id: float(len(hits) - rank) for rank, hit in enumerate(hits)}
     latency_ms = 1000 * (time.perf_counter() - started) / max(len(queries), 1)
 
+    if not any(run.values()):
+        return {**{m: 0.0 for m in metrics}, "n_queries": len(queries), "latency_ms": latency_ms}
+
     scores = evaluate(Qrels(qrels), Run(run), list(metrics), make_comparable=True)
     scores = scores if isinstance(scores, dict) else {metrics[0]: scores}
     return {**{k: float(v) for k, v in scores.items()}, "n_queries": len(queries), "latency_ms": latency_ms}
