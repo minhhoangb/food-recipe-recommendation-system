@@ -74,7 +74,9 @@ class DenseRetriever:
         if manifest.normalized_vectors is False:
             raise BundleError("bundle vectors are not normalised; rebuild the bundle")
         encoder = model if model is not None else load_model()
-        return cls(encoder, vectors, recipe_ids, embedding_dim=int(vectors.shape[1]))
+        retriever = cls(encoder, vectors, recipe_ids, embedding_dim=int(vectors.shape[1]))
+        retriever.name = manifest.model_name
+        return retriever
 
     @classmethod
     def cold_load(cls, bundle: str | Path, model: Any | None = None) -> tuple[DenseRetriever, float]:

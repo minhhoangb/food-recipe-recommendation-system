@@ -177,10 +177,17 @@ def encode_corpus(
 
 
 # ---------------------------------------------------------------------------------------------
-# Bundle
-# ---------------------------------------------------------------------------------------------
-def bundle_run_id(mode: EmbeddingMode, profile: str, corpus_sha256: str) -> str:
-    return f"minilm_pretrained-{MODE_LABELS[mode]}-{profile}-{corpus_sha256[:8]}"
+from src.contracts import BundleManifest, ModelName, RecipeRecord
+
+# ... (rest unchanged)
+def bundle_run_id(
+    mode: EmbeddingMode,
+    profile: str,
+    corpus_sha256: str,
+    model_name: str = "minilm_pretrained",
+) -> str:
+    label = MODE_LABELS.get(mode, mode)
+    return f"{model_name}-{label}-{profile}-{corpus_sha256[:8]}"
 
 
 def save_bundle(
@@ -193,10 +200,11 @@ def save_bundle(
     corpus_sha256: str,
     truncated: int,
     encode_seconds: float,
+    model_name: ModelName = "minilm_pretrained",
     out_dir: Path = DEFAULT_MODELS_DIR,
 ) -> Path:
     """Write embeddings.npy, recipe_ids.json and manifest.json; return the bundle folder."""
-    run_id = bundle_run_id(mode, profile, corpus_sha256)
+    run_id = bundle_run_id(mode, profile, corpus_sha256, model_name=model_name)
     bundle = Path(out_dir) / run_id
     bundle.mkdir(parents=True, exist_ok=True)
 
@@ -205,7 +213,7 @@ def save_bundle(
 
     manifest = BundleManifest(
         run_id=run_id,
-        model_name="minilm_pretrained",
+        model_name=model_name,
         revision=None,
         corpus_sha256=corpus_sha256,
         recipe_ids_sha256=sha256_obj(recipe_ids),
