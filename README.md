@@ -148,19 +148,21 @@ locked in `tests/test_ranking_metrics.py`.
 
 ### Fine-tuning and training pipeline (Person 3)
 
-`src/build_pairs.py` builds training pairs and hard negatives from `data/processed/<profile>/`.
-`src/finetune.py` fine-tunes `sentence-transformers/all-MiniLM-L6-v2` with `MultipleNegativesRankingLoss`.
-`src/train.py` orchestrates the complete workflow:
+`src/build_pairs.py` builds training pairs from `train` recipes using `src.queries.make_query_ingredients` across multiple seeds (up to 10,000 pairs for pilot, seed 42) and Hưng's document representation (`src.embeddings.format_document`), outputting a manifest with SHA256 hashes. It also provides `NoDuplicateBatchSampler` ensuring no batch contains duplicate recipes or duplicate groups.
+
+`notebooks/02_finetune_colab.ipynb` runs fine-tuning on Colab GPU with `SentenceTransformerTrainer` + `MultipleNegativesRankingLoss`, evaluates every epoch with `InformationRetrievalEvaluator` (MRR@10), demonstrates `save_steps` checkpointing and `resume_from_checkpoint`, and exports the model.
+
+Hand-off to Person 2 (Hưng): pass the exported fine-tuned checkpoint via `--model-path`:
 
 ```bash
-# 1. Build training pairs/triplets
-python -m src.build_pairs --config configs/pilot.yaml --split train --mode ingredients --negatives
+# 1. Build training pairs with verified manifest
+python -m src.build_pairs --config configs/pilot.yaml --split train --mode ingredients --max-pairs 10000 --seed 42
 
-# 2. Fine-tune model directly
-python -m src.finetune --config configs/pilot.yaml --epochs 1 --batch-size 16
-
-# 3. Or run the full end-to-end training, bundle creation, evaluation, and MLflow logging:
+# 2. Fine-tune model directly or end-to-end with MLflow logging
 python -m src.train --config configs/pilot.yaml --epochs 1 --batch-size 16 --promote
+
+# 3. Person 2 (Hưng) hand-off: build serving bundle using the fine-tuned model checkpoint
+python -m src.embeddings --config configs/pilot.yaml --model-path models/minilm_finetuned_checkpoint
 ```
 
 ### Production API & Model Monitoring (Person 3)
@@ -203,7 +205,7 @@ data/raw/       original CSV, never modified (git-ignored)
 data/processed/ corpus.jsonl, splits.json, queries.jsonl, qrels.jsonl, manifest per profile
 fe/             static web UI                                (Person 2)
 models/         serving bundles (git-ignored)
-notebooks/      00_colab_bootstrap.ipynb, 01_finetune_colab.ipynb, EDA
+notebooks/      00_colab_bootstrap.ipynb, 02_finetune_colab.ipynb, EDA
 reports/        figures, final report, monitoring_report.md
 scripts/        verify_data.py, package_artifacts.py, fetch_artifacts.py
 src/            contracts, config, utils, normalize, preprocess, data_collection, queries, reference
