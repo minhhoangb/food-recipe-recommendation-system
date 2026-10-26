@@ -246,6 +246,9 @@ API_BACKEND=dense API_BUNDLE=models/minilm_pretrained-E04-main-1f1f4ce5 \
 The image size is reported in `reports/e04_e05_main_benchmark.md` after the build
 (torch CPU wheels are the bulk of it).
 
+The image bakes in the ingredient-parser NLTK resource **and** the MiniLM weights, so the
+dense backend also starts without network access. The corpus and the bundles are still
+mounted at runtime (`data/`, `models/`), never baked in.
 ## MLflow
 
 **TODO(Person 3)**: launching the UI, experiments, registry (`staging` / `production`).

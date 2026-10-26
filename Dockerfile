@@ -14,9 +14,10 @@ RUN pip install --timeout 120 --retries 10 torch==2.9.1 \
         --index-url https://download.pytorch.org/whl/cpu \
     && pip install --timeout 120 --retries 10 -r requirements.txt
 
-# ingredient-parser-nlp downloads one small NLTK resource on first import; do it at build
-# time so the container starts without network access.
-RUN python -c "import ingredient_parser"
+# ingredient-parser-nlp downloads one small NLTK resource on first import; the MiniLM
+# weights are pre-downloaded too, so the dense backend also runs without network access.
+RUN python -c "import ingredient_parser" \
+    && python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')"
 
 COPY api ./api
 COPY src ./src

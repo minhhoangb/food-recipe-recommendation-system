@@ -89,3 +89,20 @@ query came from". It is therefore **off by default** (`rerank="none"` in
 `src/predict.py`, `MissingFirstRetriever` is opt-in) and the metrics above document
 what it costs. The final ranking should be judged with manual labels (Person 1), not
 with the origin-recipe proxy.
+
+## (d) Docker
+
+```bash
+docker compose up --build    # API on http://127.0.0.1:8000
+docker compose --profile mlflow up  # optional MLflow UI on http://127.0.0.1:5000
+```
+
+- Image: `food-recipe-api:cpu`, **3.19 GB on disk / 751 MB compressed** (torch CPU wheels
+  and the baked-in MiniLM weights are the bulk). No CUDA: torch comes from the CPU index.
+- The image bakes in the ingredient-parser NLTK resource and the MiniLM weights, so both
+  backends start without network access; `data/` and `models/` are mounted read-only at
+  runtime, never baked in.
+- `HEALTHCHECK` calls `/health` every 30 s. `docker compose ps` reports the `api` service
+  as `Up (healthy)`; `/health` returns `{"status": "ok", "model": "tfidf-reference", ...}`.
+- Both backends were exercised inside the container: `reference` (5000 pilot recipes) and
+  `dense` (`minilm_pretrained-E04-main-1f1f4ce5`, 50 000 recipes) with a real `/predict`.

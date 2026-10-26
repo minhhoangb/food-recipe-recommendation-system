@@ -123,5 +123,7 @@ Full table, the hardware and the reasoning: `reports/e04_e05_main_benchmark.md`.
 - `python -m src.evaluation --mode both --config configs/default.yaml --split validation --ablation --out reports/e04_e05_main.md`
   -> the table above, 6 MLflow runs (E04, E05, E06 x 2).
 - `python -m pytest tests/test_predict.py tests/test_api.py` -> 15 + 17 tests pass.
-- `docker build -t food-recipe-api:cpu .` -> see the size in the report.
-- `docker compose up --build` -> `/health` returns `{"status": "ok", ...}`.
+- `docker build -t food-recipe-api:cpu .` -> image `3.19 GB` on disk / `751 MB` compressed.
+- `docker compose up -d` -> `api Up (healthy)`; `/health` returns `{"status": "ok", ...}`.
+- Dense backend exercised inside the container on the 50 000-recipe main bundle:
+  `/predict ["chicken","rice"]` returns 200 with matched/missing ingredients, offline.
