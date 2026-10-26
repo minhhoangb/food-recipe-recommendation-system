@@ -26,7 +26,10 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 from api.request_log import RequestLogger
 from src.config import load_config, processed_dir
@@ -83,6 +86,31 @@ app = FastAPI(
     version="1",
     lifespan=lifespan,
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def _validation_error_handler(request: Request, error: RequestValidationError) -> JSONResponse:
+    """422 with the reason, and the rejected request is logged like every other one."""
+    logger = getattr(app.state, "logger", None)
+    if logger is not None:
+        body = error.body if isinstance(error.body, dict) else {}
+        raw = body.get("ingredients") or []
+        logger.log(
+            RequestLogRecord(
+                request_id=uuid.uuid4().hex,
+                timestamp_utc=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                endpoint=request.url.path,
+                model=getattr(app.state.retriever, "name", "unknown"),
+                model_version=getattr(app.state.retriever, "version", "unknown"),
+                ingredients=[str(item) for item in raw] if isinstance(raw, list) else [],
+                top_k=int(body.get("top_k", 0) or 0),
+                result_ids=[],
+                scores=[],
+                latency_ms=0.0,
+                status_code=422,
+            )
+        )
+    return JSONResponse(status_code=422, content=jsonable_encoder({"detail": error.errors()}))
 
 
 def _predict(payload: PredictRequest) -> PredictResponse:

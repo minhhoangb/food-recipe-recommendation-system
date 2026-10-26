@@ -8,10 +8,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # torch (CPU) first: it is the biggest wheel and the CPU index must be used for it.
+# The timeouts/retries matter: the CPU wheel is ~200 MB and a slow link times out.
 COPY requirements.txt .
-RUN pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu \
-    && pip install -r requirements.txt \
-    && pip install fastapi==0.162.0 uvicorn==0.54.0 httpx==0.28.1
+RUN pip install --timeout 120 --retries 10 torch==2.9.1 \
+        --index-url https://download.pytorch.org/whl/cpu \
+    && pip install --timeout 120 --retries 10 -r requirements.txt
 
 # ingredient-parser-nlp downloads one small NLTK resource on first import; do it at build
 # time so the container starts without network access.

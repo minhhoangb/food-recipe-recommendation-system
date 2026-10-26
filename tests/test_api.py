@@ -186,6 +186,18 @@ def test_the_requests_are_logged(api_client, tmp_path_factory):
     assert status_code == 200
 
 
+def test_a_rejected_request_is_logged_with_its_status(api_client):
+    api_client.post("/predict", json={"ingredients": ["rice"], "top_k": 99})
+    log_path = Path(os.environ["API_REQUEST_LOG"])
+    import sqlite3
+
+    with sqlite3.connect(log_path) as connection:
+        rows = connection.execute(
+            "SELECT status_code FROM request_log WHERE status_code = 422"
+        ).fetchall()
+    assert rows, "a rejected request must be logged with its status code"
+
+
 def test_the_api_works_against_the_real_processed_corpus():
     """The same app, on the real pilot corpus when it is present."""
     cfg = load_config("configs/pilot.yaml")
