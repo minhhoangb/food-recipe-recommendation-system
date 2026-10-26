@@ -69,3 +69,19 @@ def test_finetuned_bundle_creation_and_contract(tmp_path: Path):
     hits = retriever.search(["chicken"], 2)
     assert len(hits) == 2
     assert hits[0].recipe_id == "recipenlg:0"
+
+
+def test_cpu_load_and_inference():
+    """DoD d: Có test load CPU."""
+    from src.embeddings import load_model
+
+    # Verify load_model instantiates on CPU without asking for CUDA
+    model = load_model(device="cpu")
+    assert getattr(model, "device", None) is not None
+    assert str(model.device).startswith("cpu")
+
+    # Encode a test query on CPU
+    q_vec = model.encode(["chicken, rice, garlic"], normalize_embeddings=True)
+    assert q_vec.shape == (1, 384)
+    norm = np.linalg.norm(q_vec[0])
+    assert norm == pytest.approx(1.0, abs=1e-5)
