@@ -35,7 +35,15 @@ def evaluate_retriever(
     top_k: int = 10,
     metrics: Sequence[str] = METRICS,
 ) -> dict[str, float]:
-    """Run every query and score with ranx. Returns metrics plus n_queries and mean latency (ms).
+    """Run every query and score with ranx. Returns metrics plus n_queries and mean latency (ms)."""
+    run, latency_ms = run_retriever(retriever, queries, top_k)
+    return {**score_run(run, qrels, metrics), "n_queries": len(queries), "latency_ms": latency_ms}
+
+
+def run_retriever(
+    retriever: Retriever, queries: Sequence[dict], top_k: int = 10
+) -> tuple[dict[str, dict[str, float]], float]:
+    """query_id -> {recipe_id: score} for every query, plus the mean latency in ms.
 
     Hits are converted to rank-based scores so ranx keeps the retriever's own ordering, including
     the recipe_id tie-break; a query with no hits is an empty result (scored 0, not skipped).
@@ -45,14 +53,17 @@ def evaluate_retriever(
     for query in queries:
         hits = retriever.search(query["ingredients"], top_k)
         run[query["query_id"]] = {hit.recipe_id: float(len(hits) - rank) for rank, hit in enumerate(hits)}
-    latency_ms = 1000 * (time.perf_counter() - started) / max(len(queries), 1)
+    return run, 1000 * (time.perf_counter() - started) / max(len(queries), 1)
 
-    if not any(run.values()):
-        return {**{m: 0.0 for m in metrics}, "n_queries": len(queries), "latency_ms": latency_ms}
 
+def score_run(
+    run: dict[str, dict[str, float]], qrels: dict[str, dict[str, int]], metrics: Sequence[str] = METRICS
+) -> dict[str, float]:
+    if not any(run.values()):  # ranx cannot build a Run with no document at all
+        return {m: 0.0 for m in metrics}
     scores = evaluate(Qrels(qrels), Run(run), list(metrics), make_comparable=True)
     scores = scores if isinstance(scores, dict) else {metrics[0]: scores}
-    return {**{k: float(v) for k, v in scores.items()}, "n_queries": len(queries), "latency_ms": latency_ms}
+    return {k: float(v) for k, v in scores.items()}
 
 
 def load_split(directory: Path, split: str) -> tuple[list[dict], dict[str, dict[str, int]]]:
@@ -66,12 +77,23 @@ def load_split(directory: Path, split: str) -> tuple[list[dict], dict[str, dict[
 
 
 def log_to_mlflow(
-    results: dict, manifest, bundle: Path, cfg, split: str, top_k: int, uri: str, experiment: str
+    results: dict,
+    manifest,
+    bundle: Path,
+    cfg,
+    split: str,
+    top_k: int,
+    uri: str,
+    experiment: str,
+    tags: dict | None = None,
 ) -> str:
+    """tags["experiment"] (E01, E02, ...) also prefixes the run name, so E01/E02 runs stay apart."""
     mlflow.set_tracking_uri(uri)
     mlflow.set_experiment(experiment)
     fit_info = read_json(bundle / "metrics.json") if (bundle / "metrics.json").exists() else {}
-    with mlflow.start_run(run_name=f"{manifest.model_name}-{cfg.data.profile}-{split}") as run:
+    tags = tags or {}
+    label = f"{tags['experiment']}-" if "experiment" in tags else ""
+    with mlflow.start_run(run_name=f"{label}{manifest.model_name}-{cfg.data.profile}-{split}") as run:
         mlflow.log_params(
             {
                 "model": manifest.model_name,
@@ -87,7 +109,7 @@ def log_to_mlflow(
         mlflow.log_metrics({k.replace("@", "_at_"): v for k, v in results.items()})  # MLflow forbids "@"
         if "fit_seconds" in fit_info:
             mlflow.log_metric("fit_seconds", fit_info["fit_seconds"])
-        mlflow.set_tags({k: str(v) for k, v in fit_info.items() if k != "fit_seconds"})
+        mlflow.set_tags({**{k: str(v) for k, v in fit_info.items() if k != "fit_seconds"}, **tags})
         return run.info.run_id
 
 
