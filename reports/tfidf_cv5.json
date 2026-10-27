@@ -1,0 +1,40 @@
+{
+  "best": {
+    "mean_cv_mrr@10": 0.6895776915237742,
+    "mean_fit_time": 0.2686652660369873,
+    "mean_train_mrr@10": 0.7279918486954198,
+    "min_df": 1,
+    "norm": "l2",
+    "rank_cv_mrr@10": 1,
+    "std_cv_mrr@10": 0.006322741312960568,
+    "std_train_mrr@10": 0.0014264532040943545,
+    "sublinear_tf": false,
+    "tokens": "ingredient"
+  },
+  "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+  "cv_seconds": 939.3,
+  "default_E01": {
+    "mean_cv_mrr@10": 0.6895776915237742,
+    "mean_fit_time": 0.2686652660369873,
+    "mean_train_mrr@10": 0.7279918486954198,
+    "min_df": 1,
+    "norm": "l2",
+    "rank_cv_mrr@10": 1,
+    "std_cv_mrr@10": 0.006322741312960568,
+    "std_train_mrr@10": 0.0014264532040943545,
+    "sublinear_tf": false,
+    "tokens": "ingredient"
+  },
+  "n_candidates": 24,
+  "n_folds": 5,
+  "n_groups": 28705,
+  "n_queries": 5000,
+  "n_recipes": 35896,
+  "profile": "main",
+  "tfidf_tuned": {
+    "min_df": 1,
+    "norm": "l2",
+    "sublinear_tf": false,
+    "tokens": "ingredient"
+  }
+}
