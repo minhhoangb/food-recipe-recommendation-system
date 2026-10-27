@@ -10,10 +10,12 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import FeatureUnion, Pipeline
 from sklearn.preprocessing import FunctionTransformer, Normalizer, OneHotEncoder, StandardScaler
 
-from src.features import MeanIngredientRarity, identity, ingredient_count
+from src.features import MeanIngredientRarity, identity, ingredient_and_words, ingredient_count
 from src.normalize import normalize_ingredients
 
 SEED = 42
+# Token choices for TF-IDF, by name so they can be stored in a YAML config.
+ANALYZERS = {"ingredient": identity, "ingredient_and_words": ingredient_and_words}
 
 
 def normalize_all(recipes: list[list[str]]) -> list[list[str]]:
@@ -30,9 +32,9 @@ def _normalizer() -> FunctionTransformer:
     return FunctionTransformer(normalize_all)
 
 
-def build_text_pipeline(**tfidf_params) -> Pipeline:
-    """normalise -> TF-IDF over ingredient names. tfidf_params are tuned later with GridSearchCV."""
-    tfidf = TfidfVectorizer(analyzer=identity, **tfidf_params)
+def build_text_pipeline(tokens: str = "ingredient", **tfidf_params) -> Pipeline:
+    """normalise -> TF-IDF over ingredient names. tokens/tfidf_params come from src.tune (E02)."""
+    tfidf = TfidfVectorizer(analyzer=ANALYZERS[tokens], **tfidf_params)
     return Pipeline([("normalize", _normalizer()), ("tfidf", tfidf)])
 
 

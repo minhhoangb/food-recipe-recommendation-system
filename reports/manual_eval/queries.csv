@@ -1,0 +1,41 @@
+query_id,split,difficulty,text,ingredients,probes
+m01,dev,easy,"I have chicken breasts, broccoli and garlic. What can I cook tonight?",chicken breasts;broccoli;garlic,common dinner combination
+m02,dev,easy,"Something with ground beef, onion and tomato sauce",ground beef;onion;tomato sauce,common combination with a sauce ingredient
+m03,dev,easy,"What can I bake with ripe bananas, eggs and flour?",bananas;eggs;flour,baking; plural forms
+m04,dev,easy,"Eggs, spinach and cheese for breakfast",eggs;spinach;cheese,meal intent (breakfast)
+m05,dev,easy,"I want a pasta dish with shrimp, garlic and butter",shrimp;garlic;butter;pasta,dish type intent (pasta)
+m06,dev,easy,"Potatoes, bacon and cheddar cheese - any ideas?",potatoes;bacon;cheddar cheese,multi-word ingredient name
+m07,dev,medium,"Leftover turkey, celery, mayonnaise and dried cranberries",turkey;celery;mayonnaise;dried cranberries,leftovers; 4 ingredients
+m08,dev,medium,"Black beans, corn, red onion and cilantro, vegetarian please",black beans;corn;red onion;cilantro,explicit constraint (vegetarian)
+m09,dev,medium,"I have scallions, eggs, rice and frozen peas",scallions;eggs;rice;frozen peas,synonym (scallion = green onion)
+m10,dev,medium,"Ground turkey, zucchini, bell peppers and taco seasoning",ground turkey;zucchini;bell peppers;taco seasoning,seasoning mix as an ingredient
+m11,dev,medium,"Chickpeas, coconut milk, curry powder and spinach",chickpeas;coconut milk;curry powder;spinach,synonym (chickpea = garbanzo bean)
+m12,dev,medium,"Cream cheese, strawberries and graham crackers for a no-bake dessert",cream cheese;strawberries;graham crackers,explicit constraint (no-bake)
+m13,dev,medium,"Tomatoes, basil, mozzarella, balsamic vinegar and olive oil",tomatoes;basil;mozzarella;balsamic vinegar;olive oil,5 ingredients incl. a staple
+m14,dev,hard,"What can I do with tahini, lemon and garlic?",tahini;lemon;garlic,rare key ingredient
+m15,dev,hard,"Flour, sugar, eggs, butter and milk",flour;sugar;eggs;butter;milk,staples only; very ambiguous
+m16,dev,hard,"Gochujang, pork belly and kimchi",gochujang;pork belly;kimchi,rare ingredients (kimchi in no train recipe)
+m17,dev,hard,I only have chicken,chicken,single generic ingredient
+m18,dev,hard,"Cool Whip, Jell-O and cottage cheese",cool whip;jell-o;cottage cheese,brand names standing in for products
+m19,dev,hard,"Kale, quinoa, feta, cucumber, red onion, lemon, olive oil and mint for a salad",kale;quinoa;feta;cucumber;red onion;lemon;olive oil;mint,long query (8 ingredients) + dish intent
+m20,dev,hard,"Saffron, arborio rice, white wine and parmesan",saffron;arborio rice;white wine;parmesan,rare ingredient + one specific dish (risotto)
+m21,final,easy,"I've got salmon, lemon and dill",salmon;lemon;dill,common combination
+m22,final,easy,"Chicken thighs, rice and soy sauce for dinner",chicken thighs;rice;soy sauce,meal intent (dinner)
+m23,final,easy,"A dessert with apples, cinnamon and brown sugar",apples;cinnamon;brown sugar,dish type intent (dessert)
+m24,final,easy,"Pork chops with apples and onions",pork chops;apples;onions,common combination; plurals
+m25,final,easy,"Zucchini, tomatoes and parmesan",zucchini;tomatoes;parmesan,vegetable side dish
+m26,final,easy,"Cookies with peanut butter, sugar and an egg",peanut butter;sugar;egg,dish type intent (cookies)
+m27,final,medium,"Sweet potatoes, black beans, chili powder and lime",sweet potatoes;black beans;chili powder;lime,4 ingredients
+m28,final,medium,"Mushrooms, heavy cream, thyme and chicken",mushrooms;heavy cream;thyme;chicken,generic meat name (chicken)
+m29,final,medium,"Cabbage, carrots, rice vinegar and sesame oil for a slaw",cabbage;carrots;rice vinegar;sesame oil,dish intent (slaw)
+m30,final,medium,"A soup with lentils, carrots, celery, onion and cumin",lentils;carrots;celery;onion;cumin,5 ingredients + dish intent (soup)
+m31,final,medium,"Oats, honey, peanut butter and chocolate chips, no oven",oats;honey;peanut butter;chocolate chips,explicit constraint (no oven)
+m32,final,medium,"Eggplant, ricotta, marinara sauce and mozzarella",eggplant;ricotta;marinara sauce;mozzarella,cheese names without the word cheese
+m33,final,medium,"Shrimp, avocado, lime, cilantro and tortillas",shrimp;avocado;lime;cilantro;tortillas,5 ingredients
+m34,final,hard,"Miso paste, tofu and seaweed",miso paste;tofu;seaweed,rare ingredients (seaweed in no train recipe)
+m35,final,hard,Leftover mashed potatoes and cheese,mashed potatoes;cheese,prepared food as an ingredient (normalised to potato)
+m36,final,hard,"Butter, garlic, salt and pepper",butter;garlic;salt;pepper,mostly staples; very ambiguous
+m37,final,hard,"Fish sauce, lemongrass, coconut milk and shrimp",fish sauce;lemongrass;coconut milk;shrimp,rare ingredients
+m38,final,hard,"Rhubarb and strawberries, but no oven",rhubarb;strawberries,rare ingredient + explicit constraint (no oven)
+m39,final,hard,"Ground lamb, mint, yogurt, cumin, garlic, onion, pita bread and cucumber",ground lamb;mint;yogurt;cumin;garlic;onion;pita bread;cucumber,long query (8 ingredients)
+m40,final,hard,"A vegan dinner with tofu, broccoli and peanut sauce",tofu;broccoli;peanut sauce,explicit constraint (vegan) + prepared sauce
