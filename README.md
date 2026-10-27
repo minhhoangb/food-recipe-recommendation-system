@@ -134,21 +134,158 @@ MLflow runs are stored in `mlflow.db` (git-ignored); open them with `mlflow ui`.
 `src/evaluate.py` owns the shared baseline evaluation; the metric conventions are the ones
 locked in `tests/test_ranking_metrics.py`.
 
+### Fine-tuning and training pipeline (Person 3)
+
+`src/build_pairs.py` builds training pairs from `train` recipes using `src.queries.make_query_ingredients` across multiple seeds (up to 10,000 pairs for pilot, seed 42) and Hưng's document representation (`src.embeddings.format_document`), outputting a manifest with SHA256 hashes. It also provides `NoDuplicateBatchSampler` ensuring no batch contains duplicate recipes or duplicate groups.
+
+`notebooks/02_finetune_colab.ipynb` runs fine-tuning on Colab GPU with `SentenceTransformerTrainer` + `MultipleNegativesRankingLoss`, evaluates every epoch with `InformationRetrievalEvaluator` (MRR@10), demonstrates `save_steps` checkpointing and `resume_from_checkpoint`, and exports the model.
+
+Hand-off to Person 2 (Hưng): pass the exported fine-tuned checkpoint via `--model-path`:
+
+```bash
+# 1. Build training pairs with verified manifest
+python -m src.build_pairs --config configs/pilot.yaml --split train --mode ingredients --max-pairs 10000 --seed 42
+
+# 2. Fine-tune model directly or end-to-end with MLflow logging
+python -m src.train --config configs/pilot.yaml --epochs 1 --batch-size 16 --promote
+
+# 3. Person 2 (Hưng) hand-off: build serving bundle using the fine-tuned model checkpoint
+python -m src.embeddings --config configs/pilot.yaml --model-path models/minilm_finetuned_checkpoint
+```
+
+### Production API & Model Monitoring (Person 3)
+
+`src/monitor.py` parses `RequestLogRecord` entries from `logs/requests.jsonl` to compute request throughput, error rates, p90/p95/p99 latency, zero-hit rate, and vocabulary drift:
+
+```bash
+python -m src.monitor --log-path logs/requests.jsonl --out reports/monitoring_report.md --mlflow
+```
+
 ## Experiment results (Master Comparison Table)
 
 **TODO(Person 1)**: filled from the MLflow runs after the frozen final evaluation.
 
 ## API usage
 
-**TODO(Person 2)**: endpoints `GET /health`, `GET /model-info`, `POST /predict`, `POST /batch-predict`, curl and Python examples. Request/response schemas are already defined in `src/contracts.py`.
+The FastAPI app lives in `api/app.py`. The retriever and the corpus metadata are loaded
+**once** at startup (the lifespan), not per request.
+
+```bash
+# reference backend (TF-IDF over the processed corpus; no model download)
+uvicorn api.app:app --reload
+
+# dense backend (MiniLM over a stored bundle)
+set API_BACKEND=dense
+set API_BUNDLE=models/minilm_pretrained-E04-main-1f1f4ce5
+set API_CONFIG=configs/default.yaml
+uvicorn api.app:app --reload
+```
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `API_BACKEND` | `reference` | `reference` (TF-IDF) or `dense` (MiniLM bundle) |
+| `API_CONFIG` | `configs/pilot.yaml` | which processed profile to serve |
+| `API_BUNDLE` | - | bundle folder, required when `API_BACKEND=dense` |
+| `API_REQUEST_LOG` | `logs/requests.db` | SQLite request log (`""` disables it) |
+
+Endpoints (`src/contracts.py` owns the request/response schemas):
+
+| Endpoint | Method | What it does |
+| --- | --- | --- |
+| `/health` | GET | `{"status": "ok", ...}` — used by the Docker health check |
+| `/model-info` | GET | the serving model, the backend and the corpus size |
+| `/predict` | POST | one ingredient list -> `top_k` recipes with matched/missing ingredients |
+| `/batch-predict` | POST | up to 20 instances; the order of the input is preserved |
+
+A bad request returns **422** with the reason (e.g. `top_k` out of range, an ingredient
+list that normalises to nothing). `top_k` is an integer in `[1, 20]`, a batch holds at
+most 20 instances.
+
+```bash
+curl http://127.0.0.1:8000/health
+
+curl -X POST http://127.0.0.1:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"ingredients": ["chicken", "rice"], "top_k": 3}'
+
+curl -X POST http://127.0.0.1:8000/batch-predict \
+  -H "Content-Type: application/json" \
+  -d '{"instances": [{"ingredients": ["chicken"], "top_k": 3}, {"ingredients": ["rice"], "top_k": 3}]}'
+```
+
+```python
+import requests
+
+response = requests.post(
+    "http://127.0.0.1:8000/predict",
+    json={"ingredients": ["chicken", "rice"], "top_k": 3},
+    timeout=30,
+)
+for result in response.json()["results"]:
+    print(result["title"], result["matched_ingredients"], result["missing_ingredients"])
+```
+
+Every request is appended to the SQLite request log
+(`RequestLogRecord` from `src/contracts.py`): request id, timestamp, endpoint, model,
+normalised ingredients, `top_k`, result ids, scores, latency and status code. SQLite is
+used because it is safe with several workers writing at the same time (WAL mode + a busy
+timeout).
+
+### recommend() and the E06 rerank
+
+`src/predict.py` holds the recommendation logic used by the API:
+
+```python
+from src.predict import load_corpus_metadata, recommend
+
+metadata = load_corpus_metadata("data/processed/main/corpus.jsonl")
+results = recommend(["chicken", "rice"], 5, retriever=retriever, metadata=metadata)
+```
+
+`matched_ingredients` are the query ingredients the recipe uses, `missing_ingredients`
+the recipe ingredients the user does not have (both on the normalised ingredient sets).
+
+The **missing-first rerank** (E06 ablation) ranks the top 100 candidates by the number
+of missing ingredients (fewest first). It is **off by default**; `reports/e04_e05_main_benchmark.md`
+shows that it costs 34% of the relative Recall@10 on the main corpus (0.576 -> 0.380),
+because the synthetic label is the origin recipe, which is exactly the recipe with the
+most missing ingredients.
 
 ## Docker
 
-**TODO(Person 2)**: `docker build`, `docker compose up --build`, health check.
+The image is CPU-only: torch comes from the CPU wheel index, so no CUDA is pulled in.
 
+```bash
+docker compose up --build          # API on http://127.0.0.1:8000
+docker compose --profile mlflow up  # optional MLflow UI on http://127.0.0.1:5000
+```
+
+- `data/` and `models/` are mounted read-only; the request log goes to the `api_logs`
+  volume.
+- The health check (`HEALTHCHECK` in the `Dockerfile`) calls `/health` every 30 s.
+- To serve the dense model, set the backend and the bundle before starting:
+
+```bash
+API_BACKEND=dense API_BUNDLE=models/minilm_pretrained-E04-main-1f1f4ce5 \
+  API_CONFIG=configs/default.yaml docker compose up --build
+```
+
+The image size is reported in `reports/e04_e05_main_benchmark.md` after the build
+(torch CPU wheels are the bulk of it).
+
+The image bakes in the ingredient-parser NLTK resource **and** the MiniLM weights, so the
+dense backend also starts without network access. The corpus and the bundles are still
+mounted at runtime (`data/`, `models/`), never baked in.
 ## MLflow
 
-**TODO(Person 3)**: launching the UI, experiments, registry (`staging` / `production`).
+MLflow tracks all baseline runs, pretrained evaluations, and fine-tuning experiments under `mlflow.db`:
+
+```bash
+# Launch the MLflow UI
+mlflow ui --backend-store-uri sqlite:///mlflow.db
+```
+
+Experiments are recorded in `recipe-retrieval`. Serving bundles are saved as artifacts, and fine-tuned models are registered in the MLflow Model Registry under `minilm_finetuned` with aliases (`staging`, `production`).
 
 ## Repository structure
 
@@ -159,11 +296,12 @@ data/raw/       original CSV, never modified (git-ignored)
 data/processed/ corpus.jsonl, splits.json, queries.jsonl, qrels.jsonl, manifest per profile
 fe/             static web UI                                (Person 2)
 models/         serving bundles (git-ignored)
-notebooks/      00_colab_bootstrap.ipynb, EDA, fine-tuning
-reports/        figures, final report
+notebooks/      00_colab_bootstrap.ipynb, 02_finetune_colab.ipynb, EDA
+reports/        figures, final report, monitoring_report.md
 scripts/        verify_data.py, package_artifacts.py, fetch_artifacts.py
 src/            contracts, config, utils, normalize, preprocess, data_collection, queries, reference
                 embeddings, retrieval, evaluation, memory    (Person 2)
+                build_pairs, finetune, train, monitor        (Person 3)
 tests/          pytest suite, tests/fixtures (hand-written, not RecipeNLG)
 docs/           implementation plans per owner
 ```
@@ -173,5 +311,5 @@ docs/           implementation plans per owner
 - Seed 42 everywhere; `configs/default.yaml` holds every data parameter and is hashed into each manifest.
 - `python -m src.data_collection` reproduces the processed files exactly (hashes are in the manifest; `tests/test_data_collection.py::test_build_is_reproducible` checks it on a fixture).
 - `python -m pytest` runs offline in seconds. Tests that read the real processed data skip themselves if it is absent.
-- Training from scratch (`python src/train.py`) and CPU fallback: **TODO(Person 3)**.
+- Training from scratch: run `python -m src.train --config configs/pilot.yaml`. Runs on CPU by default; automatically leverages CUDA when available (e.g. on Colab GPU).
 - Collaboration rules and file ownership: [CONTRIBUTING.md](CONTRIBUTING.md).

@@ -1,0 +1,40 @@
+services:
+  api:
+    build: .
+    image: food-recipe-api:cpu
+    ports:
+      - "8000:8000"
+    environment:
+      API_BACKEND: ${API_BACKEND:-reference}
+      API_CONFIG: ${API_CONFIG:-configs/pilot.yaml}
+      API_BUNDLE: ${API_BUNDLE:-}
+      API_REQUEST_LOG: /app/logs/requests.db
+    volumes:
+      # The processed corpus and the serving bundles are read-only for the app.
+      - ./data:/app/data:ro
+      - ./models:/app/models:ro
+      - api_logs:/app/logs
+    restart: unless-stopped
+
+  # Optional MLflow UI with the same tracking store as the local runs (sqlite:///mlflow.db).
+  # Start it with: docker compose --profile mlflow up
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v3.17.2
+    profiles: ["mlflow"]
+    ports:
+      - "5000:5000"
+    environment:
+      MLFLOW_BACKEND_STORE_URI: sqlite:////mlflow/mlflow.db
+      MLFLOW_DEFAULT_ARTIFACT_ROOT: /mlflow/mlruns
+    volumes:
+      - mlflow_data:/mlflow
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --default-artifact-root /mlflow/mlruns
+
+volumes:
+  api_logs:
+  mlflow_data:

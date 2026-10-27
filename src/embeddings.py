@@ -99,8 +99,8 @@ def count_truncated(texts: list[str], tokenizer: Any, max_seq_length: int = MAX_
 # ---------------------------------------------------------------------------------------------
 # Model
 # ---------------------------------------------------------------------------------------------
-def load_model(device: str = "cpu") -> Encoder:
-    """Load the pretrained MiniLM on CPU (downloads the weights once)."""
+def load_model(device: str = "cpu", model_name_or_path: str = MODEL_NAME) -> Encoder:
+    """Load the MiniLM encoder on CPU (downloads pretrained weights or loads from path)."""
     try:
         from sentence_transformers import SentenceTransformer
     except ImportError as error:  # pragma: no cover - depends on the environment
@@ -108,7 +108,7 @@ def load_model(device: str = "cpu") -> Encoder:
             "sentence-transformers is not installed. Run: pip install -r requirements.txt"
         ) from error
 
-    model = SentenceTransformer(MODEL_NAME, device=device)
+    model = SentenceTransformer(model_name_or_path, device=device)
     model.max_seq_length = MAX_SEQ_LENGTH
     return model
 
@@ -177,10 +177,17 @@ def encode_corpus(
 
 
 # ---------------------------------------------------------------------------------------------
-# Bundle
-# ---------------------------------------------------------------------------------------------
-def bundle_run_id(mode: EmbeddingMode, profile: str, corpus_sha256: str) -> str:
-    return f"minilm_pretrained-{MODE_LABELS[mode]}-{profile}-{corpus_sha256[:8]}"
+from src.contracts import BundleManifest, ModelName, RecipeRecord
+
+# ... (rest unchanged)
+def bundle_run_id(
+    mode: EmbeddingMode,
+    profile: str,
+    corpus_sha256: str,
+    model_name: str = "minilm_pretrained",
+) -> str:
+    label = MODE_LABELS.get(mode, mode)
+    return f"{model_name}-{label}-{profile}-{corpus_sha256[:8]}"
 
 
 def save_bundle(
@@ -193,10 +200,11 @@ def save_bundle(
     corpus_sha256: str,
     truncated: int,
     encode_seconds: float,
+    model_name: ModelName = "minilm_pretrained",
     out_dir: Path = DEFAULT_MODELS_DIR,
 ) -> Path:
     """Write embeddings.npy, recipe_ids.json and manifest.json; return the bundle folder."""
-    run_id = bundle_run_id(mode, profile, corpus_sha256)
+    run_id = bundle_run_id(mode, profile, corpus_sha256, model_name=model_name)
     bundle = Path(out_dir) / run_id
     bundle.mkdir(parents=True, exist_ok=True)
 
@@ -205,7 +213,7 @@ def save_bundle(
 
     manifest = BundleManifest(
         run_id=run_id,
-        model_name="minilm_pretrained",
+        model_name=model_name,
         revision=None,
         corpus_sha256=corpus_sha256,
         recipe_ids_sha256=sha256_obj(recipe_ids),
@@ -293,7 +301,12 @@ def validate_bundle(bundle: str | Path) -> tuple[BundleManifest, np.ndarray, lis
 # ---------------------------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------------------------
-def build(cfg: DictConfig, mode: EmbeddingMode, out_dir: Path = DEFAULT_MODELS_DIR) -> dict:
+def build(
+    cfg: DictConfig,
+    mode: EmbeddingMode,
+    out_dir: Path = DEFAULT_MODELS_DIR,
+    model_path: str | Path | None = None,
+) -> dict:
     """Encode the configured corpus and write the bundle. Returns a small report dict."""
     directory = processed_dir(cfg)
     corpus_path = directory / "corpus.jsonl"
@@ -303,7 +316,8 @@ def build(cfg: DictConfig, mode: EmbeddingMode, out_dir: Path = DEFAULT_MODELS_D
             "(python -m src.data_collection / python scripts/fetch_artifacts.py)."
         )
     records = load_corpus(directory)
-    model = load_model()
+    model = load_model(model_name_or_path=str(model_path)) if model_path else load_model()
+    model_name: ModelName = "minilm_finetuned" if model_path else "minilm_pretrained"
     batch_size = int(cfg.get("embeddings", {}).get("batch_size", DEFAULT_BATCH_SIZE))
 
     started = time.perf_counter()
@@ -319,6 +333,7 @@ def build(cfg: DictConfig, mode: EmbeddingMode, out_dir: Path = DEFAULT_MODELS_D
         corpus_sha256=sha256_file(corpus_path),
         truncated=truncated,
         encode_seconds=encode_seconds,
+        model_name=model_name,
         out_dir=out_dir,
     )
     return {
@@ -328,6 +343,7 @@ def build(cfg: DictConfig, mode: EmbeddingMode, out_dir: Path = DEFAULT_MODELS_D
         "dim": int(vectors.shape[1]),
         "truncated": truncated,
         "encode_seconds": round(encode_seconds, 3),
+        "model_name": model_name,
     }
 
 
@@ -339,6 +355,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--mode", default="ingredients", choices=list(MODES))
     parser.add_argument("--out", default=str(DEFAULT_MODELS_DIR))
     parser.add_argument(
+        "--model-path",
+        default=None,
+        help="Path or name of custom/fine-tuned model checkpoint (default: pretrained)",
+    )
+    parser.add_argument(
         "--batch-size",
         type=int,
         default=None,
@@ -348,8 +369,8 @@ def main(argv: list[str] | None = None) -> int:
 
     overrides = {"embeddings": {"batch_size": int(args.batch_size)}} if args.batch_size else None
     cfg = load_config(args.config, overrides)
-    report = build(cfg, args.mode, Path(args.out))
-    print(f"[{MODE_LABELS[report['mode']]}] {report['mode']}")
+    report = build(cfg, args.mode, Path(args.out), model_path=args.model_path)
+    print(f"[{MODE_LABELS[report['mode']]}] {report['mode']} ({report['model_name']})")
     print(f"  bundle          {report['bundle']}")
     print(f"  documents       {report['documents']}")
     print(f"  dimension       {report['dim']}")
