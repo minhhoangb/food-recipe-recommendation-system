@@ -161,8 +161,11 @@ All runs, parameters, loss curves, and registered models are stored in local SQL
 mlflow ui --backend-store-uri sqlite:///mlflow.db
 ```
 
-- **Experiment:** `recipe-minilm-main-finetune` (6 runs: baseline E04, Config 1, Config 2, Ablation wd=0.0, Ablation wd=0.01, Best E07).
+- **Experiment:** `recipe-retrieval` (ID: 1, 6 runs: baseline E04, Config 1, Config 2, Ablation wd=0.0, Ablation wd=0.01, Best E07).
 - **Registered Model:** `minilm_finetuned` with aliases `@staging` and `@production`.
+- **UI Screenshot:** [reports/figures/mlflow_dashboard_ui.png](reports/figures/mlflow_dashboard_ui.png)
+
+![MLflow UI Dashboard](reports/figures/mlflow_dashboard_ui.png)
 
 #### Hand-off to Person 2 (Hưng): Indexing with Fine-Tuned Checkpoint
 
