@@ -12,6 +12,16 @@ def identity(ingredients: list[str]) -> list[str]:
     return ingredients
 
 
+def ingredient_and_words(ingredients: list[str]) -> list[str]:
+    """Analyzer: each ingredient name plus the single words inside multi-word names.
+
+    Why: with whole-name tokens a query "chicken" never matches "chicken breast". Splitting inside
+    a name (never across names: ingredient order carries no meaning) is the only n-gram choice that
+    makes sense here; TfidfVectorizer ignores `ngram_range` once the analyzer is a callable.
+    """
+    return list(ingredients) + [word for name in ingredients if " " in name for word in name.split()]
+
+
 def ingredient_count(recipes: list[list[str]]) -> np.ndarray:
     """Number of distinct ingredients, shape (n, 1).
 
