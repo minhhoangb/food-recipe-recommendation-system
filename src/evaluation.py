@@ -217,7 +217,7 @@ def compare(records: list[dict]) -> str:
     lines = [
         "| Experiment | Representation | Recall@5 | Recall@10 | MRR@10 | Queries | "
         "Encode s | Cold load s | Peak RSS MB |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for record in records:
         metrics = record["metrics"]
@@ -235,6 +235,103 @@ def compare(records: list[dict]) -> str:
             )
         )
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------------------------
+# E06 ablation: rerank missing-first
+# ---------------------------------------------------------------------------------------------
+def run_rerank_ablation(
+    mode: str,
+    cfg: Any,
+    *,
+    split: str = "validation",
+    top_k: int = 10,
+    models_dir: Path,
+    tracking_uri: str = DEFAULT_TRACKING_URI,
+    experiment: str = DEFAULT_EXPERIMENT,
+    log: bool = True,
+) -> list[dict]:
+    """E06: the same corpus and the same queries, ranked with and without the rerank.
+
+    The rerank puts the recipes with the fewest missing ingredients first (top 100
+    candidates), which is what a cook wants, but it gives up the pure similarity order,
+    so the origin-recipe retrieval metrics can go down. Both variants are scored with
+    the same ranx conventions on the same queries.
+    """
+    from src.embeddings import build, bundle_run_id
+    from src.predict import MissingFirstRetriever, load_corpus_metadata
+    from src.retrieval import DenseRetriever
+
+    directory = processed_dir(cfg)
+    corpus_sha = sha256_file(directory / "corpus.jsonl")
+    run_id = bundle_run_id(mode, cfg.data.profile, corpus_sha)
+    bundle = Path(models_dir) / run_id
+    if not (bundle / "embeddings.npy").exists():
+        bundle = build(cfg, mode, Path(models_dir))["bundle"]
+
+    retriever = DenseRetriever.from_bundle(bundle)
+    metadata = load_corpus_metadata(directory / "corpus.jsonl")
+    queries, qrels = load_split(directory, split)
+
+    variants = {
+        "none": retriever,
+        "missing_first": MissingFirstRetriever(retriever, metadata),
+    }
+    records = []
+    for variant, variant_retriever in variants.items():
+        started = time.perf_counter()
+        results = evaluate_retriever(variant_retriever, queries, qrels, top_k)
+        results["wall_seconds"] = round(time.perf_counter() - started, 3)
+        record = {
+            "mode": mode,
+            "variant": variant,
+            "bundle": bundle,
+            "metrics": results,
+            "split": split,
+        }
+        if log:
+            bundle_info = read_json(bundle / "manifest.json")
+            manifest = BundleManifest(**bundle_info)
+            record["mlflow_run_id"] = log_to_mlflow(
+                results,
+                manifest,
+                bundle,
+                cfg,
+                split,
+                top_k,
+                tracking_uri,
+                experiment,
+                extra_params={
+                    "rerank": variant,
+                    "experiment": "E06",
+                    "wall_seconds": results["wall_seconds"],
+                },
+            )
+        records.append(record)
+    return records
+
+
+def compare_rerank(records: list[dict]) -> str:
+    """Markdown table of the E06 ablation (same corpus, same queries)."""
+    lines = [
+        "| Experiment | Rerank | Recall@5 | Recall@10 | MRR@10 | Queries | Wall s |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for record in records:
+        metrics = record["metrics"]
+        lines.append(
+            "| {label} | {variant} | {r5:.4f} | {r10:.4f} | {mrr:.4f} | {n} | {wall} |".format(
+                label="E04" if record["mode"] == "ingredients" else "E05",
+                variant=record["variant"],
+                r5=metrics["recall@5"],
+                r10=metrics["recall@10"],
+                mrr=metrics["mrr@10"],
+                n=metrics["n_queries"],
+                wall=metrics.get("wall_seconds", 0.0),
+            )
+        )
+    return "\n".join(lines)
+
 
 
 def library_versions() -> dict[str, str]:
@@ -260,6 +357,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--experiment", default=DEFAULT_EXPERIMENT)
     parser.add_argument("--no-mlflow", action="store_true")
     parser.add_argument("--out", default=None, help="write the comparison table to this file")
+    parser.add_argument(
+        "--ablation",
+        action="store_true",
+        help="E06: also score the missing-first rerank on the same queries",
+    )
     args = parser.parse_args(argv)
 
     cfg = load_config(args.config)
@@ -296,6 +398,29 @@ def main(argv: list[str] | None = None) -> int:
     if args.out:
         Path(args.out).parent.mkdir(parents=True, exist_ok=True)
         Path(args.out).write_text(table + "\n", encoding="utf-8")
+
+    if args.ablation:
+        ablation_records = []
+        for mode in modes:
+            ablation_records.extend(
+                run_rerank_ablation(
+                    mode,
+                    cfg,
+                    split=args.split,
+                    top_k=args.top_k,
+                    models_dir=Path(args.models_dir),
+                    tracking_uri=args.tracking_uri,
+                    experiment=args.experiment,
+                    log=not args.no_mlflow,
+                )
+            )
+        ablation_table = compare_rerank(ablation_records)
+        print()
+        print("[E06] missing-first rerank, same corpus and same queries")
+        print(ablation_table)
+        if args.out:
+            out = Path(args.out)
+            out.write_text(out.read_text(encoding="utf-8") + "\n" + ablation_table + "\n", encoding="utf-8")
     return 0
 
 

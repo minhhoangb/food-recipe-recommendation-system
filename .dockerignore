@@ -1,0 +1,25 @@
+# Build context: only the files the image needs.
+.git
+.github
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.ipynb_checkpoints
+
+# data, models, logs and generated files are mounted as volumes, never baked in
+data
+models
+logs
+mlruns
+dist
+*.db
+notebooks
+reports
+docs
+tests
+
+# the task sheets are not part of the project
+Hưng*.md
