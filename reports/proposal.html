@@ -1,0 +1,161 @@
+<!doctype html>
+<!--
+  Phase 1 project proposal. Source of reports/proposal.pdf; rebuild with:
+  msedge --headless --disable-gpu --no-pdf-header-footer --print-to-pdf=reports/proposal.pdf reports/proposal.html
+  Every number comes from data/processed/main/dataset_manifest.json, reports/data_audit.md or an
+  MLflow run in mlflow.db (run ids in reports/comparison.csv); numbers not measured yet are TBD.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Project Proposal - Food Recipe Recommendation System</title>
+<style>
+  @page { size: A4; margin: 15mm 16mm 15mm 16mm; }
+  body { font-family: "Segoe UI", Arial, sans-serif; font-size: 9.8pt; line-height: 1.36; color: #111; margin: 0; }
+  h1 { font-size: 16pt; margin: 0 0 2pt; }
+  .sub { color: #444; margin: 0 0 8pt; }
+  h2 { font-size: 11.5pt; margin: 10pt 0 3pt; border-bottom: 1px solid #999; padding-bottom: 1pt; }
+  p { margin: 3pt 0; }
+  ul { margin: 3pt 0 3pt 15pt; padding: 0; }
+  li { margin: 1pt 0; }
+  table { border-collapse: collapse; width: 100%; margin: 4pt 0; font-size: 8.8pt; page-break-inside: avoid; }
+  th, td { border: 1px solid #aaa; padding: 2pt 4pt; vertical-align: top; text-align: left; }
+  th { background: #eee; }
+  td.n { text-align: right; white-space: nowrap; }
+  .note { font-size: 8.3pt; color: #444; }
+  code { font-family: Consolas, monospace; font-size: 8.8pt; }
+</style>
+</head>
+<body>
+
+<h1>Food Recipe Recommendation System</h1>
+<p class="sub">Phase 1 Project Proposal &middot; MDS301 Machine Learning in Data Sciences &middot; 27 October 2026<br>
+Team: Bui Minh Hoang, Tran Tuan Hung, Ho Minh Hieu (roll numbers: TBD) &middot;
+Repository: github.com/minhhoangb/food-recipe-recommendation-system</p>
+
+<h2>1. Problem statement and users</h2>
+<p>Home cooks often have a handful of ingredients in the fridge and no idea what to make with them, so food is wasted
+or a meal is bought instead. Searching recipe sites by dish name does not help when the starting point is
+<i>"I have chicken thighs, rice and soy sauce"</i>. Our system takes the ingredients a user has and returns
+the recipes that best use them, each with the ingredients the user already has (<i>matched</i>), those still
+needed (<i>missing</i>), the directions and a link to the source.</p>
+<p><b>Who benefits:</b> people cooking at home who want to use up what they have (students, families,
+anyone reducing food waste), and recipe or grocery apps that could embed the API. The scope is English
+recipes and ingredient-list queries; dietary, allergy or nutrition guarantees are out of scope and the
+interface must say so (no allergy filtering is claimed).</p>
+
+<h2>2. ML formulation</h2>
+<p><b>Task type: content-based recommendation framed as ranked retrieval (NLP).</b> Given a set of ingredient
+names <i>q</i>, rank the 50,000 candidate recipes so the most usable ones come first. There are no users,
+ratings or clicks in the data, so collaborative filtering and matrix factorisation do not apply; there is no
+fixed label per recipe, so plain classification or regression do not fit either. Each recipe is an
+item described by text (title, ingredient list), which makes this a content-based, text-similarity problem.</p>
+<ul>
+  <li><b>Classical models (scikit-learn):</b> TF-IDF + cosine similarity (E01; E02 = TF-IDF tuned with
+    5-fold group cross-validation), BM25 (E03, rank-bm25) and LSA, i.e. TruncatedSVD over TF-IDF
+    (dimensionality reduction, unsupervised).</li>
+  <li><b>Deep learning:</b> the transformer bi-encoder <code>sentence-transformers/all-MiniLM-L6-v2</code>, first
+    pretrained (E04: ingredients only, E05: title + ingredients), then fine-tuned on our training pairs
+    with MultipleNegativesRankingLoss (E07-E09, including a regularisation ablation).</li>
+  <li><b>Labels:</b> (1) <i>synthetic queries</i>: 2-6 ingredients sampled from a recipe, at least one
+    ingredient hidden and at least one non-common ingredient kept; the origin recipe is the known positive,
+    so Recall@k / MRR@10 measure an <i>origin-recipe retrieval proxy</i>; (2) <i>manual graded labels</i>
+    (0/1/2) on 40 natural English queries (20 development, 20 blind final), pooled across models, for nDCG@10.</li>
+  <li><b>Leakage control:</b> recipes sharing an ingredient set or a title form a group; groups never cross
+    the train / validation / test split. Vectorisers, IDF and fine-tuning see train only; test is read once,
+    after the configuration is frozen.</li>
+</ul>
+
+<h2>3. Dataset</h2>
+<p><b>RecipeNLG</b> (Bien et al., INLG 2020), <a href="https://recipenlg.cs.put.poznan.pl/">recipenlg.cs.put.poznan.pl</a>
+(also mirrored on Kaggle). One CSV of 2.29 GB with 2,231,142 recipes and 7 columns: index, <code>title</code>,
+<code>ingredients</code> (raw lines), <code>directions</code>, <code>link</code>, <code>source</code>
+(<code>Gathered</code> or <code>Recipes1M</code>) and <code>NER</code> (ingredient names extracted by the authors).
+The raw file stays unmodified in <code>data/raw/</code> (sha256 <code>f376ee0b&hellip;</code>); it is not committed
+and is fetched or rebuilt with the documented scripts.</p>
+<p><b>Subset (within the course limit of 2,000-500,000 samples).</b> A seeded random draw (seed 42) over all
+raw ids, because the file is sorted by source and its first rows would be biased. Of 50,360 recipes examined,
+180 were dropped as exact duplicates and 180 for having fewer than 2 or more than 40 normalised ingredients,
+giving <b>50,000 recipes</b> (<code>main</code>; the first 5,000 form a <code>pilot</code> profile).</p>
+<table>
+  <tr><th>Item (main)</th><th>Value</th><th>Item (main)</th><th>Value</th></tr>
+  <tr><td>Recipes / groups</td><td class="n">50,000 / 39,869</td><td>Train / validation / test recipes</td><td class="n">35,896 / 3,970 / 10,134</td></tr>
+  <tr><td>Singleton groups / largest group</td><td class="n">92.7% / 141</td><td>Synthetic queries train / val / test</td><td class="n">5,000 / 500 / 1,000</td></tr>
+  <tr><td>Ingredients per recipe (mean, median, range)</td><td class="n">8.25, 8, 2-37</td><td>Source mix Gathered / Recipes1M</td><td class="n">73.7% / 26.3%</td></tr>
+</table>
+<p><b>Features.</b> 7 raw columns; models use the normalised ingredient list (vocabulary of 11,901 names fitted on
+train), the title for E05, and two engineered features (ingredient count, mean ingredient rarity fitted on train)
+plus query-time matched/missing counts. How the course's "8-200 features" rule applies to text input: TBD with
+the instructor.</p>
+<p><b>Known data quality issues</b> (raw scan and a manual review of 100 recipes, <code>reports/data_audit.md</code>):</p>
+<ul>
+  <li><b>Noisy ingredient names:</b> 36 of 100 reviewed recipes have at least one wrong or truncated normalised
+    ingredient (e.g. NER keeps <i>"virgin"</i> and loses <i>"coconut oil"</i>; brand fragments like <i>"dew"</i>).</li>
+  <li><b>Missing entries:</b> NER has fewer entries than the raw lines in 20.2% of recipes; 573 raw recipes have an
+    empty NER list (raw-line fallback used); 1 null title.</li>
+  <li><b>Duplicates and near-duplicates:</b> 1,245 exact duplicates in the raw file (0.06%); near-duplicates are
+    grouped, not removed, so they cannot leak across splits.</li>
+  <li><b>Skew:</b> 60% of distinct names occur in one recipe only, while salt appears in 43.5% of recipes.
+    Links lack a scheme (the pipeline adds <code>https://</code>).</li>
+</ul>
+<p><b>Licence: not assigned.</b> We have not verified RecipeNLG's terms of use and assume no licence. The repository
+does not redistribute the raw data; the terms must be checked before any redistribution or public deployment
+of recipe text (owner: Hoang, before 1 November).</p>
+
+<h2>4. Success criteria</h2>
+<table>
+  <tr><th>#</th><th>Criterion (deployed model unless stated)</th><th>Target</th><th>Status today</th></tr>
+  <tr><td>1</td><td>Recall@10 on the synthetic <b>test</b> split (1,000 queries, read once after freezing)</td>
+      <td>&ge; 0.85</td><td>Test: TBD. Validation (500 q): best system BM25 0.910, TF-IDF 0.826, MiniLM pretrained 0.576</td></tr>
+  <tr><td>2</td><td>MRR@10 on the synthetic test split</td><td>&ge; 0.70</td>
+      <td>Test: TBD. Validation: BM25 0.758, TF-IDF 0.657, MiniLM pretrained 0.434</td></tr>
+  <tr><td>3</td><td>Pooled nDCG@10 on the 20 blind manual queries, with Cohen's &kappa; on the &ge; 20% double-labelled pool</td>
+      <td>nDCG@10 &ge; 0.60, &kappa; &ge; 0.60</td><td>TBD (guideline and queries ready; labelling in frames 3-4)</td></tr>
+  <tr><td>4</td><td>API latency for <code>/predict</code>, top_k = 10, on one CPU core (p95)</td><td>&le; 300 ms</td>
+      <td>TBD (benchmark in frame 3)</td></tr>
+  <tr><td>5</td><td>Fine-tuned MiniLM vs. pretrained on validation MRR@10 (same format and corpus), paired test</td>
+      <td>better at p &lt; 0.01</td><td>TBD; if not met, it is reported and the better model is deployed</td></tr>
+</table>
+<p class="note">Validation numbers: MLflow experiment <code>recipe-retrieval</code>, corpus sha256 1f1f4ce5&hellip;; run ids listed in
+<code>reports/comparison.csv</code>. TF-IDF tuning (GroupKFold(5), 24 grid points) kept the defaults: CV MRR@10 0.690 &plusmn; 0.006.
+Synthetic labels have one known positive per query, so criteria 1-2 are a proxy and criterion 3 checks real usefulness.</p>
+
+<h2>5. Project plan</h2>
+<p>Work is split into 48-hour frames; every task runs on its own feature branch and merges into <code>dev</code> through a
+reviewed pull request (Hoang reviewed by Hieu, Hung by Hoang, Hieu by Hung). Configuration freeze and the single test
+run: 1 November. Hard deadline: 7 November.</p>
+<table>
+  <tr><th style="width:15%">Week / frame</th><th>Hoang: data, baselines, evaluation, report</th><th>Hung: embeddings, API, UI, Docker</th><th>Hieu: fine-tuning, MLflow, monitoring</th></tr>
+  <tr><td><b>Week 1</b> (19-25 Oct)<br>Frame 1: 23-25 Oct</td>
+      <td>Data pipeline, group split, synthetic queries, EDA and data audit; TF-IDF / BM25 / LSA baselines and ranx evaluator on pilot (done)</td>
+      <td>MiniLM encoder, dense retriever, E04/E05 on pilot (done)</td>
+      <td>Training pairs, Colab fine-tuning notebook with checkpoint/resume, CPU export (done)</td></tr>
+  <tr><td><b>Week 2</b> (26-31 Oct)<br>Frame 2: 26-27 Oct</td>
+      <td>E02 CV tuning, validation comparison of E01-E05 with significance tests, this proposal, manual query set and guideline</td>
+      <td>Main 50k index, recommend() with matched/missing, E06 rerank ablation, FastAPI, Docker</td>
+      <td>Main fine-tuning (2 configs), regularisation ablation, MLflow registry (staging)</td></tr>
+  <tr><td>Frame 3: 28-29 Oct</td>
+      <td>Blind dev pool and labels, error analysis (&ge; 20 cases), report part 1, tests and coverage</td>
+      <td>Web UI, latency/RAM benchmark, bundle selection by config, dev labels</td>
+      <td>Drift monitoring, one-command <code>train.py</code>, registry aliases and rollback, dev labels</td></tr>
+  <tr><td>Frame 4: 30-31 Oct</td>
+      <td>Freeze, single test run (E10), final labels and kappa, Master Comparison Table, report part 2</td>
+      <td>Docker and README from a clean clone, demo runbook, smoke tests, final labels</td>
+      <td>FT vs. pretrained analysis, monitoring on real API logs, MLflow evidence, DL/MLOps report, final labels</td></tr>
+  <tr><td><b>Week 3</b> (1-7 Nov)<br>Frame 5: 1-2 Nov</td>
+      <td>Merge the 15-25 page report, slides on problem/data/models/results, README audit, clean-clone check, release tag</td>
+      <td>Deployment slides, live demo rehearsal, backup demo video</td>
+      <td>DL/MLOps slides, Q&amp;A notes, full rehearsal (20 min + 10 min Q&amp;A)</td></tr>
+  <tr><td>3-7 Nov</td><td colspan="3">Buffer only: bug fixes, rehearsal, submission. No new features.</td></tr>
+</table>
+
+<h2>6. Risks</h2>
+<ul>
+  <li><b>Proxy labels</b> reward finding one recipe and may underrate good alternatives &rarr; manual graded labels (criterion 3).</li>
+  <li><b>Fine-tuning may not beat lexical baselines</b> (on validation BM25 already leads) &rarr; reported as is; the deployed model is chosen on validation, not on expectations.</li>
+  <li><b>Free Colab GPU limits</b> &rarr; checkpoint/resume and a CPU path with fewer steps.</li>
+  <li><b>Dependency conflicts</b> between training and serving packages &rarr; pinned, separately tested requirements.</li>
+</ul>
+
+</body>
+</html>
