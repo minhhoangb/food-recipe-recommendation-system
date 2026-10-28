@@ -12,10 +12,13 @@ request). Two backends are supported:
 The backend and the paths are read from the environment so Docker and a local run
 behave the same:
 
-    API_BACKEND=reference|dense
+    API_BACKEND=reference|dense|bundle   (bundle: whatever serving.bundle points at)
     API_CONFIG=configs/pilot.yaml
-    API_BUNDLE=models/minilm_pretrained-E04-pilot-<sha8>
+    API_BUNDLE=models/bm25-main-1f1f4ce5  (overrides serving.bundle)
     API_REQUEST_LOG=logs/requests.db
+
+`serving.bundle` in the config picks the model, so switching between tfidf, bm25, lsa and the
+MiniLM bundles is a config change, not a code change (see `src/serving.py`).
 """
 
 from __future__ import annotations
@@ -25,11 +28,13 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from api.request_log import RequestLogger
 from src.config import load_config, processed_dir
@@ -54,28 +59,34 @@ def _env(name: str, default: str) -> str:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Load the retriever and the corpus metadata once, before the first request."""
-    backend = _env("API_BACKEND", "reference")
     config_path = _env("API_CONFIG", DEFAULT_CONFIG)
     cfg = load_config(config_path)
     corpus_path = processed_dir(cfg) / "corpus.jsonl"
 
-    if backend == "dense":
-        from src.retrieval import DenseRetriever
+    # A bundle comes from API_BUNDLE or from serving.bundle in the config. When one is set the
+    # bundle is loaded unless API_BACKEND=reference explicitly asks for the reference retriever.
+    bundle = _env("API_BUNDLE", "") or str(cfg.get("serving", {}).get("bundle", "") or "")
+    backend = _env("API_BACKEND", "").lower() or ("bundle" if bundle else "reference")
 
-        bundle = _env("API_BUNDLE", "")
+    if backend in ("bundle", "dense"):
+        from src.serving import bundle_kind, load_retriever
+
         if not bundle:
             raise RuntimeError(
-                "API_BACKEND=dense needs API_BUNDLE=<models/run_id>; "
+                "API_BACKEND=dense needs API_BUNDLE=<models/run_id> or serving.bundle in the config; "
                 "build one with: python -m src.embeddings --config <config> --mode ingredients"
             )
-        app.state.retriever = DenseRetriever.from_bundle(bundle)
+        app.state.retriever = load_retriever(bundle)
+        app.state.bundle = bundle
+        app.state.backend = bundle_kind(bundle)
     else:
         from src.reference import TfidfReference
 
         app.state.retriever = TfidfReference.from_corpus(corpus_path)
+        app.state.bundle = None
+        app.state.backend = "reference"
 
     app.state.metadata = load_corpus_metadata(corpus_path)
-    app.state.backend = backend
     app.state.logger = RequestLogger(_env("API_REQUEST_LOG", DEFAULT_LOG))
     app.state.config_path = config_path
     yield
@@ -159,15 +170,26 @@ def health() -> dict:
 
 @app.get("/model-info")
 def model_info() -> dict:
-    """Which model is serving, and where its data comes from."""
+    """Which model is serving, where its data comes from, and what it scored on validation."""
+    from src.serving import bundle_manifest, bundle_metrics
+
     retriever = app.state.retriever
-    return {
+    info = {
         "model": retriever.name,
         "model_version": retriever.version,
         "backend": app.state.backend,
         "config": app.state.config_path,
         "corpus_recipes": len(app.state.metadata),
+        "bundle": app.state.bundle,
     }
+    if app.state.bundle:
+        manifest = bundle_manifest(app.state.bundle)
+        info["corpus_sha256"] = manifest.get("corpus_sha256")
+        info["metrics"] = bundle_metrics(app.state.bundle, _env("API_TRACKING_URI", "sqlite:///mlflow.db"))
+    else:
+        info["corpus_sha256"] = None
+        info["metrics"] = None
+    return info
 
 
 @app.post("/predict", response_model=PredictResponse)
@@ -192,5 +214,8 @@ def batch_predict(payload: BatchPredictRequest) -> BatchPredictResponse:
         predictions.append(response)
     return BatchPredictResponse(predictions=predictions)
 
+
+# The static UI is mounted last so it never shadows the JSON endpoints above.
+app.mount("/", StaticFiles(directory=Path(__file__).resolve().parents[1] / "fe", html=True), name="fe")
 
 __all__ = ["app", "lifespan"]
