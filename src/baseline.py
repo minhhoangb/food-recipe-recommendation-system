@@ -19,7 +19,7 @@ from pathlib import Path
 
 import joblib
 import numpy as np
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 from rank_bm25 import BM25Okapi
 from sklearn.metrics.pairwise import linear_kernel
 
@@ -73,8 +73,13 @@ class Bm25Retriever:
         return rank_top_k(self.ids, self.index.get_scores(query), top_k)
 
 
-def fit_retriever(model: str, corpus: list[dict], train_ids: set[str]) -> tuple[Retriever, dict]:
-    """Fit on train, index every recipe in `corpus`. Returns (retriever, metrics.json content)."""
+def fit_retriever(
+    model: str, corpus: list[dict], train_ids: set[str], tfidf_params: dict | None = None
+) -> tuple[Retriever, dict]:
+    """Fit on train, index every recipe in `corpus`. Returns (retriever, metrics.json content).
+
+    tfidf_params (model "tfidf" only): build_text_pipeline arguments, e.g. the E02 values from src.tune.
+    """
     corpus = sorted(corpus, key=lambda r: r["recipe_id"])
     ids = np.array([r["recipe_id"] for r in corpus])
     docs = [r["ingredients_normalized"] for r in corpus]
@@ -86,13 +91,15 @@ def fit_retriever(model: str, corpus: list[dict], train_ids: set[str]) -> tuple[
         info = {"idf_corpus": "all candidate recipes (transductive)"}
     else:
         if model == "tfidf":
-            pipeline = build_text_pipeline()
+            pipeline = build_text_pipeline(**(tfidf_params or {}))
         else:
             vocabulary = len({ingredient for doc in train_docs for ingredient in doc})
             pipeline = build_lsa_pipeline(n_components=min(256, max(1, vocabulary - 1)))
         pipeline.fit(train_docs)
         retriever = VectorRetriever(model, pipeline, ids, pipeline.transform(docs))
         info = {"fit_on": "train recipes only", "vocabulary_size": len(pipeline["tfidf"].vocabulary_)}
+        if tfidf_params:
+            info["tfidf_params"] = tfidf_params
 
     info.update(
         fit_seconds=round(time.perf_counter() - started, 3), n_docs=len(docs), n_train_docs=len(train_docs)
@@ -101,11 +108,16 @@ def fit_retriever(model: str, corpus: list[dict], train_ids: set[str]) -> tuple[
 
 
 def save_bundle(
-    retriever: Retriever, info: dict, cfg: DictConfig, out_dir: Path = DEFAULT_MODELS_DIR
+    retriever: Retriever,
+    info: dict,
+    cfg: DictConfig,
+    out_dir: Path = DEFAULT_MODELS_DIR,
+    prefix: str | None = None,
 ) -> Path:
+    """Write models/<prefix or model name>-<profile>-<corpus sha8>/."""
     directory = processed_dir(cfg)
     corpus_sha = sha256_file(directory / "corpus.jsonl")
-    run_id = f"{retriever.name}-{cfg.data.profile}-{corpus_sha[:8]}"
+    run_id = f"{prefix or retriever.name}-{cfg.data.profile}-{corpus_sha[:8]}"
     bundle = Path(out_dir) / run_id
     bundle.mkdir(parents=True, exist_ok=True)
     joblib.dump(retriever, bundle / "model.joblib")
@@ -147,14 +159,20 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--out", default=str(DEFAULT_MODELS_DIR), help="folder that receives models/<run_id>/"
     )
+    parser.add_argument(
+        "--tuned", action="store_true", help="tfidf only: use baselines.tfidf_tuned from the config (E02)"
+    )
     args = parser.parse_args(argv)
+    if args.tuned and args.model != "tfidf":
+        parser.error("--tuned only applies to --model tfidf")
 
     cfg = load_config(args.config)
     directory = processed_dir(cfg)
     corpus = list(read_jsonl(directory / "corpus.jsonl"))
     train_ids = set(read_json(directory / "splits.json")["train"])
-    retriever, info = fit_retriever(args.model, corpus, train_ids)
-    bundle = save_bundle(retriever, info, cfg, Path(args.out))
+    params = OmegaConf.to_container(cfg.baselines.tfidf_tuned) if args.tuned else None
+    retriever, info = fit_retriever(args.model, corpus, train_ids, params)
+    bundle = save_bundle(retriever, info, cfg, Path(args.out), prefix="tfidf_tuned" if args.tuned else None)
     print(f"{args.model}: {info}\nbundle: {bundle}")
     return 0
 

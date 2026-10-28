@@ -28,6 +28,16 @@ queries:
     validation: {main: 500, pilot: 200}
     test: {main: 1000, pilot: 300}
 
+baselines:
+  # E02: best TF-IDF grid point of GroupKFold(5) CV on main outer train (python -m src.tune,
+  # reports/tfidf_cv5.json, MLflow run dac82cb580e8403082cd9d0fabb40448). It equals the sklearn
+  # defaults used by E01: CV MRR@10 0.6896 +/- 0.0063; no other grid point beat it.
+  tfidf_tuned:
+    tokens: ingredient     # ingredient | ingredient_and_words
+    min_df: 1
+    sublinear_tf: false
+    norm: l2               # l2 | null
+
 artifacts:
   # Filled in by the data owner after uploading dist/processed-<id>.zip (see scripts/).
   url: ""

@@ -136,21 +136,47 @@ locked in `tests/test_ranking_metrics.py`.
 
 ### Fine-tuning and training pipeline (Person 3)
 
-`src/build_pairs.py` builds training pairs from `train` recipes using `src.queries.make_query_ingredients` across multiple seeds (up to 10,000 pairs for pilot, seed 42) and Hưng's document representation (`src.embeddings.format_document`), outputting a manifest with SHA256 hashes. It also provides `NoDuplicateBatchSampler` ensuring no batch contains duplicate recipes or duplicate groups.
+`src/build_pairs.py` builds training pairs from `train` recipes using `src.queries.make_query_ingredients` across multiple seeds (up to 10,000 pairs for pilot, 30,000 for main, seed 42) and Hưng's document representation (`src.embeddings.format_document`), outputting a manifest with SHA256 hashes. It also provides `NoDuplicateBatchSampler` ensuring no batch contains duplicate recipes or duplicate groups.
 
-`notebooks/02_finetune_colab.ipynb` runs fine-tuning on Colab GPU with `SentenceTransformerTrainer` + `MultipleNegativesRankingLoss`, evaluates every epoch with `InformationRetrievalEvaluator` (MRR@10), demonstrates `save_steps` checkpointing and `resume_from_checkpoint`, and exports the model.
+- **Pilot Fine-Tuning**: `notebooks/02_finetune_colab.ipynb` runs pilot fine-tuning on Colab GPU with `SentenceTransformerTrainer` + `MultipleNegativesRankingLoss`, evaluates every epoch with `InformationRetrievalEvaluator` (MRR@10), demonstrates `save_steps` checkpointing and `resume_from_checkpoint`, and exports the model.
+- **Main Fine-Tuning & Regularization Ablation (Sprint 2)**: `notebooks/03_finetune_main_ablation.ipynb` generates 30,000 pairs on the `main` profile, trains 2 hyperparameter configurations (`lr=2e-5, batch=32` vs `lr=1e-5, batch=64`), selects the top checkpoint according to validation MRR@10 (`load_best_model_at_end`), conducts a DL regularization ablation (`weight_decay=0.0` vs `0.01`), and logs 6 runs to MLflow (`sqlite:///mlflow.db`) with model registry alias `staging` and `production`. Full report and loss curve plots: [reports/ablation_regularization.md](reports/ablation_regularization.md) and [reports/e07_e08_finetune_main.md](reports/e07_e08_finetune_main.md).
 
-Hand-off to Person 2 (Hưng): pass the exported fine-tuned checkpoint via `--model-path`:
+#### Main Validation Benchmark: Pretrained vs Fine-Tuned (E04/E05 vs E07/E08)
+
+All runs evaluated strictly on the `main` validation split (500 queries over 50,000 corpus recipes, zero test leakage):
+
+| Exp ID | Pipeline Description | Recall@5 | Recall@10 | MRR@10 | Delta vs Baseline |
+|---|---|---|---|---|---|
+| **E04** | Pretrained MiniLM (`all-MiniLM-L6-v2`, Dense Only) | 0.5120 | 0.5760 | 0.4332 | Baseline |
+| **E07** | **Fine-Tuned MiniLM (`minilm_finetuned_main`, Dense Only)** | **0.6280** | **0.7020** | **0.5540** | **+27.9% MRR@10 (+0.1208)** |
+| **E05** | Hybrid BM25 + Pretrained MiniLM | 0.6980 | 0.7720 | 0.6120 | Baseline |
+| **E08** | **Hybrid BM25 + Fine-Tuned MiniLM** | **0.7560** | **0.8240** | **0.6780** | **+10.8% MRR@10 (+0.0660)** |
+
+#### MLflow Tracking & Model Registry
+
+All runs, parameters, loss curves, and registered models are stored in local SQLite backend:
 
 ```bash
-# 1. Build training pairs with verified manifest
-python -m src.build_pairs --config configs/pilot.yaml --split train --mode ingredients --max-pairs 10000 --seed 42
+# Launch MLflow UI to inspect runs and model registry
+mlflow ui --backend-store-uri sqlite:///mlflow.db
+```
 
-# 2. Fine-tune model directly or end-to-end with MLflow logging
-python -m src.train --config configs/pilot.yaml --epochs 1 --batch-size 16 --promote
+- **Experiment:** `recipe-retrieval` (ID: 1, 6 runs: baseline E04, Config 1, Config 2, Ablation wd=0.0, Ablation wd=0.01, Best E07).
+- **Registered Model:** `minilm_finetuned` with aliases `@staging` and `@production`.
+- **UI Screenshot:** [reports/figures/mlflow_dashboard_ui.png](reports/figures/mlflow_dashboard_ui.png)
 
-# 3. Person 2 (Hưng) hand-off: build serving bundle using the fine-tuned model checkpoint
-python -m src.embeddings --config configs/pilot.yaml --model-path models/minilm_finetuned_checkpoint
+![MLflow UI Dashboard](reports/figures/mlflow_dashboard_ui.png)
+
+#### Hand-off to Person 2 (Hưng): Indexing with Fine-Tuned Checkpoint
+
+Pass the exported fine-tuned checkpoint bundle via `--model-path`:
+
+```bash
+# 1. Build training pairs on main (30,000 pairs, seed 42)
+python -m src.build_pairs --config configs/default.yaml --split train --mode ingredients --max-pairs 30000 --seed 42
+
+# 2. Build index bundle using the best fine-tuned model checkpoint (E07)
+python -m src.embeddings --config configs/default.yaml --model-path models/minilm_finetuned_main
 ```
 
 ### Production API & Model Monitoring (Person 3)
