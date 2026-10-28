@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What can I cook?</title>
+<style>
+  :root {
+    --bg: #faf7f2;
+    --card: #ffffff;
+    --ink: #23201c;
+    --muted: #6d655c;
+    --line: #e3ddd3;
+    --accent: #b4451f;
+    --accent-ink: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1816;
+      --card: #232019;
+      --ink: #f2ede6;
+      --muted: #a89f93;
+      --line: #3a352d;
+      --accent: #e0714a;
+      --accent-ink: #1a1816;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem 1rem 4rem;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 60rem; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin: 0 0 .25rem; }
+  .lede { color: var(--muted); margin: 0 0 1.5rem; }
+  form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    align-items: flex-end;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: .75rem;
+    padding: 1rem;
+  }
+  .field { display: flex; flex-direction: column; gap: .3rem; }
+  .field.grow { flex: 1 1 18rem; }
+  label { font-size: .85rem; font-weight: 600; }
+  input, button {
+    font: inherit;
+    color: inherit;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: .5rem;
+    padding: .55rem .7rem;
+  }
+  #top-k { width: 5rem; }
+  button {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: transparent;
+    font-weight: 600;
+    cursor: pointer;
+    padding: .55rem 1.2rem;
+  }
+  button:disabled { opacity: .55; cursor: progress; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .hint { color: var(--muted); font-size: .85rem; margin: .5rem 0 0; }
+  #status { margin: 1.25rem 0 0; min-height: 1.5rem; color: var(--muted); }
+  #status.error { color: var(--accent); font-weight: 600; }
+  #retry { display: none; margin-top: .5rem; }
+  #retry.show { display: inline-block; }
+  ul.results { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+  .recipe {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: .75rem;
+    padding: 1rem;
+  }
+  .recipe h2 { font-size: 1.1rem; margin: 0 0 .5rem; }
+  .score { color: var(--muted); font-size: .8rem; font-weight: 400; }
+  .tags { display: flex; flex-wrap: wrap; gap: .35rem; margin: 0 0 .6rem; padding: 0; list-style: none; }
+  .tag { font-size: .78rem; padding: .15rem .5rem; border-radius: 999px; border: 1px solid var(--line); }
+  .tag.have { border-color: var(--accent); }
+  .tag.need { color: var(--muted); }
+  details summary { cursor: pointer; font-size: .9rem; color: var(--muted); }
+  details ol { margin: .6rem 0 0; padding-left: 1.2rem; }
+  details li { margin-bottom: .3rem; }
+  .recipe a { color: var(--accent); font-size: .85rem; }
+  .label { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 .3rem; }
+  @media (max-width: 420px) {
+    body { padding: 1.25rem .75rem 3rem; }
+    form { padding: .85rem; }
+    button { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>What can I cook?</h1>
+  <p class="lede">Type what you have. You get recipes that use it, and what else each one needs.</p>
+
+  <form id="search" novalidate>
+    <div class="field grow">
+      <label for="ingredients">Your ingredients (comma separated)</label>
+      <input id="ingredients" name="ingredients" type="text" autocomplete="off" required
+             placeholder="chicken, rice, garlic">
+    </div>
+    <div class="field">
+      <label for="top-k">Results</label>
+      <input id="top-k" name="top_k" type="number" min="1" max="20" step="1" value="5">
+    </div>
+    <button id="submit" type="submit">Find recipes</button>
+  </form>
+  <p class="hint">Up to 20 results. Ingredients are normalised on the server.</p>
+
+  <p id="status" role="status" aria-live="polite"></p>
+  <button id="retry" type="button">Try again</button>
+  <ul class="results" id="results"></ul>
+</main>
+
+<script>
+const form = document.getElementById("search");
+const ingredientsInput = document.getElementById("ingredients");
+const topKInput = document.getElementById("top-k");
+const statusEl = document.getElementById("status");
+const retryButton = document.getElementById("retry");
+const resultsEl = document.getElementById("results");
+const submitButton = document.getElementById("submit");
+
+let lastPayload = null;
+
+function setStatus(text, isError = false) {
+  statusEl.textContent = text;
+  statusEl.classList.toggle("error", isError);
+}
+
+/** Only http(s) links ever become an href; anything else is rendered as plain text. */
+function safeHref(link) {
+  try {
+    const url = new URL(link);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;  // textContent, never innerHTML
+  return node;
+}
+
+function renderRecipe(result) {
+  const item = el("li", "recipe");
+  const heading = el("h2");
+  heading.append(document.createTextNode(result.title || "Untitled recipe"));
+  heading.append(el("span", "score", ` · score ${Number(result.score).toFixed(3)}`));
+  item.append(heading);
+
+  const tags = el("ul", "tags");
+  for (const name of result.matched_ingredients) tags.append(el("li", "tag have", `have: ${name}`));
+  for (const name of result.missing_ingredients) tags.append(el("li", "tag need", `need: ${name}`));
+  item.append(tags);
+
+  if (result.directions.length) {
+    const details = el("details");
+    details.append(el("summary", null, `Directions (${result.directions.length} steps)`));
+    const list = el("ol");
+    for (const step of result.directions) list.append(el("li", null, step));
+    details.append(list);
+    item.append(details);
+  }
+
+  const href = safeHref(result.link);
+  if (href) {
+    const link = el("a", null, "Open source recipe");
+    link.href = href;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    item.append(link);
+  }
+
+  return item;
+}
+
+function renderResults(results) {
+  resultsEl.replaceChildren();
+  if (!results.length) {
+    setStatus("No recipe shares an ingredient with what you typed. Try fewer or more common ingredients.");
+    return;
+  }
+  for (const result of results) resultsEl.append(renderRecipe(result));
+  setStatus(`${results.length} recipe${results.length === 1 ? "" : "s"}.`);
+}
+
+async function predict(payload) {
+  submitButton.disabled = true;
+  retryButton.classList.remove("show");
+  resultsEl.replaceChildren();
+  setStatus("Searching…");
+  try {
+    const response = await fetch("/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      const detail = body && body.detail
+        ? (Array.isArray(body.detail) ? body.detail.map(d => d.msg || String(d)).join("; ") : String(body.detail))
+        : `The server answered ${response.status}.`;
+      throw new Error(detail);
+    }
+    if (body.note) setStatus(body.note);
+    renderResults(body.results);
+  } catch (error) {
+    setStatus(`Could not get recipes: ${error.message}`, true);
+    retryButton.classList.add("show");
+  } finally {
+    submitButton.disabled = false;
+  }
+}
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const ingredients = ingredientsInput.value.split(",").map(s => s.trim()).filter(Boolean);
+  if (!ingredients.length) {
+    setStatus("Type at least one ingredient.", true);
+    ingredientsInput.focus();
+    return;
+  }
+  const topK = Math.min(20, Math.max(1, Number(topKInput.value) || 5));
+  topKInput.value = String(topK);
+  lastPayload = { ingredients, top_k: topK };
+  predict(lastPayload);
+});
+
+retryButton.addEventListener("click", () => {
+  if (lastPayload) predict(lastPayload);
+});
+
+// ?q=chicken,rice,garlic&k=3 fills the form and searches, so a result page can be linked.
+const params = new URLSearchParams(location.search);
+const query = params.get("q");
+if (query) {
+  ingredientsInput.value = query;
+  if (params.get("k")) topKInput.value = params.get("k");
+  form.requestSubmit();
+}
+</script>
+</body>
+</html>

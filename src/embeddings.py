@@ -29,7 +29,7 @@ import numpy as np
 from omegaconf import DictConfig
 
 from src.config import fingerprint, load_config, processed_dir
-from src.contracts import BundleManifest, RecipeRecord
+from src.contracts import BundleManifest, ModelName, RecipeRecord
 from src.normalize import NORMALIZATION_FINGERPRINT
 from src.utils import REPO_ROOT, read_jsonl, sha256_file, sha256_obj, write_json
 
@@ -177,9 +177,6 @@ def encode_corpus(
 
 
 # ---------------------------------------------------------------------------------------------
-from src.contracts import BundleManifest, ModelName, RecipeRecord
-
-# ... (rest unchanged)
 def bundle_run_id(
     mode: EmbeddingMode,
     profile: str,

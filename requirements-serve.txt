@@ -1,0 +1,36 @@
+# The packages the API needs to serve: no training stack, no notebook stack.
+# `requirements.txt` has everything (training included); this file is what the Docker image
+# installs, because the training extras (`datasets`) need huggingface-hub >= 1.31 while
+# `transformers` needs < 1.0, and the two cannot be installed together.
+#
+#   pip install -r requirements-serve.txt
+#
+# The training stack (accelerate, datasets) stays in requirements.txt for the notebooks.
+numpy==2.5.3
+pandas==3.0.5
+pydantic==2.13.5
+PyYAML==6.0.3
+omegaconf==2.4.0
+scikit-learn==1.9.1
+scipy==1.18.1
+ranx==0.3.21
+ingredient-parser-nlp==2.9.1
+inflect==7.6.0
+pooch==1.9.0
+psutil==7.2.2
+mlflow==3.17.2
+rank-bm25==0.2.2
+matplotlib==3.11.2
+pytest==9.1.1
+ruff==0.17.0
+
+# Person 2 (Hưng): pretrained MiniLM encoder + dense retrieval + the API.
+# torch is the CPU build; install it from the CPU index (see README, Installation):
+#   pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu
+# The line below installs the default (CUDA) wheel on Linux; the CPU index is only needed
+# when the CUDA build is not wanted. On Windows/macOS the default torch wheel is CPU-only.
+torch==2.9.1
+sentence-transformers==5.1.2
+fastapi==0.162.0
+uvicorn==0.54.0
+httpx==0.28.1
