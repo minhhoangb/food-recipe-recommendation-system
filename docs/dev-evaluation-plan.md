@@ -20,6 +20,10 @@ reviewer: Hiếu. Hạn nộp: 24:00 ngày 29/10/2026 (00:00 ngày 30/10/2026).
 - Query chính được chia 7/7/6; mỗi người còn nhận một phần chấm kép.
 - Đọc `reports/manual_eval/annotation_guide.md`; không mở file key khi chấm.
 - Lệnh tạo pool từ chối ghi đè CSV đã có relevance hoặc notes.
+- Đã có một lượt chấm AI riêng cho đủ 396 mục trong
+  `reports/manual_eval/pool_dev_ai.csv`, gồm nhãn 0/1/2, nguồn `ai` và lý do.
+  Có 116 nhãn 0, 208 nhãn 1, 72 nhãn 2; 20 mục đánh dấu `unsure`.
+  Metadata và MLflow ghi rõ chưa được người kiểm chứng, không tính kappa.
 - **Còn chờ:** cả ba chấm relevance thật, ghi nhận nhãn ban đầu, đối chiếu
   bất đồng sau khi chấm độc lập, lưu nhãn thống nhất và nguồn người chấm.
 - Chỉ khi có nhãn mới tính agreement, pooled nDCG và coverage. Không điền
@@ -59,4 +63,5 @@ reviewer: Hiếu. Hạn nộp: 24:00 ngày 29/10/2026 (00:00 ngày 30/10/2026).
 - `ruff check .`: đạt, không bỏ qua lỗi.
 - Toàn bộ pytest: 243 passed. Coverage baseline 97.20%, features 100%, evaluate 96.69%.
 - Trên Windows sandbox, TestClient bị chặn ở socketpair; bộ test chạy đạt ngoài sandbox.
-- Các nhãn relevance vẫn trống; bước chấm của người và CI trên PR chưa hoàn tất.
+- Ba file nhãn của người vẫn trống; bộ nhãn AI được lưu riêng và không thay thế
+  ba lượt chấm độc lập. PR #14 đã được merge; các thay đổi tiếp nối được nộp riêng.

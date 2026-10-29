@@ -6,7 +6,15 @@ query-recipe pairs. Every query's items are shuffled with seed 42 before assignm
 
 Use the existing [annotation guide](annotation_guide.md) without changing its scale.
 Fill only `relevance` and `notes` in your assigned file; `annotator` is already set.
-All relevance labels are currently empty.
+The three human assignment files still have empty relevance labels.
+
+A separate [AI annotation pass](pool_dev_ai.csv) covers all 396 items with
+`annotator=ai` and a reason in every row. It is not an independent human judgment.
+See [the annotation report](ai_annotation_report.md),
+[per-query counts](ai_label_summary.csv) and [source metadata](ai_label_metadata.json).
+The 20 rows marked `unsure` need particular attention. Keep the original human
+assignments separate; do not copy AI labels into a person's file without recording
+that person's actual review.
 
 | Annotator | File | Rows |
 | --- | --- | ---: |
