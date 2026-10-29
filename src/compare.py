@@ -40,7 +40,7 @@ MAX_P = 0.01
 CV_NOT_APPLICABLE = {
     "bm25": "N/A: rank-bm25 indexes every candidate (transductive IDF), nothing is fitted on train",
     "minilm_pretrained": "N/A: pretrained encoder, nothing is fitted on our data",
-    "minilm_finetuned": "N/A: one fine-tuning run; checkpoint chosen on validation, not cross-validated",
+    "minilm_finetuned": "N/A: one fine-tuning run, not cross-validated",
 }
 
 

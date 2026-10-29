@@ -228,6 +228,15 @@ def pool_main(argv: list[str]) -> int:
     parser.add_argument("--out", default=str(MANUAL_DIR / "pool"))
     args = parser.parse_args(argv)
 
+    out = Path(args.out)
+    for existing in out.glob(f"pool_{args.split}*.csv"):
+        with existing.open(encoding="utf-8-sig", newline="") as handle:
+            if any(
+                row.get("relevance", "").strip() or row.get("notes", "").strip()
+                for row in csv.DictReader(handle)
+            ):
+                parser.error(f"{existing} contains labels or notes; use a new --out directory")
+
     cfg = load_config(args.config)
     directory = processed_dir(cfg)
     corpus_sha = sha256_file(directory / "corpus.jsonl")
@@ -245,7 +254,6 @@ def pool_main(argv: list[str]) -> int:
 
     items, key = build_pool(systems, queries, corpus, args.depth, cfg.seed)
     rows = assign_annotators(items, seed=cfg.seed)
-    out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     for annotator in ANNOTATORS:
         mine = [row for row in rows if row["annotator"] == annotator]

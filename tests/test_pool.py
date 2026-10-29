@@ -87,11 +87,16 @@ def fixture_bundles(built_fixture, tmp_path_factory):
     train_ids = set(read_json(directory / "splits.json")["train"])
     tmp = tmp_path_factory.mktemp("pool")
     config = tmp / "fixture.yaml"
-    config.write_text(f"paths:\n  processed_dir: {out.as_posix()}\ndata:\n  profile: main\n", encoding="utf-8")
+    config.write_text(
+        f"paths:\n  processed_dir: {out.as_posix()}\ndata:\n  profile: main\n", encoding="utf-8"
+    )
     from omegaconf import OmegaConf
 
     main_cfg = OmegaConf.merge(cfg, {"data": {"profile": "main"}})
-    bundles = {m: save_bundle(*fit_retriever(m, corpus, train_ids), main_cfg, tmp / "models") for m in ("tfidf", "bm25")}
+    bundles = {
+        m: save_bundle(*fit_retriever(m, corpus, train_ids), main_cfg, tmp / "models")
+        for m in ("tfidf", "bm25")
+    }
     return config, bundles, tmp
 
 
@@ -116,6 +121,26 @@ def test_pool_cli_writes_one_blind_file_per_annotator(fixture_bundles, capsys):
 
 def test_evaluate_cli_without_mlflow(fixture_bundles, capsys):
     config, bundles, _ = fixture_bundles
-    argv = ["--bundle", str(bundles["tfidf"]), "--split", "validation", "--config", str(config), "--no-mlflow"]
+    argv = [
+        "--bundle",
+        str(bundles["tfidf"]),
+        "--split",
+        "validation",
+        "--config",
+        str(config),
+        "--no-mlflow",
+    ]
     assert main(argv) == 0
     assert "mrr@10" in capsys.readouterr().out
+
+
+def test_pool_cli_preserves_existing_labels(fixture_bundles):
+    config, bundles, tmp = fixture_bundles
+    out = tmp / "labelled"
+    out.mkdir()
+    labelled = out / "pool_dev_hoang.csv"
+    original = "item_id,relevance,notes\nm01-01,2,checked\n"
+    labelled.write_text(original, encoding="utf-8")
+    with pytest.raises(SystemExit):
+        main(["pool", "--config", str(config), "--system", f"E01={bundles['tfidf']}", "--out", str(out)])
+    assert labelled.read_text(encoding="utf-8") == original
