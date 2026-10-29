@@ -1,4 +1,4 @@
-# Pool nhãn dev, phân tích lỗi, báo cáo phần 1 và test
+# Kế hoạch gán nhãn dev, phân tích lỗi và báo cáo
 
 Nhánh: `error-analysis-labels`. PR đích: `dev`. Người thực hiện: Hoàng;
 reviewer: Hiếu. Hạn nộp: 24:00 ngày 29/10/2026 (00:00 ngày 30/10/2026).
