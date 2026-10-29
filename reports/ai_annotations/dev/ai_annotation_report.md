@@ -2,6 +2,15 @@
 
 Generated on 2026-10-29 after a request to annotate the dev pool. These are a single AI pass, not three independent human judgments.
 
+**Post-judging review only. Do not read this report, its CSVs or summaries before
+independent human labels are locked.** Prior exposure must be recorded and prevents
+claiming the affected judgments were blind and independent.
+
+Inputs: `reports/manual_eval/pool_dev.csv` and the annotation guide as it stood
+at annotation time. Their recorded hashes remain in `ai_label_metadata.json`.
+The guide later gained a dated independence clarification; its label scale was
+not changed. Moving these artifacts leaves the original AI decisions unchanged.
+
 ## Outputs
 
 - `pool_dev_ai.csv`: 396 rows, the original pool columns, `annotator=ai`, relevance 0/1/2 and a reason per row.

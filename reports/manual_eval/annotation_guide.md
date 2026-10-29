@@ -82,4 +82,10 @@ Query "I have chicken thighs, rice and soy sauce, what can I make for dinner?"
 
 ## Change log
 
-(empty)
+- 2026-10-29 — Independence clarification; the relevance scale is unchanged.
+  Before independent labels are locked, annotators must not open system keys
+  (`pool_dev_key.csv`, `pool_dev_systems.jsonl`) or AI artifacts under
+  `reports/ai_annotations/`, including labels, summaries and worked examples.
+  Record prior exposure if it occurred; affected judgments cannot be described
+  as blind independent labels. AI-assisted review may happen only after locking
+  the original independent labels and must retain its actual source.

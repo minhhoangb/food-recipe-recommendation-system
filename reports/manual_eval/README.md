@@ -8,13 +8,12 @@ Use the existing [annotation guide](annotation_guide.md) without changing its sc
 Fill only `relevance` and `notes` in your assigned file; `annotator` is already set.
 The three human assignment files still have empty relevance labels.
 
-A separate [AI annotation pass](pool_dev_ai.csv) covers all 396 items with
-`annotator=ai` and a reason in every row. It is not an independent human judgment.
-See [the annotation report](ai_annotation_report.md),
-[per-query counts](ai_label_summary.csv) and [source metadata](ai_label_metadata.json).
-The 20 rows marked `unsure` need particular attention. Keep the original human
-assignments separate; do not copy AI labels into a person's file without recording
-that person's actual review.
+**Before independent labels are locked, do not open `pool_dev_key.csv`,
+`pool_dev_systems.jsonl`, or any files under `reports/ai_annotations/` (including
+AI labels, summaries and examples).** They reveal system information or suggested
+answers and can influence your judgments. Read only your assignment and the guide.
+If you have already seen any of them, record that exposure; those judgments must
+not be reported as blind independent labels. Moving the files cannot undo exposure.
 
 | Annotator | File | Rows |
 | --- | --- | ---: |
@@ -26,11 +25,24 @@ There are 484 assignments: 396 first labels and 88 independent second labels
 (at least 20% of each query's items). Keep both original labels when resolving
 disagreements, as required by the annotation guide.
 
-`pool_dev.csv` is the unassigned master copy. Annotators must not open
-`pool_dev_key.csv` or `pool_dev_systems.jsonl` during judging: those files reveal
-system names and ranks. Both keys refer to the same item IDs as the assigned files.
+`pool_dev.csv` is the unassigned master copy. Both system keys refer to the same
+item IDs as the assigned files.
 `pool_dev_metadata.json` records the checkpoint hash, corpus hash, query hash and
 MLflow run ID for this pool.
 
 The final queries have not been pooled or judged. Human agreement, pooled nDCG@10
 and top-10 judging coverage remain pending until manual labels are complete.
+
+## Rebuilding pools
+
+`python -m src.evaluate pool` is the single pool implementation for both splits.
+Supply each frozen bundle as `--system LABEL=path` and the matching FT checkpoint
+as `--encoder LABEL=path`. For example, from the repository root:
+
+```bash
+python -m src.evaluate pool --config configs/default.yaml --split dev --depth 5 --system E04=models/minilm_pretrained-E04-main-1f1f4ce5 --system FT=models/minilm_finetuned-E04-main-1f1f4ce5 --encoder FT=models/minilm_finetuned-main-cpu1ep --out reports/manual_eval/pool
+```
+
+This example selects two systems; use all agreed frozen systems for the actual
+pool. Use `--split final` only after the configuration is frozen. The command
+refuses to overwrite assignment CSVs containing relevance labels or notes.
