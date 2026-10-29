@@ -9,10 +9,10 @@ WORKDIR /app
 
 # torch (CPU) first: it is the biggest wheel and the CPU index must be used for it.
 # The timeouts/retries matter: the CPU wheel is ~200 MB and a slow link times out.
-COPY requirements.txt .
+COPY requirements-serve.txt .
 RUN pip install --timeout 120 --retries 10 torch==2.9.1 \
         --index-url https://download.pytorch.org/whl/cpu \
-    && pip install --timeout 120 --retries 10 -r requirements.txt
+    && pip install --timeout 120 --retries 10 -r requirements-serve.txt
 
 # ingredient-parser-nlp downloads one small NLTK resource on first import; the MiniLM
 # weights are pre-downloaded too, so the dense backend also runs without network access.
@@ -26,8 +26,9 @@ COPY fe ./fe
 
 # The corpus and the bundles are mounted as volumes (see docker-compose.yml); the app
 # reads them at startup and never writes to them.
-ENV API_BACKEND=reference \
-    API_CONFIG=configs/pilot.yaml \
+# The served model is chosen by the config (serving.bundle) or by API_BUNDLE; API_BACKEND
+# is left unset on purpose, so the bundle in the config wins.
+ENV API_CONFIG=configs/default.yaml \
     API_REQUEST_LOG=/app/logs/requests.db
 
 EXPOSE 8000

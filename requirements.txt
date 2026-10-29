@@ -32,6 +32,9 @@ fastapi==0.162.0
 uvicorn==0.54.0
 httpx==0.28.1
 
-# Person 3 (Hiếu): fine-tuning, Trainer and dataset utilities
+# Person 3 (Hiếu): fine-tuning, Trainer and dataset utilities.
+# NOTE: these two are only needed for training (the notebooks), not for serving. They cannot
+# be installed next to `transformers`: datasets>=5.1 needs huggingface-hub>=1.31 while
+# transformers needs <1.0. The Docker image installs `requirements-serve.txt` instead.
 accelerate>=1.15.0
 datasets>=5.1.0

@@ -5,8 +5,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      API_BACKEND: ${API_BACKEND:-reference}
-      API_CONFIG: ${API_CONFIG:-configs/pilot.yaml}
+      # The served model comes from the config (serving.bundle) unless API_BUNDLE is set.
+      API_CONFIG: ${API_CONFIG:-configs/default.yaml}
       API_BUNDLE: ${API_BUNDLE:-}
       API_REQUEST_LOG: /app/logs/requests.db
     volumes:

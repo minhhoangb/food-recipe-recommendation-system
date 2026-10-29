@@ -21,6 +21,15 @@ pip install -r requirements.txt
 python -m pytest
 ```
 
+`requirements.txt` has everything, the training stack included. `requirements-serve.txt` is
+the same list without the training extras (`accelerate`, `datasets`): those two cannot be
+installed next to `transformers` — `datasets>=5.1` needs `huggingface-hub>=1.31` while
+`transformers` needs `<1.0` — so the Docker image installs the serving list instead.
+
+```bash
+pip install -r requirements-serve.txt     # only what the API needs
+```
+
 Python 3.11 or 3.12 is recommended for the model work. Serving and training dependencies are appended to `requirements.txt` by their owners after testing (**TODO(owner)**).
 
 ### CPU-only torch (needed for the MiniLM encoder)
@@ -200,28 +209,47 @@ The FastAPI app lives in `api/app.py`. The retriever and the corpus metadata are
 # reference backend (TF-IDF over the processed corpus; no model download)
 uvicorn api.app:app --reload
 
-# dense backend (MiniLM over a stored bundle)
-set API_BACKEND=dense
-set API_BUNDLE=models/minilm_pretrained-E04-main-1f1f4ce5
+# a bundle: the model is chosen in the config (serving.bundle), not in the code
 set API_CONFIG=configs/default.yaml
+uvicorn api.app:app --reload
+
+# the env var overrides the config
+set API_BUNDLE=models/minilm_pretrained-E04-main-1f1f4ce5
 uvicorn api.app:app --reload
 ```
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `API_BACKEND` | `reference` | `reference` (TF-IDF) or `dense` (MiniLM bundle) |
+| `API_BACKEND` | from the config | `reference` (TF-IDF) or `bundle` (the bundle of `serving.bundle`) |
 | `API_CONFIG` | `configs/pilot.yaml` | which processed profile to serve |
-| `API_BUNDLE` | - | bundle folder, required when `API_BACKEND=dense` |
+| `API_BUNDLE` | - | bundle folder; overrides `serving.bundle` from the config |
 | `API_REQUEST_LOG` | `logs/requests.db` | SQLite request log (`""` disables it) |
+
+### Choosing the model with the config
+
+`serving.bundle` in `configs/default.yaml` (or in any profile file) says which bundle the
+API serves. The folder decides the loader: `model.joblib` is a lexical bundle (tfidf, bm25,
+lsa, written by `src.baseline`), `embeddings.npy` is a dense one (MiniLM, written by
+`src.embeddings`). Both are checked against their manifest before the app answers a single
+request, so a bundle with a wrong hash stops the startup instead of serving wrong results.
+
+```yaml
+serving:
+  bundle: models/bm25-main-1f1f4ce5
+```
+
+`/model-info` then reports the model, the bundle, the corpus hash and the validation
+metrics of the run that produced the bundle (read from the manifest or from MLflow).
 
 Endpoints (`src/contracts.py` owns the request/response schemas):
 
 | Endpoint | Method | What it does |
 | --- | --- | --- |
 | `/health` | GET | `{"status": "ok", ...}` — used by the Docker health check |
-| `/model-info` | GET | the serving model, the backend and the corpus size |
+| `/model-info` | GET | the serving model, the bundle, the corpus hash and the metrics |
 | `/predict` | POST | one ingredient list -> `top_k` recipes with matched/missing ingredients |
 | `/batch-predict` | POST | up to 20 instances; the order of the input is preserved |
+| `/` | GET | the web UI (`fe/index.html`) |
 
 A bad request returns **422** with the reason (e.g. `top_k` out of range, an ingredient
 list that normalises to nothing). `top_k` is an integer in `[1, 20]`, a batch holds at
@@ -277,6 +305,46 @@ shows that it costs 34% of the relative Recall@10 on the main corpus (0.576 -> 0
 because the synthetic label is the origin recipe, which is exactly the recipe with the
 most missing ingredients.
 
+## Web UI
+
+`fe/index.html` is a static page (HTML/CSS/JS, no build step, no dependency) that the API
+serves through `StaticFiles`. It asks for ingredients and a number of results, and shows for
+every recipe the title, the ingredients you have, the ones you are missing, the directions
+(behind a toggle) and the link to the source recipe.
+
+- The page is in English, works with the keyboard only (labels, visible focus, `aria-live`
+  status) and shows a loading, empty, error and retry state.
+- Recipe content is written with `textContent`, never with `innerHTML`, and a link only
+  becomes clickable when its protocol is `http:` or `https:`.
+- `?q=chicken,rice,garlic&k=3` fills the form and searches, so a result page can be linked.
+
+```bash
+uvicorn api.app:app --reload
+# open http://127.0.0.1:8000/
+```
+
+The screenshots of the task (390 px and 1440 px, real results from the API) are in
+`reports/figures/ui_390.png` and `reports/figures/ui_1440.png`. They are taken with
+headless Chrome:
+
+```bash
+python scripts/shoot_ui.py --url http://127.0.0.1:8000/ --ingredients "chicken, rice, garlic"
+```
+
+## Benchmark
+
+`src/benchmark.py` measures the serving bundles: p50/p95 latency, peak RAM, startup time
+and bundle size. Every bundle is measured in its **own process** (peak RSS is a process
+high-water mark), with 20 warmup queries and 100 measured queries, one after the other.
+
+```bash
+python -m src.benchmark --config configs/default.yaml --out reports/benchmark.json
+```
+
+It writes `reports/benchmark.json` (the numbers plus the CPU and the RAM of the machine) and
+`reports/benchmark.md` (the same numbers as a table). A bundle built from another corpus is
+skipped instead of being timed on queries that do not belong to it.
+
 ## Docker
 
 The image is CPU-only: torch comes from the CPU wheel index, so no CUDA is pulled in.
@@ -289,10 +357,10 @@ docker compose --profile mlflow up  # optional MLflow UI on http://127.0.0.1:500
 - `data/` and `models/` are mounted read-only; the request log goes to the `api_logs`
   volume.
 - The health check (`HEALTHCHECK` in the `Dockerfile`) calls `/health` every 30 s.
-- To serve the dense model, set the backend and the bundle before starting:
+- To serve a bundle, point the config at it (or set `API_BUNDLE`):
 
 ```bash
-API_BACKEND=dense API_BUNDLE=models/minilm_pretrained-E04-main-1f1f4ce5 \
+API_BUNDLE=models/minilm_pretrained-E04-main-1f1f4ce5 \
   API_CONFIG=configs/default.yaml docker compose up --build
 ```
 
@@ -302,6 +370,24 @@ The image size is reported in `reports/e04_e05_main_benchmark.md` after the buil
 The image bakes in the ingredient-parser NLTK resource **and** the MiniLM weights, so the
 dense backend also starts without network access. The corpus and the bundles are still
 mounted at runtime (`data/`, `models/`), never baked in.
+
+### Native vs Docker parity
+
+The same bundle must give the same answers on the host and in the container.
+`scripts/check_parity.py` sends the same queries to both servers and compares the recipe
+ids (same order) and the scores (within a tolerance); the log of the check is
+`reports/parity.json`.
+
+```bash
+# native
+API_CONFIG=configs/default.yaml API_BUNDLE=models/bm25-main-1f1f4ce5 \
+  uvicorn api.app:app --port 8010
+# container
+API_BUNDLE=models/bm25-main-1f1f4ce5 API_CONFIG=configs/default.yaml \
+  docker compose up -d --build
+python scripts/check_parity.py --native http://127.0.0.1:8010 --docker http://127.0.0.1:8000
+```
+
 ## MLflow
 
 MLflow tracks all baseline runs, pretrained evaluations, and fine-tuning experiments under `mlflow.db`:
@@ -320,13 +406,14 @@ api/            FastAPI app                                  (Person 2)
 configs/        default.yaml, pilot.yaml
 data/raw/       original CSV, never modified (git-ignored)
 data/processed/ corpus.jsonl, splits.json, queries.jsonl, qrels.jsonl, manifest per profile
-fe/             static web UI                                (Person 2)
+fe/             static web UI (index.html)                   (Person 2)
 models/         serving bundles (git-ignored)
 notebooks/      00_colab_bootstrap.ipynb, 02_finetune_colab.ipynb, EDA
-reports/        figures, final report, monitoring_report.md
+reports/        figures, final report, monitoring_report.md, benchmark.json
 scripts/        verify_data.py, package_artifacts.py, fetch_artifacts.py
+                shoot_ui.py, check_parity.py                  (Person 2)
 src/            contracts, config, utils, normalize, preprocess, data_collection, queries, reference
-                embeddings, retrieval, evaluation, memory    (Person 2)
+                embeddings, retrieval, evaluation, memory, serving, benchmark  (Person 2)
                 build_pairs, finetune, train, monitor        (Person 3)
 tests/          pytest suite, tests/fixtures (hand-written, not RecipeNLG)
 docs/           implementation plans per owner
