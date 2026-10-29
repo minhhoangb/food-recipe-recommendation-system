@@ -22,14 +22,13 @@ import mlflow
 import pandas as pd
 from ranx import Qrels, Run, compare
 
-from src.baseline import load_bundle
 from src.config import load_config, processed_dir
-from src.contracts import BundleManifest
 from src.evaluate import (
     DEFAULT_EXPERIMENT,
     DEFAULT_TRACKING_URI,
     METRICS,
     load_split,
+    load_system,
     log_to_mlflow,
     run_retriever,
     score_run,
@@ -41,22 +40,8 @@ MAX_P = 0.01
 CV_NOT_APPLICABLE = {
     "bm25": "N/A: rank-bm25 indexes every candidate (transductive IDF), nothing is fitted on train",
     "minilm_pretrained": "N/A: pretrained encoder, nothing is fitted on our data",
+    "minilm_finetuned": "N/A: one fine-tuning run; checkpoint chosen on validation, not cross-validated",
 }
-
-
-def load_system(bundle: Path):
-    """(retriever, manifest, fit seconds, what the fit time measures) for a lexical or dense bundle."""
-    if (bundle / "model.joblib").exists():
-        retriever, manifest = load_bundle(bundle)
-        info = read_json(bundle / "metrics.json")
-        what = "index build" if manifest.model_name == "bm25" else "fit on train + transform corpus"
-        return retriever, manifest, info["fit_seconds"], what
-    from src.retrieval import DenseRetriever  # torch only when a dense bundle is compared
-
-    payload = read_json(bundle / "manifest.json")
-    return DenseRetriever.from_bundle(bundle), BundleManifest(**payload), payload["encode_seconds"], (
-        "corpus encoding (no training)"
-    )
 
 
 def cv_columns(label: str, model_name: str, reports: Path) -> dict:
@@ -85,6 +70,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("--config", default="configs/default.yaml")
     parser.add_argument("--system", action="append", required=True, help="LABEL=models/<run_id>")
+    parser.add_argument("--encoder", action="append", default=[], help="LABEL=<checkpoint> (fine-tuned)")
     parser.add_argument("--out", default="reports")
     parser.add_argument("--top-k", type=int, default=10)
     parser.add_argument("--tracking-uri", default=DEFAULT_TRACKING_URI)
@@ -98,15 +84,17 @@ def main(argv: list[str] | None = None) -> int:
     out = Path(args.out) if Path(args.out).is_absolute() else REPO_ROOT / args.out
     splits = {split: load_split(directory, split) for split in ("train", "validation")}
 
+    encoders = dict(spec.split("=", 1) for spec in args.encoder)
     rows, validation_runs = [], []
     for spec in args.system:
         label, _, path = spec.partition("=")
         bundle = Path(path) if Path(path).is_absolute() else REPO_ROOT / path
-        retriever, manifest, fit_seconds, fit_what = load_system(bundle)
+        retriever, manifest, fit_seconds, fit_what = load_system(bundle, encoders.get(label))
         if manifest.corpus_sha256 != corpus_sha:
             parser.error(f"{label}: bundle was built from a different corpus than the configured profile")
         row = {"experiment": label, "model": manifest.model_name, "bundle": manifest.run_id}
-        row["tuned"] = "yes (GroupKFold CV5)" if label == "E02" else "no"
+        tuned = {"E02": "yes (GroupKFold CV5)"}.get(label, "no")
+        row["tuned"] = "fine-tuned (MNRL)" if manifest.model_name == "minilm_finetuned" else tuned
         for split, (queries, qrels) in splits.items():
             run, latency_ms = run_retriever(retriever, queries, args.top_k)
             results = {**score_run(run, qrels), "n_queries": len(queries), "latency_ms": latency_ms}
