@@ -1,17 +1,19 @@
 """Render a high-fidelity visual screenshot of the MLflow Dashboard UI from sqlite:///mlflow.db
-Displaying 6 runs, parameters, metrics, artifacts, and registered model minilm_finetuned with staging/production aliases.
+Displaying 6 runs, parameters, metrics, artifacts, and registered model minilm_finetuned
+with staging/production aliases.
 """
-import os
+
 from pathlib import Path
-import matplotlib.pyplot as plt
+
 import matplotlib.patches as patches
-import mlflow
+import matplotlib.pyplot as plt
 from mlflow.tracking import MlflowClient
+
 
 def generate_mlflow_ui():
     client = MlflowClient("sqlite:///mlflow.db")
     runs = client.search_runs(["1"], order_by=["attribute.start_time DESC"], max_results=6)
-    
+
     # Create high-res figure mimicking MLflow dark theme UI
     fig = plt.figure(figsize=(19, 11), facecolor="#14161a", dpi=180)
     ax = fig.add_axes([0, 0, 1, 1], facecolor="#14161a")
@@ -37,9 +39,11 @@ def generate_mlflow_ui():
     # 2. Left Sidebar (Experiment Tree)
     ax.add_patch(patches.Rectangle((0, 0), 280, 1035, facecolor="#181b20", edgecolor="#30363d", linewidth=1))
     ax.text(25, 990, "EXPERIMENTS", color="#8b949e", fontsize=11, fontweight="bold")
-    
+
     # Active experiment item
-    ax.add_patch(patches.Rectangle((12, 935), 256, 42, facecolor="#262c36", edgecolor="#388bfd", linewidth=1.5))
+    ax.add_patch(
+        patches.Rectangle((12, 935), 256, 42, facecolor="#262c36", edgecolor="#388bfd", linewidth=1.5)
+    )
     ax.text(25, 952, "recipe-retrieval (ID: 1)", color="#58a6ff", fontsize=12, fontweight="bold")
     ax.text(25, 905, "0 Default", color="#8b949e", fontsize=12)
 
@@ -48,7 +52,7 @@ def generate_mlflow_ui():
     ax.add_patch(patches.Rectangle((12, 735), 256, 80, facecolor="#21262d", edgecolor="#30363d", linewidth=1))
     ax.text(25, 785, "minilm_finetuned", color="#f0f6fc", fontsize=13, fontweight="bold")
     ax.text(25, 765, "Version 2  [Active]", color="#7ee787", fontsize=10)
-    
+
     # Badges for aliases
     ax.add_patch(patches.Rectangle((25, 742), 65, 18, facecolor="#1f6feb", edgecolor="none"))
     ax.text(29, 746, "@staging", color="#ffffff", fontsize=9, fontweight="bold")
@@ -63,7 +67,17 @@ def generate_mlflow_ui():
 
     # 3. Main Workspace Header
     ax.text(315, 990, "Experiment: recipe-retrieval", color="#f0f6fc", fontsize=22, fontweight="bold")
-    ax.text(315, 965, "Fine-tuning main corpus (all-MiniLM-L6-v2), hyperparameter grid, regularization ablation, and registry hand-off", color="#8b949e", fontsize=12)
+    ax.text(
+        315,
+        965,
+        (
+            "Fine-tuning main corpus (all-MiniLM-L6-v2), hyperparame"
+            "ter grid, regularization ablation, and registry hand-of"
+            "f"
+        ),
+        color="#8b949e",
+        fontsize=12,
+    )
 
     # 4. Summary Metric Cards
     cards = [
@@ -76,14 +90,20 @@ def generate_mlflow_ui():
     card_w = 280
     for i, (title, val, col) in enumerate(cards):
         x = 315 + i * (card_w + 20)
-        ax.add_patch(patches.Rectangle((x, 875), card_w, 70, facecolor="#1c2128", edgecolor="#30363d", linewidth=1))
+        ax.add_patch(
+            patches.Rectangle((x, 875), card_w, 70, facecolor="#1c2128", edgecolor="#30363d", linewidth=1)
+        )
         ax.text(x + 15, 920, title, color="#8b949e", fontsize=11, fontweight="bold")
         ax.text(x + 15, 890, val, color=col, fontsize=14, fontweight="bold")
 
     # 5. Experiment Runs Table Header
     table_top = 835
-    ax.add_patch(patches.Rectangle((315, table_top - 35), 1545, 35, facecolor="#21262d", edgecolor="#30363d", linewidth=1))
-    
+    ax.add_patch(
+        patches.Rectangle(
+            (315, table_top - 35), 1545, 35, facecolor="#21262d", edgecolor="#30363d", linewidth=1
+        )
+    )
+
     headers = [
         (330, "Run Name"),
         (630, "Status"),
@@ -108,16 +128,43 @@ def generate_mlflow_ui():
         bg_col = "#161b22" if idx % 2 == 0 else "#13171d"
         run_name = r.data.tags.get("mlflow.runName", r.info.run_id[:8])
         is_best = "best-finetuned" in run_name or "lr2e-5-b32" in run_name
-        
+
         edge_col = "#388bfd" if is_best else "#30363d"
-        ax.add_patch(patches.Rectangle((315, row_y), 1545, row_h, facecolor=bg_col, edgecolor=edge_col, linewidth=1.5 if is_best else 1))
+        ax.add_patch(
+            patches.Rectangle(
+                (315, row_y),
+                1545,
+                row_h,
+                facecolor=bg_col,
+                edgecolor=edge_col,
+                linewidth=1.5 if is_best else 1,
+            )
+        )
 
         # Checkbox & Run Name
-        ax.text(330, row_y + 32, f"● {run_name}", color="#58a6ff" if not is_best else "#7ee787", fontsize=12, fontweight="bold")
-        ax.text(330, row_y + 12, f"ID: {r.info.run_id[:12]}...", color="#6e7681", fontsize=9, fontfamily="monospace")
+        ax.text(
+            330,
+            row_y + 32,
+            f"● {run_name}",
+            color="#58a6ff" if not is_best else "#7ee787",
+            fontsize=12,
+            fontweight="bold",
+        )
+        ax.text(
+            330,
+            row_y + 12,
+            f"ID: {r.info.run_id[:12]}...",
+            color="#6e7681",
+            fontsize=9,
+            fontfamily="monospace",
+        )
 
         # Status Badge
-        ax.add_patch(patches.Rectangle((630, row_y + 19), 65, 20, facecolor="#238636" if r.info.status=="FINISHED" else "#30363d"))
+        ax.add_patch(
+            patches.Rectangle(
+                (630, row_y + 19), 65, 20, facecolor="#238636" if r.info.status == "FINISHED" else "#30363d"
+            )
+        )
         ax.text(636, row_y + 24, r.info.status, color="#ffffff", fontsize=9, fontweight="bold")
 
         # Duration
@@ -130,7 +177,7 @@ def generate_mlflow_ui():
         wd = r.data.params.get("weight_decay", "0.01")
         ax.text(790, row_y + 23, str(lr), color="#c9d1d9", fontsize=11)
         ax.text(860, row_y + 23, str(batch), color="#c9d1d9", fontsize=11)
-        ax.text(930, row_y + 23, str(wd), color="#e3b341" if wd=="0.0" else "#c9d1d9", fontsize=11)
+        ax.text(930, row_y + 23, str(wd), color="#e3b341" if wd == "0.0" else "#c9d1d9", fontsize=11)
 
         # Metrics
         mrr = r.data.metrics.get("val_mrr_at_10", 0.0)
@@ -141,7 +188,9 @@ def generate_mlflow_ui():
         mrr_col = "#7ee787" if mrr >= 0.55 else ("#f0883e" if mrr < 0.45 else "#c9d1d9")
         ax.text(1000, row_y + 23, f"{mrr:.4f}", color=mrr_col, fontsize=12, fontweight="bold")
         ax.text(1110, row_y + 23, f"{rec:.4f}", color="#c9d1d9", fontsize=11)
-        ax.text(1230, row_y + 23, f"{ev_loss:.3f}", color="#f85149" if ev_loss > 1.0 else "#c9d1d9", fontsize=11)
+        ax.text(
+            1230, row_y + 23, f"{ev_loss:.3f}", color="#f85149" if ev_loss > 1.0 else "#c9d1d9", fontsize=11
+        )
         ax.text(1330, row_y + 23, f"{tr_loss:.3f}", color="#c9d1d9", fontsize=11)
 
         # Model / Artifacts tag
@@ -154,9 +203,28 @@ def generate_mlflow_ui():
 
     # 7. Bottom Model Registry Detail Bar
     reg_y = 65
-    ax.add_patch(patches.Rectangle((315, reg_y), 1545, 80, facecolor="#1c2128", edgecolor="#388bfd", linewidth=1.5))
-    ax.text(335, reg_y + 50, "★ Registered Model: minilm_finetuned (Version 2)", color="#58a6ff", fontsize=14, fontweight="bold")
-    ax.text(335, reg_y + 25, "Source: runs:/9d465a30cc7141bfa089739eb0e756cc/model  |  Framework: sentence-transformers (all-MiniLM-L6-v2)  |  Stage: Production", color="#8b949e", fontsize=11)
+    ax.add_patch(
+        patches.Rectangle((315, reg_y), 1545, 80, facecolor="#1c2128", edgecolor="#388bfd", linewidth=1.5)
+    )
+    ax.text(
+        335,
+        reg_y + 50,
+        "★ Registered Model: minilm_finetuned (Version 2)",
+        color="#58a6ff",
+        fontsize=14,
+        fontweight="bold",
+    )
+    ax.text(
+        335,
+        reg_y + 25,
+        (
+            "Source: runs:/9d465a30cc7141bfa089739eb0e756cc/model  |"
+            "  Framework: sentence-transformers (all-MiniLM-L6-v2)  "
+            "|  Stage: Production"
+        ),
+        color="#8b949e",
+        fontsize=11,
+    )
     ax.add_patch(patches.Rectangle((1420, reg_y + 30), 120, 28, facecolor="#1f6feb"))
     ax.text(1430, reg_y + 38, "alias: @staging", color="#ffffff", fontsize=11, fontweight="bold")
     ax.add_patch(patches.Rectangle((1560, reg_y + 30), 140, 28, facecolor="#238636"))
@@ -166,7 +234,11 @@ def generate_mlflow_ui():
     out_file.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(out_file, facecolor=fig.get_facecolor(), edgecolor="none")
     plt.close()
-    print(f"Generated clean MLflow UI dashboard screenshot at {out_file} (Size: {out_file.stat().st_size:,} bytes)")
+    print(
+        f"Generated clean MLflow UI dashboard screenshot at {out_file} "
+        f"(Size: {out_file.stat().st_size:,} bytes)"
+    )
+
 
 if __name__ == "__main__":
     generate_mlflow_ui()

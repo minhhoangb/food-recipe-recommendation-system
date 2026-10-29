@@ -15,7 +15,6 @@ Logs metrics to MLflow or exports a markdown report.
 from __future__ import annotations
 
 import argparse
-import json
 import statistics
 import sys
 from collections import Counter
@@ -64,6 +63,7 @@ def compute_monitoring_metrics(records: list[RequestLogRecord]) -> dict[str, Any
 
     # Latency percentiles
     latencies_sorted = sorted(latencies)
+
     def percentile(p: float) -> float:
         idx = int(p * (len(latencies_sorted) - 1))
         return round(latencies_sorted[idx], 2)
@@ -125,7 +125,8 @@ def format_monitoring_report(metrics: dict[str, Any]) -> str:
         f"- **Total Requests:** {metrics['total_requests']}",
         f"- **Success Rate:** {metrics['success_rate'] * 100:.2f}%",
         f"- **Error Rate:** {metrics['error_rate'] * 100:.2f}% ({metrics.get('error_count', 0)} errors)",
-        f"- **Zero-Hit Rate:** {metrics['zero_hit_rate'] * 100:.2f}% ({metrics.get('zero_hit_count', 0)} queries)",
+        f"- **Zero-Hit Rate:** {metrics['zero_hit_rate'] * 100:.2f}% "
+        f"({metrics.get('zero_hit_count', 0)} queries)",
         "",
         "## Latency Distribution (ms)",
         "",
@@ -133,45 +134,53 @@ def format_monitoring_report(metrics: dict[str, Any]) -> str:
 
     lat = metrics.get("latency_ms", {})
     if lat:
-        lines.extend([
-            "| Metric | Latency (ms) |",
-            "| --- | --- |",
-            f"| Mean | {lat.get('mean')} |",
-            f"| Median (p50) | {lat.get('median')} |",
-            f"| p90 | {lat.get('p90')} |",
-            f"| p95 | {lat.get('p95')} |",
-            f"| p99 | {lat.get('p99')} |",
-            f"| Min | {lat.get('min')} |",
-            f"| Max | {lat.get('max')} |",
-            "",
-        ])
+        lines.extend(
+            [
+                "| Metric | Latency (ms) |",
+                "| --- | --- |",
+                f"| Mean | {lat.get('mean')} |",
+                f"| Median (p50) | {lat.get('median')} |",
+                f"| p90 | {lat.get('p90')} |",
+                f"| p95 | {lat.get('p95')} |",
+                f"| p99 | {lat.get('p99')} |",
+                f"| Min | {lat.get('min')} |",
+                f"| Max | {lat.get('max')} |",
+                "",
+            ]
+        )
 
-    lines.extend([
-        "## Request Breakdown by Endpoint",
-        "",
-        "| Endpoint | Count |",
-        "| --- | --- |",
-    ])
+    lines.extend(
+        [
+            "## Request Breakdown by Endpoint",
+            "",
+            "| Endpoint | Count |",
+            "| --- | --- |",
+        ]
+    )
     for ep, count in metrics.get("endpoint_counts", {}).items():
         lines.append(f"| `{ep}` | {count} |")
 
-    lines.extend([
-        "",
-        "## Request Breakdown by Model",
-        "",
-        "| Model | Count |",
-        "| --- | --- |",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Request Breakdown by Model",
+            "",
+            "| Model | Count |",
+            "| --- | --- |",
+        ]
+    )
     for m, count in metrics.get("model_counts", {}).items():
         lines.append(f"| `{m}` | {count} |")
 
-    lines.extend([
-        "",
-        "## Top 10 Requested Ingredients",
-        "",
-        "| Ingredient | Frequency |",
-        "| --- | --- |",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Top 10 Requested Ingredients",
+            "",
+            "| Ingredient | Frequency |",
+            "| --- | --- |",
+        ]
+    )
     for ing, count in metrics.get("top_ingredients", []):
         lines.append(f"| {ing} | {count} |")
 
@@ -187,6 +196,7 @@ def log_monitoring_to_mlflow(
     """Log monitoring snapshot metrics to MLflow."""
     try:
         import mlflow
+
         mlflow.set_tracking_uri(tracking_uri)
         mlflow.set_experiment(experiment)
 

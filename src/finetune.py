@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 import torch
+
 try:
     from sentence_transformers.sentence_transformer import losses
 except (ImportError, AttributeError):
@@ -72,7 +73,6 @@ def finetune_model(
     train_loss = losses.MultipleNegativesRankingLoss(model)
 
     start_time = time.perf_counter()
-    start_rss = peak_rss_mb()
 
     model.fit(
         train_objectives=[(train_dataloader, train_loss)],
@@ -114,7 +114,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out-model", default=None)
     args = parser.parse_args(argv)
 
-    cfg: DictConfig = load_config(args.config)
+    cfg = load_config(args.config)
     if args.pairs:
         pairs = load_pairs(args.pairs)
     else:
@@ -122,9 +122,12 @@ def main(argv: list[str] | None = None) -> int:
         if not (directory / "corpus.jsonl").exists():
             print(f"error: {directory}/corpus.jsonl missing; build or fetch data first", file=sys.stderr)
             return 1
-        pairs = build_pairs(directory, split="train", mode="ingredients")
+        pairs, _ = build_pairs(directory, split="train", mode="ingredients")
 
-    print(f"Fine-tuning {MODEL_NAME} on {len(pairs)} pairs (epochs={args.epochs}, batch_size={args.batch_size})...")
+    print(
+        f"Fine-tuning {MODEL_NAME} on {len(pairs)} pairs "
+        f"(epochs={args.epochs}, batch_size={args.batch_size})..."
+    )
     _, summary = finetune_model(
         pairs,
         output_path=args.out_model,
