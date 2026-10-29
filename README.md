@@ -149,7 +149,7 @@ locked in `tests/test_ranking_metrics.py`.
 
 - **Pilot Fine-Tuning**: `notebooks/02_finetune_colab.ipynb` runs pilot fine-tuning on Colab GPU with `SentenceTransformerTrainer` + `MultipleNegativesRankingLoss`, evaluates every epoch with `InformationRetrievalEvaluator` (MRR@10), demonstrates `save_steps` checkpointing and `resume_from_checkpoint`, and exports the model.
 - **Main CPU run (2026-10-29)**: `src/finetune.py` trained one epoch on 30,000 train pairs (batch 32, lr 2e-5). The checkpoint is `models/minilm_finetuned-main-cpu1ep`; measured validation results and MLflow IDs are in [reports/e07_e08_finetune_main.md](reports/e07_e08_finetune_main.md). The current training loader shuffles pairs; it does not use the available `NoDuplicateBatchSampler`.
-- **Main ablation notebook**: `notebooks/03_finetune_main_ablation.ipynb` provides a separate workflow for hyperparameter and weight-decay experiments. The older [ablation report](reports/ablation_regularization.md) describes a different experiment; its numbers and registry aliases were not verified by the CPU evaluation below.
+- **Main ablation notebook**: `notebooks/03_finetune_main_ablation.ipynb` provides a workflow for measured hyperparameter experiments and exports the checkpoint with the best validation MRR@10. A controlled weight-decay ablation is still pending; see [the experiment status](reports/ablation_regularization.md).
 
 #### Main validation: pretrained vs CPU one-epoch fine-tuned MiniLM
 
@@ -174,9 +174,6 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db
 
 - **Experiment:** `recipe-retrieval`; per-system evaluation run IDs are in `reports/comparison.csv`.
 - **Checkpoint provenance:** [reports/finetune_cpu1ep_provenance.json](reports/finetune_cpu1ep_provenance.json). This evaluation does not register or promote a model alias.
-- **Earlier UI screenshot:** [reports/figures/mlflow_dashboard_ui.png](reports/figures/mlflow_dashboard_ui.png); it is not evidence of the current CPU run.
-
-![MLflow UI Dashboard](reports/figures/mlflow_dashboard_ui.png)
 
 #### Hand-off to Person 2 (Hưng): Indexing with Fine-Tuned Checkpoint
 

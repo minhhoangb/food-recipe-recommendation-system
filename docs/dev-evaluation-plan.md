@@ -18,12 +18,15 @@ reviewer: Hiếu. Hạn nộp: 24:00 ngày 29/10/2026 (00:00 ngày 30/10/2026).
 - Hưng: `reports/manual_eval/pool_dev_hung.csv`, 161 dòng.
 - Hiếu: `reports/manual_eval/pool_dev_hieu.csv`, 151 dòng.
 - Query chính được chia 7/7/6; mỗi người còn nhận một phần chấm kép.
-- Đọc `reports/manual_eval/annotation_guide.md`; không mở file key khi chấm.
+- Đọc `reports/manual_eval/annotation_guide.md`; trước khi khóa nhãn độc lập,
+  không mở key, systems hoặc bất kỳ file nào trong `reports/ai_annotations/`.
+  Nếu đã xem trước, phải ghi nhận việc đó và không gọi nhãn ấy là chấm mù độc lập.
 - Lệnh tạo pool từ chối ghi đè CSV đã có relevance hoặc notes.
-- Đã có một lượt chấm AI riêng cho đủ 396 mục trong
-  `reports/manual_eval/pool_dev_ai.csv`, gồm nhãn 0/1/2, nguồn `ai` và lý do.
-  Có 116 nhãn 0, 208 nhãn 1, 72 nhãn 2; 20 mục đánh dấu `unsure`.
-  Metadata và MLflow ghi rõ chưa được người kiểm chứng, không tính kappa.
+- Một lượt chấm AI được cách ly trong `reports/ai_annotations/dev/`;
+  chỉ mở sau khi đã khóa nhãn độc lập. Metadata và MLflow ghi rõ nguồn AI,
+  chưa được người kiểm chứng, không tính kappa.
+- Dùng duy nhất `python -m src.evaluate pool` cho cả pool dev và final;
+  `--split final` chỉ chạy sau khi khóa cấu hình.
 - **Còn chờ:** cả ba chấm relevance thật, ghi nhận nhãn ban đầu, đối chiếu
   bất đồng sau khi chấm độc lập, lưu nhãn thống nhất và nguồn người chấm.
 - Chỉ khi có nhãn mới tính agreement, pooled nDCG và coverage. Không điền
@@ -53,7 +56,7 @@ reviewer: Hiếu. Hạn nộp: 24:00 ngày 29/10/2026 (00:00 ngày 30/10/2026).
 - Chạy `ruff check .` và toàn bộ `pytest` với pytest-cov như workflow CI.
 - Yêu cầu từng module baseline, features và evaluate có coverage ít nhất 70%.
 - Commit code, test và báo cáo; loại log tạm, dữ liệu, weights và file skill mới.
-  Giữ nguyên các file đã được Git theo dõi từ trước.
+  Không untrack các file skill đã được Git theo dõi từ trước.
 - Push nhánh, mở PR vào `dev`, chờ CI và Hiếu review trước khi merge.
 - DoD chỉ đóng khi nhãn người hoàn tất và CI trên PR xanh; kết quả local
   không được ghi thành kết quả GitHub Actions.
@@ -61,7 +64,7 @@ reviewer: Hiếu. Hạn nộp: 24:00 ngày 29/10/2026 (00:00 ngày 30/10/2026).
 ## Kết quả kiểm tra local ngày 29/10/2026
 
 - `ruff check .`: đạt, không bỏ qua lỗi.
-- Toàn bộ pytest: 243 passed. Coverage baseline 97.20%, features 100%, evaluate 96.69%.
+- Toàn bộ pytest: 246 passed. Coverage baseline 97.20%, features 100%, evaluate 96.69%.
 - Trên Windows sandbox, TestClient bị chặn ở socketpair; bộ test chạy đạt ngoài sandbox.
 - Ba file nhãn của người vẫn trống; bộ nhãn AI được lưu riêng và không thay thế
   ba lượt chấm độc lập. PR #14 đã được merge; các thay đổi tiếp nối được nộp riêng.

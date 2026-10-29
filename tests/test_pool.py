@@ -106,13 +106,17 @@ def test_load_system_reports_what_fit_time_measures(fixture_bundles):
     assert manifest.model_name == "bm25" and seconds >= 0 and what == "index build"
 
 
-def test_pool_cli_writes_one_blind_file_per_annotator(fixture_bundles, capsys):
+@pytest.mark.parametrize("split", ["dev", "final"])
+def test_pool_cli_writes_one_blind_file_per_annotator(fixture_bundles, capsys, split):
     config, bundles, tmp = fixture_bundles
-    args = ["pool", "--config", str(config), "--out", str(tmp / "out")]
+    out = tmp / split
+    args = ["pool", "--config", str(config), "--split", split, "--out", str(out)]
     args += [arg for label, path in bundles.items() for arg in ("--system", f"{label.upper()}={path}")]
     assert main(args) == 0
-    files = {a: pd.read_csv(tmp / "out" / f"pool_dev_{a}.csv", dtype=str) for a in ANNOTATORS}
-    key = pd.read_csv(tmp / "out" / "pool_dev_key.csv")
+    files = {a: pd.read_csv(out / f"pool_{split}_{a}.csv", dtype=str) for a in ANNOTATORS}
+    key = pd.read_csv(out / f"pool_{split}_key.csv")
+    expected_ids = set(pd.read_csv(MANUAL_DIR / "queries.csv").query("split == @split")["query_id"])
+    assert set(key["query_id"]) <= expected_ids
     labelled = set().union(*(set(f["item_id"]) for f in files.values()))
     assert labelled == set(key["item_id"])  # every pooled item has an annotator
     assert all(list(f.columns) == POOL_COLUMNS and (f["annotator"] == a).all() for a, f in files.items())
