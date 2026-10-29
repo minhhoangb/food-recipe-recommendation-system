@@ -1,0 +1,17 @@
+{
+  "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+  "dataset_manifest_sha256": "cfa2e0aeca4fdd74704d86a9480599c5bf66ce2ef8c0a2d3d5a32e68359f9245",
+  "metrics": {
+    "corpus_recipes": 50000,
+    "groups": 39869,
+    "largest_group": 141,
+    "multi_positive_queries": 66,
+    "ner_shorter_than_raw": 10095,
+    "qrels": 6572,
+    "queries": 6500,
+    "short_ingredient_names": 133,
+    "vocabulary_size": 14450
+  },
+  "mlflow_run_id": "50b22eab28da441ab299b6f7e2c98c05",
+  "raw_audit_source": "reports/data_audit.md (existing audit, not rerun in this revision)"
+}

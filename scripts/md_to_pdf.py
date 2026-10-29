@@ -28,6 +28,8 @@ body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10.5pt; line-heigh
 h1 { font-size: 18pt; margin: 0 0 4pt; }
 h2 { font-size: 14pt; margin-top: 16pt; border-bottom: 1px solid #999; }
 h3 { font-size: 11.5pt; margin: 12pt 0 4pt; } p, li { text-align: justify; }
+h1, h2, h3 { break-after: avoid; }
+p { orphans: 3; widows: 3; }
 table { border-collapse: collapse; width: 100%; margin: 6pt 0; font-size: 9pt; page-break-inside: avoid; }
 th, td { border: 1px solid #aaa; padding: 3pt 5pt; vertical-align: top; text-align: left; }
 th { background: #eee; }

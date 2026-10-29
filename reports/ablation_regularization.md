@@ -1,5 +1,11 @@
 # Ablation Study: Weight Decay Regularization on Main Corpus
 
+> Historical report for a separate three-epoch Colab experiment. Its numbers and
+> curves were not verified in the 2026-10-29 CPU evaluation and must not be attributed
+> to `minilm_finetuned-main-cpu1ep`. The measured one-epoch checkpoint results are in
+> [e07_e08_finetune_main.md](e07_e08_finetune_main.md); this task does not establish a
+> weight-decay ablation or a causal regularization effect.
+
 **Owner:** Hiếu (Person 3)  
 **Objective:** Evaluate the effect of $L_2$ weight decay regularization on Transformer fine-tuning (`all-MiniLM-L6-v2`) using `MultipleNegativesRankingLoss`.
 

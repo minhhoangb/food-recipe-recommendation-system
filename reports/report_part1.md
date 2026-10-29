@@ -63,14 +63,14 @@ qrels; a query generated from two recipes of the same split is merged, which hap
 Generation skipped 2,149 recipes whose ingredients were all common and 808 recipes with fewer than 3
 ingredients, and dropped 117 queries whose ingredient set also occurred in another split.
 
-This label set has one known positive per query. A system that returns a different but perfectly usable
+Most queries have one known positive; 66 merged queries have multiple known positives. A system that returns a different but perfectly usable
 recipe is counted as wrong, so the metrics below measure an **origin-recipe retrieval proxy**, not true
 relevance. The error analysis (`reports/error_analysis.md`) counts how often the rank-1 recipe of a
 system contains every query ingredient without being the origin.
 
 **Manual graded labels (used for the final judgement).** Forty natural English queries
 (`reports/manual_eval/queries.csv`; 20 development, 20 blind final; 6 easy, 7 medium and 7 hard in each
-half) are judged on a 0/1/2 scale defined in `reports/manual_eval/annotation_guide.md` before any system
+half) are intended to be judged on a 0/1/2 scale defined in `reports/manual_eval/annotation_guide.md` before any system
 output was seen. Judges see a pool made of the top 5 of every system, merged, shuffled and with no system
 name; at least 20% of each pool is labelled independently by a second person and agreement is reported
 with Cohen's kappa.
@@ -93,8 +93,9 @@ queries with kappa ≥ 0.60; API p95 latency ≤ 300 ms on one CPU core. The tes
 - **Group split.** Recipes that share a normalised ingredient set or a normalised title form a group
   (section 3.3). Groups never cross train, validation and test, so near-identical recipes cannot sit on
   both sides of the split.
-- **Fit on train only.** Vectorisers, IDF statistics, the rarity feature and fine-tuning use train
-  recipes only. Validation is for model selection and tuning; test is read once after the configuration
+- **Fit on train only.** TF-IDF/LSA vectorisers and the rarity feature are fitted on train
+  recipes only; fine-tuning positives also come from train. BM25 IDF and the ingredient frequencies
+  used to sample fine-tuning pairs are computed over the fixed candidate corpus. Validation is for model selection and tuning; test is read once after the configuration
   is frozen (`src.evaluate` refuses `--split test` without `--allow-test`).
 - **Fixed candidate corpus.** Every system ranks the same 50,000 recipes; validation and test recipes are
   in the candidate set (otherwise their queries could not be answered), but only as documents to index,
@@ -193,17 +194,11 @@ recipe in train and test; the group split prevents this.
 
 ### 2.5 Data quality issues
 
-**Manual review of 100 recipes** (drawn with `random.Random(42)`; each read as raw lines, NER and normalised
-list): **36 of 100 recipes** have at least one wrong, truncated or missing normalised ingredient.
-
-| Category | Recipes | Example (raw line → normalised) |
-| --- | ---: | --- |
-| Junk word replaces the ingredient | 9 | "1 tablespoon virgin or extra-virgin coconut oil" → `virgin` |
-| Name truncated to a fragment or brand | 13 | "1 can Mountain Dew" → `dew` |
-| Head noun missing | 6 | "3 1/2 to 4 cups all-purpose flour" → `all purpose` |
-| Reference to another recipe | 2 | "Pie Meringue" → `pie` |
-| Introduced by our normaliser | 3 | "Consomme Soup Or Beef Broth" → two required ingredients |
-| Ingredient absent from NER | 3 | "1/4 c. + 2 Tbsp. unsweetened cocoa" → nothing |
+The existing data audit records examples of lost ingredient nouns, truncated brands and references
+to other recipes. For example, `recipenlg:1867895` maps a coconut-oil ingredient to `virgin` and
+`recipenlg:811009` maps Mountain Dew to `dew`. These illustrate representation noise; the earlier
+100-recipe inspection has no saved annotator provenance and its category counts are not used here
+as verified human judgments or an estimated error rate.
 
 **Measured at scale:** NER lists fewer entries than the raw lines in 10,095 recipes (20.2%); 133 distinct
 names have 3 characters or fewer (most are real, such as `egg`, `oil`, `yam`); normalising an
@@ -340,3 +335,20 @@ no title, so the title moves documents away from queries in the embedding space.
 | no scaling of TF-IDF / embeddings | StandardScaler everywhere | vectors are already L2-normalised |
 
 Model development, results, deep learning, MLOps and the discussion follow in part 2 of the report.
+
+## 4. Evidence and delivery status
+
+Corpus counts and query multiplicity were recomputed for this revision in MLflow run
+`50b22eab28da441ab299b6f7e2c98c05`; see `reports/report_part1_provenance.json` for hashes and metrics.
+The raw-file structure table reproduces the earlier audit in `reports/data_audit.md`, saved as an
+artifact in that run; the full raw-file audit was not rerun in this revision. EDA figures are generated
+by `notebooks/01_eda.ipynb` from this corpus. Retrieval numbers are backed by the per-system
+MLflow IDs in `reports/comparison.csv`; the fine-tuned checkpoint's actual evaluation is described
+in `reports/e07_e08_finetune_main.md`.
+
+The refreshed dev pool contains 396 unique query-recipe pairs for 20 queries, with 484 assignments
+and 88 independent second labels. The three assignment files record intended annotators, not proof
+of completed annotation: every relevance field is still blank. Human relevance, agreement and
+pooled nDCG remain pending. The final manual pool and test retrieval metrics have not been run.
+
+The source, tests and release checklist for this stage are tracked in `docs/KHUNG3_PLAN.md`.
