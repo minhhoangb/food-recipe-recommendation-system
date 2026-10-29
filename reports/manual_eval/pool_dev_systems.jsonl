@@ -1,278 +1,396 @@
-{"item_id": "m01-i01", "query_id": "m01", "recipe_id": "recipenlg:2124762", "systems": "E01"}
-{"item_id": "m01-i02", "query_id": "m01", "recipe_id": "recipenlg:34690", "systems": "E04"}
-{"item_id": "m01-i03", "query_id": "m01", "recipe_id": "recipenlg:1930600", "systems": "E04"}
-{"item_id": "m01-i04", "query_id": "m01", "recipe_id": "recipenlg:2065212", "systems": "E03,LSA"}
-{"item_id": "m01-i05", "query_id": "m01", "recipe_id": "recipenlg:299340", "systems": "E01"}
-{"item_id": "m01-i06", "query_id": "m01", "recipe_id": "recipenlg:1772555", "systems": "E03,LSA"}
-{"item_id": "m01-i07", "query_id": "m01", "recipe_id": "recipenlg:1140971", "systems": "E01"}
-{"item_id": "m01-i08", "query_id": "m01", "recipe_id": "recipenlg:2112279", "systems": "E01,LSA,E04"}
-{"item_id": "m01-i09", "query_id": "m01", "recipe_id": "recipenlg:503207", "systems": "E03"}
-{"item_id": "m01-i10", "query_id": "m01", "recipe_id": "recipenlg:2019677", "systems": "E04"}
-{"item_id": "m01-i11", "query_id": "m01", "recipe_id": "recipenlg:1165370", "systems": "E03,LSA"}
-{"item_id": "m01-i12", "query_id": "m01", "recipe_id": "recipenlg:2152993", "systems": "E01,E03,LSA,E04"}
-{"item_id": "m02-i01", "query_id": "m02", "recipe_id": "recipenlg:24248", "systems": "E01,E03,LSA,E04"}
-{"item_id": "m02-i02", "query_id": "m02", "recipe_id": "recipenlg:718741", "systems": "E01,E03,E04"}
-{"item_id": "m02-i03", "query_id": "m02", "recipe_id": "recipenlg:1733473", "systems": "LSA"}
-{"item_id": "m02-i04", "query_id": "m02", "recipe_id": "recipenlg:486926", "systems": "LSA"}
-{"item_id": "m02-i05", "query_id": "m02", "recipe_id": "recipenlg:649277", "systems": "E01"}
-{"item_id": "m02-i06", "query_id": "m02", "recipe_id": "recipenlg:896141", "systems": "E04"}
-{"item_id": "m02-i07", "query_id": "m02", "recipe_id": "recipenlg:295843", "systems": "E03,LSA,E04"}
-{"item_id": "m02-i08", "query_id": "m02", "recipe_id": "recipenlg:1432999", "systems": "E03,LSA"}
-{"item_id": "m02-i09", "query_id": "m02", "recipe_id": "recipenlg:2027776", "systems": "E01"}
-{"item_id": "m02-i10", "query_id": "m02", "recipe_id": "recipenlg:738458", "systems": "E01,E03,E04"}
-{"item_id": "m03-i01", "query_id": "m03", "recipe_id": "recipenlg:254775", "systems": "E04"}
-{"item_id": "m03-i02", "query_id": "m03", "recipe_id": "recipenlg:601879", "systems": "E01"}
-{"item_id": "m03-i03", "query_id": "m03", "recipe_id": "recipenlg:358304", "systems": "E01"}
-{"item_id": "m03-i04", "query_id": "m03", "recipe_id": "recipenlg:1587620", "systems": "LSA"}
-{"item_id": "m03-i05", "query_id": "m03", "recipe_id": "recipenlg:1738697", "systems": "E03"}
-{"item_id": "m03-i06", "query_id": "m03", "recipe_id": "recipenlg:1649066", "systems": "LSA"}
-{"item_id": "m03-i07", "query_id": "m03", "recipe_id": "recipenlg:1217167", "systems": "LSA"}
-{"item_id": "m03-i08", "query_id": "m03", "recipe_id": "recipenlg:459205", "systems": "E04"}
-{"item_id": "m03-i09", "query_id": "m03", "recipe_id": "recipenlg:473182", "systems": "E04"}
-{"item_id": "m03-i10", "query_id": "m03", "recipe_id": "recipenlg:1167226", "systems": "E03,E04"}
-{"item_id": "m03-i11", "query_id": "m03", "recipe_id": "recipenlg:1776994", "systems": "E01,E03,LSA"}
-{"item_id": "m03-i12", "query_id": "m03", "recipe_id": "recipenlg:1030036", "systems": "E03"}
-{"item_id": "m03-i13", "query_id": "m03", "recipe_id": "recipenlg:544104", "systems": "LSA"}
-{"item_id": "m03-i14", "query_id": "m03", "recipe_id": "recipenlg:255283", "systems": "E01"}
-{"item_id": "m03-i15", "query_id": "m03", "recipe_id": "recipenlg:371594", "systems": "E01"}
-{"item_id": "m03-i16", "query_id": "m03", "recipe_id": "recipenlg:306756", "systems": "E03,E04"}
-{"item_id": "m04-i01", "query_id": "m04", "recipe_id": "recipenlg:315209", "systems": "E01,E03,LSA"}
-{"item_id": "m04-i02", "query_id": "m04", "recipe_id": "recipenlg:1858039", "systems": "E04"}
-{"item_id": "m04-i03", "query_id": "m04", "recipe_id": "recipenlg:1691671", "systems": "E01,E03"}
-{"item_id": "m04-i04", "query_id": "m04", "recipe_id": "recipenlg:877895", "systems": "E01"}
-{"item_id": "m04-i05", "query_id": "m04", "recipe_id": "recipenlg:1632708", "systems": "LSA"}
-{"item_id": "m04-i06", "query_id": "m04", "recipe_id": "recipenlg:2210430", "systems": "E01,E03"}
-{"item_id": "m04-i07", "query_id": "m04", "recipe_id": "recipenlg:1030624", "systems": "E04"}
-{"item_id": "m04-i08", "query_id": "m04", "recipe_id": "recipenlg:1785799", "systems": "E03"}
-{"item_id": "m04-i09", "query_id": "m04", "recipe_id": "recipenlg:1035534", "systems": "LSA"}
-{"item_id": "m04-i10", "query_id": "m04", "recipe_id": "recipenlg:735376", "systems": "E04"}
-{"item_id": "m04-i11", "query_id": "m04", "recipe_id": "recipenlg:738994", "systems": "E04"}
-{"item_id": "m04-i12", "query_id": "m04", "recipe_id": "recipenlg:52053", "systems": "E04"}
-{"item_id": "m04-i13", "query_id": "m04", "recipe_id": "recipenlg:210722", "systems": "E01,E03,LSA"}
-{"item_id": "m04-i14", "query_id": "m04", "recipe_id": "recipenlg:2138066", "systems": "LSA"}
-{"item_id": "m05-i01", "query_id": "m05", "recipe_id": "recipenlg:2089511", "systems": "E01,E03,LSA,E04"}
-{"item_id": "m05-i02", "query_id": "m05", "recipe_id": "recipenlg:2108166", "systems": "LSA"}
-{"item_id": "m05-i03", "query_id": "m05", "recipe_id": "recipenlg:908500", "systems": "E04"}
-{"item_id": "m05-i04", "query_id": "m05", "recipe_id": "recipenlg:268146", "systems": "E03,LSA"}
-{"item_id": "m05-i05", "query_id": "m05", "recipe_id": "recipenlg:1039055", "systems": "E03,LSA,E04"}
-{"item_id": "m05-i06", "query_id": "m05", "recipe_id": "recipenlg:379944", "systems": "E01"}
-{"item_id": "m05-i07", "query_id": "m05", "recipe_id": "recipenlg:1442914", "systems": "E01"}
-{"item_id": "m05-i08", "query_id": "m05", "recipe_id": "recipenlg:601244", "systems": "E04"}
-{"item_id": "m05-i09", "query_id": "m05", "recipe_id": "recipenlg:1319088", "systems": "E01"}
-{"item_id": "m05-i10", "query_id": "m05", "recipe_id": "recipenlg:1186858", "systems": "E03"}
-{"item_id": "m05-i11", "query_id": "m05", "recipe_id": "recipenlg:348832", "systems": "E01,E03,LSA,E04"}
-{"item_id": "m06-i01", "query_id": "m06", "recipe_id": "recipenlg:1014630", "systems": "E01,E03,LSA,E04"}
-{"item_id": "m06-i02", "query_id": "m06", "recipe_id": "recipenlg:1833076", "systems": "E01"}
-{"item_id": "m06-i03", "query_id": "m06", "recipe_id": "recipenlg:110862", "systems": "E03"}
-{"item_id": "m06-i04", "query_id": "m06", "recipe_id": "recipenlg:178118", "systems": "E03,LSA"}
-{"item_id": "m06-i05", "query_id": "m06", "recipe_id": "recipenlg:634055", "systems": "LSA"}
-{"item_id": "m06-i06", "query_id": "m06", "recipe_id": "recipenlg:1920339", "systems": "E04"}
-{"item_id": "m06-i07", "query_id": "m06", "recipe_id": "recipenlg:427931", "systems": "E01,E03,LSA"}
-{"item_id": "m06-i08", "query_id": "m06", "recipe_id": "recipenlg:1888832", "systems": "E04"}
-{"item_id": "m06-i09", "query_id": "m06", "recipe_id": "recipenlg:660311", "systems": "E04"}
-{"item_id": "m06-i10", "query_id": "m06", "recipe_id": "recipenlg:579006", "systems": "E01,E03"}
-{"item_id": "m06-i11", "query_id": "m06", "recipe_id": "recipenlg:399915", "systems": "E01,LSA"}
-{"item_id": "m06-i12", "query_id": "m06", "recipe_id": "recipenlg:2167367", "systems": "E04"}
-{"item_id": "m07-i01", "query_id": "m07", "recipe_id": "recipenlg:500750", "systems": "E03"}
-{"item_id": "m07-i02", "query_id": "m07", "recipe_id": "recipenlg:2105681", "systems": "E04"}
-{"item_id": "m07-i03", "query_id": "m07", "recipe_id": "recipenlg:1683434", "systems": "LSA"}
-{"item_id": "m07-i04", "query_id": "m07", "recipe_id": "recipenlg:587267", "systems": "E04"}
-{"item_id": "m07-i05", "query_id": "m07", "recipe_id": "recipenlg:625346", "systems": "E01"}
-{"item_id": "m07-i06", "query_id": "m07", "recipe_id": "recipenlg:175353", "systems": "E01"}
-{"item_id": "m07-i07", "query_id": "m07", "recipe_id": "recipenlg:1375241", "systems": "LSA"}
-{"item_id": "m07-i08", "query_id": "m07", "recipe_id": "recipenlg:2110875", "systems": "E03,LSA"}
-{"item_id": "m07-i09", "query_id": "m07", "recipe_id": "recipenlg:25977", "systems": "E04"}
-{"item_id": "m07-i10", "query_id": "m07", "recipe_id": "recipenlg:1556933", "systems": "E04"}
-{"item_id": "m07-i11", "query_id": "m07", "recipe_id": "recipenlg:1198383", "systems": "E01"}
-{"item_id": "m07-i12", "query_id": "m07", "recipe_id": "recipenlg:1578057", "systems": "E01"}
-{"item_id": "m07-i13", "query_id": "m07", "recipe_id": "recipenlg:1672790", "systems": "LSA"}
-{"item_id": "m07-i14", "query_id": "m07", "recipe_id": "recipenlg:1290232", "systems": "E01"}
-{"item_id": "m07-i15", "query_id": "m07", "recipe_id": "recipenlg:2050174", "systems": "E03"}
-{"item_id": "m07-i16", "query_id": "m07", "recipe_id": "recipenlg:581911", "systems": "E03,E04"}
-{"item_id": "m07-i17", "query_id": "m07", "recipe_id": "recipenlg:5628", "systems": "E03,LSA"}
-{"item_id": "m08-i01", "query_id": "m08", "recipe_id": "recipenlg:1228646", "systems": "E01,E03"}
-{"item_id": "m08-i02", "query_id": "m08", "recipe_id": "recipenlg:2006290", "systems": "E04"}
-{"item_id": "m08-i03", "query_id": "m08", "recipe_id": "recipenlg:2064424", "systems": "E01"}
-{"item_id": "m08-i04", "query_id": "m08", "recipe_id": "recipenlg:1775284", "systems": "E01,E03,LSA,E04"}
-{"item_id": "m08-i05", "query_id": "m08", "recipe_id": "recipenlg:1385014", "systems": "E03,LSA"}
-{"item_id": "m08-i06", "query_id": "m08", "recipe_id": "recipenlg:1380767", "systems": "E04"}
-{"item_id": "m08-i07", "query_id": "m08", "recipe_id": "recipenlg:537554", "systems": "E03,LSA"}
-{"item_id": "m08-i08", "query_id": "m08", "recipe_id": "recipenlg:1925624", "systems": "LSA"}
-{"item_id": "m08-i09", "query_id": "m08", "recipe_id": "recipenlg:1739529", "systems": "E04"}
-{"item_id": "m08-i10", "query_id": "m08", "recipe_id": "recipenlg:2128262", "systems": "E01,E03,LSA,E04"}
-{"item_id": "m08-i11", "query_id": "m08", "recipe_id": "recipenlg:41037", "systems": "E01"}
-{"item_id": "m09-i01", "query_id": "m09", "recipe_id": "recipenlg:899642", "systems": "E04"}
-{"item_id": "m09-i02", "query_id": "m09", "recipe_id": "recipenlg:811381", "systems": "E03"}
-{"item_id": "m09-i03", "query_id": "m09", "recipe_id": "recipenlg:55442", "systems": "LSA"}
-{"item_id": "m09-i04", "query_id": "m09", "recipe_id": "recipenlg:2039844", "systems": "E04"}
-{"item_id": "m09-i05", "query_id": "m09", "recipe_id": "recipenlg:205775", "systems": "E01"}
-{"item_id": "m09-i06", "query_id": "m09", "recipe_id": "recipenlg:1232484", "systems": "E01,E03"}
-{"item_id": "m09-i07", "query_id": "m09", "recipe_id": "recipenlg:547596", "systems": "E04"}
-{"item_id": "m09-i08", "query_id": "m09", "recipe_id": "recipenlg:2135284", "systems": "LSA"}
-{"item_id": "m09-i09", "query_id": "m09", "recipe_id": "recipenlg:1535155", "systems": "E01"}
-{"item_id": "m09-i10", "query_id": "m09", "recipe_id": "recipenlg:1247577", "systems": "E03"}
-{"item_id": "m09-i11", "query_id": "m09", "recipe_id": "recipenlg:1717213", "systems": "LSA"}
-{"item_id": "m09-i12", "query_id": "m09", "recipe_id": "recipenlg:1695821", "systems": "LSA"}
-{"item_id": "m09-i13", "query_id": "m09", "recipe_id": "recipenlg:275430", "systems": "E03"}
-{"item_id": "m09-i14", "query_id": "m09", "recipe_id": "recipenlg:1642667", "systems": "E01,E03,LSA"}
-{"item_id": "m09-i15", "query_id": "m09", "recipe_id": "recipenlg:1699869", "systems": "E04"}
-{"item_id": "m09-i16", "query_id": "m09", "recipe_id": "recipenlg:1148715", "systems": "E04"}
-{"item_id": "m09-i17", "query_id": "m09", "recipe_id": "recipenlg:253891", "systems": "E01"}
-{"item_id": "m10-i01", "query_id": "m10", "recipe_id": "recipenlg:1211898", "systems": "E01"}
-{"item_id": "m10-i02", "query_id": "m10", "recipe_id": "recipenlg:1058566", "systems": "E03"}
-{"item_id": "m10-i03", "query_id": "m10", "recipe_id": "recipenlg:258638", "systems": "E04"}
-{"item_id": "m10-i04", "query_id": "m10", "recipe_id": "recipenlg:750259", "systems": "E01,E04"}
-{"item_id": "m10-i05", "query_id": "m10", "recipe_id": "recipenlg:405391", "systems": "E01,E03"}
-{"item_id": "m10-i06", "query_id": "m10", "recipe_id": "recipenlg:35007", "systems": "E01,E03,E04"}
-{"item_id": "m10-i07", "query_id": "m10", "recipe_id": "recipenlg:853364", "systems": "LSA"}
-{"item_id": "m10-i08", "query_id": "m10", "recipe_id": "recipenlg:1405655", "systems": "LSA"}
-{"item_id": "m10-i09", "query_id": "m10", "recipe_id": "recipenlg:596077", "systems": "E04"}
-{"item_id": "m10-i10", "query_id": "m10", "recipe_id": "recipenlg:2201099", "systems": "LSA"}
-{"item_id": "m10-i11", "query_id": "m10", "recipe_id": "recipenlg:84790", "systems": "E01,E03"}
-{"item_id": "m10-i12", "query_id": "m10", "recipe_id": "recipenlg:489507", "systems": "LSA"}
-{"item_id": "m10-i13", "query_id": "m10", "recipe_id": "recipenlg:246853", "systems": "LSA"}
-{"item_id": "m10-i14", "query_id": "m10", "recipe_id": "recipenlg:24060", "systems": "E03,E04"}
-{"item_id": "m11-i01", "query_id": "m11", "recipe_id": "recipenlg:822641", "systems": "LSA"}
-{"item_id": "m11-i02", "query_id": "m11", "recipe_id": "recipenlg:1526159", "systems": "E04"}
-{"item_id": "m11-i03", "query_id": "m11", "recipe_id": "recipenlg:1611505", "systems": "E01,E04"}
-{"item_id": "m11-i04", "query_id": "m11", "recipe_id": "recipenlg:2175269", "systems": "E01,E03"}
-{"item_id": "m11-i05", "query_id": "m11", "recipe_id": "recipenlg:1959712", "systems": "LSA"}
-{"item_id": "m11-i06", "query_id": "m11", "recipe_id": "recipenlg:1758713", "systems": "E01,E03"}
-{"item_id": "m11-i07", "query_id": "m11", "recipe_id": "recipenlg:2223166", "systems": "E03,E04"}
-{"item_id": "m11-i08", "query_id": "m11", "recipe_id": "recipenlg:994964", "systems": "E04"}
-{"item_id": "m11-i09", "query_id": "m11", "recipe_id": "recipenlg:1148858", "systems": "LSA"}
-{"item_id": "m11-i10", "query_id": "m11", "recipe_id": "recipenlg:1651475", "systems": "E01"}
-{"item_id": "m11-i11", "query_id": "m11", "recipe_id": "recipenlg:2128705", "systems": "E03"}
-{"item_id": "m11-i12", "query_id": "m11", "recipe_id": "recipenlg:1067815", "systems": "LSA"}
-{"item_id": "m11-i13", "query_id": "m11", "recipe_id": "recipenlg:1375385", "systems": "E01,E03,LSA,E04"}
-{"item_id": "m12-i01", "query_id": "m12", "recipe_id": "recipenlg:199991", "systems": "LSA"}
-{"item_id": "m12-i02", "query_id": "m12", "recipe_id": "recipenlg:426270", "systems": "LSA,E04"}
-{"item_id": "m12-i03", "query_id": "m12", "recipe_id": "recipenlg:1756251", "systems": "E03"}
-{"item_id": "m12-i04", "query_id": "m12", "recipe_id": "recipenlg:228860", "systems": "E03"}
-{"item_id": "m12-i05", "query_id": "m12", "recipe_id": "recipenlg:16544", "systems": "E01"}
-{"item_id": "m12-i06", "query_id": "m12", "recipe_id": "recipenlg:868823", "systems": "E01"}
-{"item_id": "m12-i07", "query_id": "m12", "recipe_id": "recipenlg:447831", "systems": "LSA"}
-{"item_id": "m12-i08", "query_id": "m12", "recipe_id": "recipenlg:709749", "systems": "E01"}
-{"item_id": "m12-i09", "query_id": "m12", "recipe_id": "recipenlg:684294", "systems": "E01"}
-{"item_id": "m12-i10", "query_id": "m12", "recipe_id": "recipenlg:220475", "systems": "E04"}
-{"item_id": "m12-i11", "query_id": "m12", "recipe_id": "recipenlg:964893", "systems": "E04"}
-{"item_id": "m12-i12", "query_id": "m12", "recipe_id": "recipenlg:235924", "systems": "E03"}
-{"item_id": "m12-i13", "query_id": "m12", "recipe_id": "recipenlg:792471", "systems": "E01,E03"}
-{"item_id": "m12-i14", "query_id": "m12", "recipe_id": "recipenlg:858691", "systems": "E04"}
-{"item_id": "m12-i15", "query_id": "m12", "recipe_id": "recipenlg:727690", "systems": "LSA"}
-{"item_id": "m12-i16", "query_id": "m12", "recipe_id": "recipenlg:108561", "systems": "E03,LSA"}
-{"item_id": "m12-i17", "query_id": "m12", "recipe_id": "recipenlg:274177", "systems": "E04"}
-{"item_id": "m13-i01", "query_id": "m13", "recipe_id": "recipenlg:1217460", "systems": "LSA"}
-{"item_id": "m13-i02", "query_id": "m13", "recipe_id": "recipenlg:1924514", "systems": "E01,E03,LSA,E04"}
-{"item_id": "m13-i03", "query_id": "m13", "recipe_id": "recipenlg:1953317", "systems": "E01"}
-{"item_id": "m13-i04", "query_id": "m13", "recipe_id": "recipenlg:1411752", "systems": "E01"}
-{"item_id": "m13-i05", "query_id": "m13", "recipe_id": "recipenlg:1098747", "systems": "E03"}
-{"item_id": "m13-i06", "query_id": "m13", "recipe_id": "recipenlg:1891141", "systems": "E01,E03,E04"}
-{"item_id": "m13-i07", "query_id": "m13", "recipe_id": "recipenlg:1518619", "systems": "E04"}
-{"item_id": "m13-i08", "query_id": "m13", "recipe_id": "recipenlg:125480", "systems": "LSA"}
-{"item_id": "m13-i09", "query_id": "m13", "recipe_id": "recipenlg:1429864", "systems": "E03"}
-{"item_id": "m13-i10", "query_id": "m13", "recipe_id": "recipenlg:1938821", "systems": "LSA"}
-{"item_id": "m13-i11", "query_id": "m13", "recipe_id": "recipenlg:346392", "systems": "E04"}
-{"item_id": "m13-i12", "query_id": "m13", "recipe_id": "recipenlg:910837", "systems": "E04"}
-{"item_id": "m13-i13", "query_id": "m13", "recipe_id": "recipenlg:1579798", "systems": "E01,E03"}
-{"item_id": "m13-i14", "query_id": "m13", "recipe_id": "recipenlg:1878718", "systems": "LSA"}
-{"item_id": "m14-i01", "query_id": "m14", "recipe_id": "recipenlg:1879172", "systems": "LSA"}
-{"item_id": "m14-i02", "query_id": "m14", "recipe_id": "recipenlg:1339253", "systems": "E01,E03"}
-{"item_id": "m14-i03", "query_id": "m14", "recipe_id": "recipenlg:1365948", "systems": "E01,E04"}
-{"item_id": "m14-i04", "query_id": "m14", "recipe_id": "recipenlg:2131940", "systems": "LSA"}
-{"item_id": "m14-i05", "query_id": "m14", "recipe_id": "recipenlg:1370621", "systems": "LSA"}
-{"item_id": "m14-i06", "query_id": "m14", "recipe_id": "recipenlg:119416", "systems": "E04"}
-{"item_id": "m14-i07", "query_id": "m14", "recipe_id": "recipenlg:1368230", "systems": "E03"}
-{"item_id": "m14-i08", "query_id": "m14", "recipe_id": "recipenlg:1401819", "systems": "E01,E03"}
-{"item_id": "m14-i09", "query_id": "m14", "recipe_id": "recipenlg:2035499", "systems": "E01,E04"}
-{"item_id": "m14-i10", "query_id": "m14", "recipe_id": "recipenlg:1760112", "systems": "E01,E03"}
-{"item_id": "m14-i11", "query_id": "m14", "recipe_id": "recipenlg:17970", "systems": "LSA"}
-{"item_id": "m14-i12", "query_id": "m14", "recipe_id": "recipenlg:1320395", "systems": "E03"}
-{"item_id": "m14-i13", "query_id": "m14", "recipe_id": "recipenlg:1326643", "systems": "E04"}
-{"item_id": "m14-i14", "query_id": "m14", "recipe_id": "recipenlg:2108154", "systems": "LSA"}
-{"item_id": "m14-i15", "query_id": "m14", "recipe_id": "recipenlg:1285283", "systems": "E04"}
-{"item_id": "m15-i01", "query_id": "m15", "recipe_id": "recipenlg:983220", "systems": "LSA"}
-{"item_id": "m15-i02", "query_id": "m15", "recipe_id": "recipenlg:509617", "systems": "E04"}
-{"item_id": "m15-i03", "query_id": "m15", "recipe_id": "recipenlg:1988686", "systems": "E04"}
-{"item_id": "m15-i04", "query_id": "m15", "recipe_id": "recipenlg:136586", "systems": "E03"}
-{"item_id": "m15-i05", "query_id": "m15", "recipe_id": "recipenlg:947527", "systems": "E01,E03,LSA,E04"}
-{"item_id": "m15-i06", "query_id": "m15", "recipe_id": "recipenlg:206371", "systems": "E01"}
-{"item_id": "m15-i07", "query_id": "m15", "recipe_id": "recipenlg:1792158", "systems": "E01"}
-{"item_id": "m15-i08", "query_id": "m15", "recipe_id": "recipenlg:13461", "systems": "E01,E03,LSA,E04"}
-{"item_id": "m15-i09", "query_id": "m15", "recipe_id": "recipenlg:142681", "systems": "LSA"}
-{"item_id": "m15-i10", "query_id": "m15", "recipe_id": "recipenlg:109386", "systems": "E03"}
-{"item_id": "m15-i11", "query_id": "m15", "recipe_id": "recipenlg:1677100", "systems": "E01,E03,LSA,E04"}
-{"item_id": "m16-i01", "query_id": "m16", "recipe_id": "recipenlg:2093034", "systems": "LSA"}
-{"item_id": "m16-i02", "query_id": "m16", "recipe_id": "recipenlg:1479064", "systems": "E03"}
-{"item_id": "m16-i03", "query_id": "m16", "recipe_id": "recipenlg:1702656", "systems": "E01"}
-{"item_id": "m16-i04", "query_id": "m16", "recipe_id": "recipenlg:2113403", "systems": "LSA"}
-{"item_id": "m16-i05", "query_id": "m16", "recipe_id": "recipenlg:2215789", "systems": "E03,E04"}
-{"item_id": "m16-i06", "query_id": "m16", "recipe_id": "recipenlg:2200255", "systems": "LSA"}
-{"item_id": "m16-i07", "query_id": "m16", "recipe_id": "recipenlg:2177958", "systems": "E04"}
-{"item_id": "m16-i08", "query_id": "m16", "recipe_id": "recipenlg:1832974", "systems": "E03,E04"}
-{"item_id": "m16-i09", "query_id": "m16", "recipe_id": "recipenlg:2022567", "systems": "E04"}
-{"item_id": "m16-i10", "query_id": "m16", "recipe_id": "recipenlg:1939175", "systems": "E01,E03"}
-{"item_id": "m16-i11", "query_id": "m16", "recipe_id": "recipenlg:1845788", "systems": "LSA"}
-{"item_id": "m16-i12", "query_id": "m16", "recipe_id": "recipenlg:1947791", "systems": "E01,E03"}
-{"item_id": "m16-i13", "query_id": "m16", "recipe_id": "recipenlg:1473783", "systems": "E01"}
-{"item_id": "m16-i14", "query_id": "m16", "recipe_id": "recipenlg:1301539", "systems": "E04"}
-{"item_id": "m16-i15", "query_id": "m16", "recipe_id": "recipenlg:1614314", "systems": "E01"}
-{"item_id": "m16-i16", "query_id": "m16", "recipe_id": "recipenlg:1948354", "systems": "LSA"}
-{"item_id": "m17-i01", "query_id": "m17", "recipe_id": "recipenlg:583819", "systems": "E04"}
-{"item_id": "m17-i02", "query_id": "m17", "recipe_id": "recipenlg:1290821", "systems": "E03"}
-{"item_id": "m17-i03", "query_id": "m17", "recipe_id": "recipenlg:1272135", "systems": "LSA"}
-{"item_id": "m17-i04", "query_id": "m17", "recipe_id": "recipenlg:449751", "systems": "LSA"}
-{"item_id": "m17-i05", "query_id": "m17", "recipe_id": "recipenlg:717687", "systems": "E01"}
-{"item_id": "m17-i06", "query_id": "m17", "recipe_id": "recipenlg:549535", "systems": "LSA"}
-{"item_id": "m17-i07", "query_id": "m17", "recipe_id": "recipenlg:1963383", "systems": "E01,E04"}
-{"item_id": "m17-i08", "query_id": "m17", "recipe_id": "recipenlg:1872336", "systems": "E01,E03,E04"}
-{"item_id": "m17-i09", "query_id": "m17", "recipe_id": "recipenlg:145411", "systems": "E03,E04"}
-{"item_id": "m17-i10", "query_id": "m17", "recipe_id": "recipenlg:1040919", "systems": "E03"}
-{"item_id": "m17-i11", "query_id": "m17", "recipe_id": "recipenlg:1339912", "systems": "LSA"}
-{"item_id": "m17-i12", "query_id": "m17", "recipe_id": "recipenlg:1691790", "systems": "E01"}
-{"item_id": "m17-i13", "query_id": "m17", "recipe_id": "recipenlg:2029670", "systems": "E01,E04"}
-{"item_id": "m17-i14", "query_id": "m17", "recipe_id": "recipenlg:1898928", "systems": "E03,LSA"}
-{"item_id": "m18-i01", "query_id": "m18", "recipe_id": "recipenlg:236408", "systems": "LSA"}
-{"item_id": "m18-i02", "query_id": "m18", "recipe_id": "recipenlg:363315", "systems": "E04"}
-{"item_id": "m18-i03", "query_id": "m18", "recipe_id": "recipenlg:609525", "systems": "E01,E03"}
-{"item_id": "m18-i04", "query_id": "m18", "recipe_id": "recipenlg:840871", "systems": "E01,E03"}
-{"item_id": "m18-i05", "query_id": "m18", "recipe_id": "recipenlg:640170", "systems": "E01"}
-{"item_id": "m18-i06", "query_id": "m18", "recipe_id": "recipenlg:1756171", "systems": "E03"}
-{"item_id": "m18-i07", "query_id": "m18", "recipe_id": "recipenlg:364790", "systems": "E01,E03"}
-{"item_id": "m18-i08", "query_id": "m18", "recipe_id": "recipenlg:572432", "systems": "E04"}
-{"item_id": "m18-i09", "query_id": "m18", "recipe_id": "recipenlg:1829693", "systems": "LSA"}
-{"item_id": "m18-i10", "query_id": "m18", "recipe_id": "recipenlg:1672514", "systems": "LSA"}
-{"item_id": "m18-i11", "query_id": "m18", "recipe_id": "recipenlg:2210199", "systems": "E04"}
-{"item_id": "m18-i12", "query_id": "m18", "recipe_id": "recipenlg:47995", "systems": "E04"}
-{"item_id": "m18-i13", "query_id": "m18", "recipe_id": "recipenlg:513609", "systems": "LSA,E04"}
-{"item_id": "m18-i14", "query_id": "m18", "recipe_id": "recipenlg:1407120", "systems": "LSA"}
-{"item_id": "m18-i15", "query_id": "m18", "recipe_id": "recipenlg:580345", "systems": "E01,E03"}
-{"item_id": "m19-i01", "query_id": "m19", "recipe_id": "recipenlg:1353223", "systems": "LSA"}
-{"item_id": "m19-i02", "query_id": "m19", "recipe_id": "recipenlg:1354994", "systems": "E01,E03"}
-{"item_id": "m19-i03", "query_id": "m19", "recipe_id": "recipenlg:2101540", "systems": "LSA"}
-{"item_id": "m19-i04", "query_id": "m19", "recipe_id": "recipenlg:1330652", "systems": "E01,E03"}
-{"item_id": "m19-i05", "query_id": "m19", "recipe_id": "recipenlg:1379412", "systems": "E03"}
-{"item_id": "m19-i06", "query_id": "m19", "recipe_id": "recipenlg:1349850", "systems": "E04"}
-{"item_id": "m19-i07", "query_id": "m19", "recipe_id": "recipenlg:142794", "systems": "LSA"}
-{"item_id": "m19-i08", "query_id": "m19", "recipe_id": "recipenlg:1137532", "systems": "E04"}
-{"item_id": "m19-i09", "query_id": "m19", "recipe_id": "recipenlg:1364592", "systems": "E04"}
-{"item_id": "m19-i10", "query_id": "m19", "recipe_id": "recipenlg:1739392", "systems": "E04"}
-{"item_id": "m19-i11", "query_id": "m19", "recipe_id": "recipenlg:1357895", "systems": "LSA"}
-{"item_id": "m19-i12", "query_id": "m19", "recipe_id": "recipenlg:1375334", "systems": "E01,E03"}
-{"item_id": "m19-i13", "query_id": "m19", "recipe_id": "recipenlg:1384703", "systems": "E01"}
-{"item_id": "m19-i14", "query_id": "m19", "recipe_id": "recipenlg:1373555", "systems": "E01,E03,LSA,E04"}
-{"item_id": "m20-i01", "query_id": "m20", "recipe_id": "recipenlg:1333262", "systems": "E01,E04"}
-{"item_id": "m20-i02", "query_id": "m20", "recipe_id": "recipenlg:866347", "systems": "LSA"}
-{"item_id": "m20-i03", "query_id": "m20", "recipe_id": "recipenlg:1069791", "systems": "LSA"}
-{"item_id": "m20-i04", "query_id": "m20", "recipe_id": "recipenlg:2107200", "systems": "E04"}
-{"item_id": "m20-i05", "query_id": "m20", "recipe_id": "recipenlg:1818352", "systems": "E01,E03"}
-{"item_id": "m20-i06", "query_id": "m20", "recipe_id": "recipenlg:1289363", "systems": "E01,E03"}
-{"item_id": "m20-i07", "query_id": "m20", "recipe_id": "recipenlg:2185624", "systems": "E04"}
-{"item_id": "m20-i08", "query_id": "m20", "recipe_id": "recipenlg:1181909", "systems": "E04"}
-{"item_id": "m20-i09", "query_id": "m20", "recipe_id": "recipenlg:1362825", "systems": "LSA"}
-{"item_id": "m20-i10", "query_id": "m20", "recipe_id": "recipenlg:1380394", "systems": "E01,E03"}
-{"item_id": "m20-i11", "query_id": "m20", "recipe_id": "recipenlg:2147785", "systems": "E04"}
-{"item_id": "m20-i12", "query_id": "m20", "recipe_id": "recipenlg:1444660", "systems": "E03"}
-{"item_id": "m20-i13", "query_id": "m20", "recipe_id": "recipenlg:1077971", "systems": "LSA"}
-{"item_id": "m20-i14", "query_id": "m20", "recipe_id": "recipenlg:1403751", "systems": "E01,E03"}
-{"item_id": "m20-i15", "query_id": "m20", "recipe_id": "recipenlg:1879840", "systems": "LSA"}
+{"item_id": "m01-01", "query_id": "m01", "recipe_id": "recipenlg:530043", "systems": "FT@1"}
+{"item_id": "m01-02", "query_id": "m01", "recipe_id": "recipenlg:1871966", "systems": "E05@1"}
+{"item_id": "m01-03", "query_id": "m01", "recipe_id": "recipenlg:2128919", "systems": "E05@5"}
+{"item_id": "m01-04", "query_id": "m01", "recipe_id": "recipenlg:1772555", "systems": "E03@2 LSA@1"}
+{"item_id": "m01-05", "query_id": "m01", "recipe_id": "recipenlg:2019677", "systems": "E04@4"}
+{"item_id": "m01-06", "query_id": "m01", "recipe_id": "recipenlg:2124762", "systems": "E01@5 E02@5"}
+{"item_id": "m01-07", "query_id": "m01", "recipe_id": "recipenlg:2152993", "systems": "E01@1 E02@1 E03@1 LSA@2 E04@5 FT@5"}
+{"item_id": "m01-08", "query_id": "m01", "recipe_id": "recipenlg:503207", "systems": "E03@4"}
+{"item_id": "m01-09", "query_id": "m01", "recipe_id": "recipenlg:1930600", "systems": "E04@3"}
+{"item_id": "m01-10", "query_id": "m01", "recipe_id": "recipenlg:2112279", "systems": "E01@2 E02@2 LSA@3 E04@2"}
+{"item_id": "m01-11", "query_id": "m01", "recipe_id": "recipenlg:34690", "systems": "E04@1"}
+{"item_id": "m01-12", "query_id": "m01", "recipe_id": "recipenlg:2031769", "systems": "FT@3"}
+{"item_id": "m01-13", "query_id": "m01", "recipe_id": "recipenlg:1140971", "systems": "E01@4 E02@4"}
+{"item_id": "m01-14", "query_id": "m01", "recipe_id": "recipenlg:2065212", "systems": "E03@3 LSA@5"}
+{"item_id": "m01-15", "query_id": "m01", "recipe_id": "recipenlg:1165370", "systems": "E03@5 LSA@4"}
+{"item_id": "m01-16", "query_id": "m01", "recipe_id": "recipenlg:299340", "systems": "E01@3 E02@3"}
+{"item_id": "m01-17", "query_id": "m01", "recipe_id": "recipenlg:1936958", "systems": "FT@2"}
+{"item_id": "m01-18", "query_id": "m01", "recipe_id": "recipenlg:1986764", "systems": "E05@3"}
+{"item_id": "m01-19", "query_id": "m01", "recipe_id": "recipenlg:1139229", "systems": "E05@2"}
+{"item_id": "m01-20", "query_id": "m01", "recipe_id": "recipenlg:121838", "systems": "FT@4"}
+{"item_id": "m01-21", "query_id": "m01", "recipe_id": "recipenlg:926117", "systems": "E05@4"}
+{"item_id": "m02-01", "query_id": "m02", "recipe_id": "recipenlg:24248", "systems": "E01@5 E02@5 E03@2 LSA@2 E04@5"}
+{"item_id": "m02-02", "query_id": "m02", "recipe_id": "recipenlg:1733473", "systems": "LSA@5"}
+{"item_id": "m02-03", "query_id": "m02", "recipe_id": "recipenlg:718741", "systems": "E01@2 E02@2 E03@3 E04@1 FT@1"}
+{"item_id": "m02-04", "query_id": "m02", "recipe_id": "recipenlg:486926", "systems": "LSA@4 E05@1 FT@2"}
+{"item_id": "m02-05", "query_id": "m02", "recipe_id": "recipenlg:1656116", "systems": "E05@5"}
+{"item_id": "m02-06", "query_id": "m02", "recipe_id": "recipenlg:1432999", "systems": "E03@1 LSA@1"}
+{"item_id": "m02-07", "query_id": "m02", "recipe_id": "recipenlg:724038", "systems": "FT@5"}
+{"item_id": "m02-08", "query_id": "m02", "recipe_id": "recipenlg:2068569", "systems": "E05@2"}
+{"item_id": "m02-09", "query_id": "m02", "recipe_id": "recipenlg:312299", "systems": "E05@3"}
+{"item_id": "m02-10", "query_id": "m02", "recipe_id": "recipenlg:2027776", "systems": "E01@3 E02@3"}
+{"item_id": "m02-11", "query_id": "m02", "recipe_id": "recipenlg:896141", "systems": "E04@4"}
+{"item_id": "m02-12", "query_id": "m02", "recipe_id": "recipenlg:439707", "systems": "E05@4 FT@4"}
+{"item_id": "m02-13", "query_id": "m02", "recipe_id": "recipenlg:738458", "systems": "E01@1 E02@1 E03@4 E04@3"}
+{"item_id": "m02-14", "query_id": "m02", "recipe_id": "recipenlg:649277", "systems": "E01@4 E02@4"}
+{"item_id": "m02-15", "query_id": "m02", "recipe_id": "recipenlg:673836", "systems": "FT@3"}
+{"item_id": "m02-16", "query_id": "m02", "recipe_id": "recipenlg:295843", "systems": "E03@5 LSA@3 E04@2"}
+{"item_id": "m03-01", "query_id": "m03", "recipe_id": "recipenlg:371594", "systems": "E01@4 E02@4"}
+{"item_id": "m03-02", "query_id": "m03", "recipe_id": "recipenlg:1776994", "systems": "E01@1 E02@1 E03@1 LSA@1 FT@1"}
+{"item_id": "m03-03", "query_id": "m03", "recipe_id": "recipenlg:544104", "systems": "LSA@2"}
+{"item_id": "m03-04", "query_id": "m03", "recipe_id": "recipenlg:459205", "systems": "E04@5"}
+{"item_id": "m03-05", "query_id": "m03", "recipe_id": "recipenlg:493152", "systems": "FT@5"}
+{"item_id": "m03-06", "query_id": "m03", "recipe_id": "recipenlg:254775", "systems": "E04@1 E05@2"}
+{"item_id": "m03-07", "query_id": "m03", "recipe_id": "recipenlg:473182", "systems": "E04@4"}
+{"item_id": "m03-08", "query_id": "m03", "recipe_id": "recipenlg:358304", "systems": "E01@2 E02@2 E05@3 FT@2"}
+{"item_id": "m03-09", "query_id": "m03", "recipe_id": "recipenlg:1738697", "systems": "E03@4"}
+{"item_id": "m03-10", "query_id": "m03", "recipe_id": "recipenlg:1030036", "systems": "E03@2"}
+{"item_id": "m03-11", "query_id": "m03", "recipe_id": "recipenlg:601879", "systems": "E01@3 E02@3 FT@4"}
+{"item_id": "m03-12", "query_id": "m03", "recipe_id": "recipenlg:183649", "systems": "E05@4"}
+{"item_id": "m03-13", "query_id": "m03", "recipe_id": "recipenlg:306756", "systems": "E03@5 E04@2"}
+{"item_id": "m03-14", "query_id": "m03", "recipe_id": "recipenlg:1649066", "systems": "LSA@5"}
+{"item_id": "m03-15", "query_id": "m03", "recipe_id": "recipenlg:1076704", "systems": "E05@5"}
+{"item_id": "m03-16", "query_id": "m03", "recipe_id": "recipenlg:255283", "systems": "E01@5 E02@5"}
+{"item_id": "m03-17", "query_id": "m03", "recipe_id": "recipenlg:1167226", "systems": "E03@3 E04@3"}
+{"item_id": "m03-18", "query_id": "m03", "recipe_id": "recipenlg:1217167", "systems": "LSA@4"}
+{"item_id": "m03-19", "query_id": "m03", "recipe_id": "recipenlg:211357", "systems": "E05@1"}
+{"item_id": "m03-20", "query_id": "m03", "recipe_id": "recipenlg:1698717", "systems": "FT@3"}
+{"item_id": "m03-21", "query_id": "m03", "recipe_id": "recipenlg:1587620", "systems": "LSA@3"}
+{"item_id": "m04-01", "query_id": "m04", "recipe_id": "recipenlg:1030624", "systems": "E04@5"}
+{"item_id": "m04-02", "query_id": "m04", "recipe_id": "recipenlg:2138066", "systems": "LSA@4"}
+{"item_id": "m04-03", "query_id": "m04", "recipe_id": "recipenlg:1691671", "systems": "E01@2 E02@2 E03@3 FT@2"}
+{"item_id": "m04-04", "query_id": "m04", "recipe_id": "recipenlg:1858039", "systems": "E04@3"}
+{"item_id": "m04-05", "query_id": "m04", "recipe_id": "recipenlg:1834114", "systems": "E05@5"}
+{"item_id": "m04-06", "query_id": "m04", "recipe_id": "recipenlg:2041238", "systems": "E05@3"}
+{"item_id": "m04-07", "query_id": "m04", "recipe_id": "recipenlg:735376", "systems": "E04@1 E05@1 FT@1"}
+{"item_id": "m04-08", "query_id": "m04", "recipe_id": "recipenlg:738994", "systems": "E04@2"}
+{"item_id": "m04-09", "query_id": "m04", "recipe_id": "recipenlg:52053", "systems": "E04@4"}
+{"item_id": "m04-10", "query_id": "m04", "recipe_id": "recipenlg:315209", "systems": "E01@1 E02@1 E03@2 LSA@3 FT@3"}
+{"item_id": "m04-11", "query_id": "m04", "recipe_id": "recipenlg:624538", "systems": "FT@5"}
+{"item_id": "m04-12", "query_id": "m04", "recipe_id": "recipenlg:1632708", "systems": "LSA@2"}
+{"item_id": "m04-13", "query_id": "m04", "recipe_id": "recipenlg:2210430", "systems": "E01@5 E02@5 E03@4"}
+{"item_id": "m04-14", "query_id": "m04", "recipe_id": "recipenlg:121088", "systems": "FT@4"}
+{"item_id": "m04-15", "query_id": "m04", "recipe_id": "recipenlg:210722", "systems": "E01@4 E02@4 E03@1 LSA@1 E05@2"}
+{"item_id": "m04-16", "query_id": "m04", "recipe_id": "recipenlg:1035534", "systems": "LSA@5"}
+{"item_id": "m04-17", "query_id": "m04", "recipe_id": "recipenlg:1159629", "systems": "E05@4"}
+{"item_id": "m04-18", "query_id": "m04", "recipe_id": "recipenlg:1785799", "systems": "E03@5"}
+{"item_id": "m04-19", "query_id": "m04", "recipe_id": "recipenlg:877895", "systems": "E01@3 E02@3"}
+{"item_id": "m05-01", "query_id": "m05", "recipe_id": "recipenlg:908500", "systems": "E04@4"}
+{"item_id": "m05-02", "query_id": "m05", "recipe_id": "recipenlg:1039055", "systems": "E03@3 LSA@3 E04@5"}
+{"item_id": "m05-03", "query_id": "m05", "recipe_id": "recipenlg:565936", "systems": "FT@4"}
+{"item_id": "m05-04", "query_id": "m05", "recipe_id": "recipenlg:2108166", "systems": "LSA@5"}
+{"item_id": "m05-05", "query_id": "m05", "recipe_id": "recipenlg:1596405", "systems": "E05@4"}
+{"item_id": "m05-06", "query_id": "m05", "recipe_id": "recipenlg:2089511", "systems": "E01@2 E02@2 E03@1 LSA@4 E04@1 FT@1"}
+{"item_id": "m05-07", "query_id": "m05", "recipe_id": "recipenlg:2131034", "systems": "E05@5"}
+{"item_id": "m05-08", "query_id": "m05", "recipe_id": "recipenlg:1322604", "systems": "E05@1"}
+{"item_id": "m05-09", "query_id": "m05", "recipe_id": "recipenlg:1319088", "systems": "E01@4 E02@4"}
+{"item_id": "m05-10", "query_id": "m05", "recipe_id": "recipenlg:1186858", "systems": "E03@5"}
+{"item_id": "m05-11", "query_id": "m05", "recipe_id": "recipenlg:379944", "systems": "E01@5 E02@5"}
+{"item_id": "m05-12", "query_id": "m05", "recipe_id": "recipenlg:601244", "systems": "E04@2 FT@5"}
+{"item_id": "m05-13", "query_id": "m05", "recipe_id": "recipenlg:348832", "systems": "E01@1 E02@1 E03@2 LSA@1 E04@3 E05@2 FT@2"}
+{"item_id": "m05-14", "query_id": "m05", "recipe_id": "recipenlg:1442914", "systems": "E01@3 E02@3 FT@3"}
+{"item_id": "m05-15", "query_id": "m05", "recipe_id": "recipenlg:268146", "systems": "E03@4 LSA@2"}
+{"item_id": "m05-16", "query_id": "m05", "recipe_id": "recipenlg:1768486", "systems": "E05@3"}
+{"item_id": "m06-01", "query_id": "m06", "recipe_id": "recipenlg:808999", "systems": "E05@3"}
+{"item_id": "m06-02", "query_id": "m06", "recipe_id": "recipenlg:1888832", "systems": "E04@1 E05@2 FT@5"}
+{"item_id": "m06-03", "query_id": "m06", "recipe_id": "recipenlg:427931", "systems": "E01@2 E02@2 E03@3 LSA@4 FT@2"}
+{"item_id": "m06-04", "query_id": "m06", "recipe_id": "recipenlg:399915", "systems": "E01@3 E02@3 LSA@5 FT@4"}
+{"item_id": "m06-05", "query_id": "m06", "recipe_id": "recipenlg:110862", "systems": "E03@5"}
+{"item_id": "m06-06", "query_id": "m06", "recipe_id": "recipenlg:504035", "systems": "E05@4"}
+{"item_id": "m06-07", "query_id": "m06", "recipe_id": "recipenlg:178118", "systems": "E03@2 LSA@2"}
+{"item_id": "m06-08", "query_id": "m06", "recipe_id": "recipenlg:2167367", "systems": "E04@5"}
+{"item_id": "m06-09", "query_id": "m06", "recipe_id": "recipenlg:731755", "systems": "E05@5"}
+{"item_id": "m06-10", "query_id": "m06", "recipe_id": "recipenlg:634055", "systems": "LSA@1"}
+{"item_id": "m06-11", "query_id": "m06", "recipe_id": "recipenlg:1833076", "systems": "E01@5 E02@5"}
+{"item_id": "m06-12", "query_id": "m06", "recipe_id": "recipenlg:1014630", "systems": "E01@1 E02@1 E03@1 LSA@3 E04@2 E05@1 FT@1"}
+{"item_id": "m06-13", "query_id": "m06", "recipe_id": "recipenlg:660311", "systems": "E04@4 FT@3"}
+{"item_id": "m06-14", "query_id": "m06", "recipe_id": "recipenlg:1920339", "systems": "E04@3"}
+{"item_id": "m06-15", "query_id": "m06", "recipe_id": "recipenlg:579006", "systems": "E01@4 E02@4 E03@4"}
+{"item_id": "m07-01", "query_id": "m07", "recipe_id": "recipenlg:2050174", "systems": "E03@5"}
+{"item_id": "m07-02", "query_id": "m07", "recipe_id": "recipenlg:625346", "systems": "E01@3 E02@3"}
+{"item_id": "m07-03", "query_id": "m07", "recipe_id": "recipenlg:264715", "systems": "FT@1"}
+{"item_id": "m07-04", "query_id": "m07", "recipe_id": "recipenlg:1290232", "systems": "E01@1 E02@1"}
+{"item_id": "m07-05", "query_id": "m07", "recipe_id": "recipenlg:2105681", "systems": "E04@2"}
+{"item_id": "m07-06", "query_id": "m07", "recipe_id": "recipenlg:870343", "systems": "E05@1"}
+{"item_id": "m07-07", "query_id": "m07", "recipe_id": "recipenlg:1198383", "systems": "E01@5 E02@5"}
+{"item_id": "m07-08", "query_id": "m07", "recipe_id": "recipenlg:51318", "systems": "FT@5"}
+{"item_id": "m07-09", "query_id": "m07", "recipe_id": "recipenlg:396441", "systems": "E05@2"}
+{"item_id": "m07-10", "query_id": "m07", "recipe_id": "recipenlg:1375241", "systems": "LSA@3"}
+{"item_id": "m07-11", "query_id": "m07", "recipe_id": "recipenlg:1556933", "systems": "E04@5"}
+{"item_id": "m07-12", "query_id": "m07", "recipe_id": "recipenlg:1672790", "systems": "LSA@5"}
+{"item_id": "m07-13", "query_id": "m07", "recipe_id": "recipenlg:1683434", "systems": "LSA@1"}
+{"item_id": "m07-14", "query_id": "m07", "recipe_id": "recipenlg:2010799", "systems": "FT@2"}
+{"item_id": "m07-15", "query_id": "m07", "recipe_id": "recipenlg:587267", "systems": "E04@3 FT@4"}
+{"item_id": "m07-16", "query_id": "m07", "recipe_id": "recipenlg:22049", "systems": "E05@3"}
+{"item_id": "m07-17", "query_id": "m07", "recipe_id": "recipenlg:5628", "systems": "E03@1 LSA@4"}
+{"item_id": "m07-18", "query_id": "m07", "recipe_id": "recipenlg:508804", "systems": "E05@5"}
+{"item_id": "m07-19", "query_id": "m07", "recipe_id": "recipenlg:500750", "systems": "E03@4"}
+{"item_id": "m07-20", "query_id": "m07", "recipe_id": "recipenlg:175353", "systems": "E01@2 E02@2"}
+{"item_id": "m07-21", "query_id": "m07", "recipe_id": "recipenlg:581911", "systems": "E03@3 E04@1"}
+{"item_id": "m07-22", "query_id": "m07", "recipe_id": "recipenlg:1886305", "systems": "FT@3"}
+{"item_id": "m07-23", "query_id": "m07", "recipe_id": "recipenlg:1578057", "systems": "E01@4 E02@4"}
+{"item_id": "m07-24", "query_id": "m07", "recipe_id": "recipenlg:25977", "systems": "E04@4"}
+{"item_id": "m07-25", "query_id": "m07", "recipe_id": "recipenlg:525677", "systems": "E05@4"}
+{"item_id": "m07-26", "query_id": "m07", "recipe_id": "recipenlg:2110875", "systems": "E03@2 LSA@2"}
+{"item_id": "m08-01", "query_id": "m08", "recipe_id": "recipenlg:41037", "systems": "E01@4 E02@4"}
+{"item_id": "m08-02", "query_id": "m08", "recipe_id": "recipenlg:1739529", "systems": "E04@5 E05@5"}
+{"item_id": "m08-03", "query_id": "m08", "recipe_id": "recipenlg:1792018", "systems": "FT@4"}
+{"item_id": "m08-04", "query_id": "m08", "recipe_id": "recipenlg:1228646", "systems": "E01@3 E02@3 E03@2"}
+{"item_id": "m08-05", "query_id": "m08", "recipe_id": "recipenlg:1982217", "systems": "E05@4"}
+{"item_id": "m08-06", "query_id": "m08", "recipe_id": "recipenlg:1385014", "systems": "E03@5 LSA@1 E05@3"}
+{"item_id": "m08-07", "query_id": "m08", "recipe_id": "recipenlg:1775284", "systems": "E01@1 E02@1 E03@1 LSA@2 E04@2 FT@2"}
+{"item_id": "m08-08", "query_id": "m08", "recipe_id": "recipenlg:1925624", "systems": "LSA@5 FT@5"}
+{"item_id": "m08-09", "query_id": "m08", "recipe_id": "recipenlg:2123910", "systems": "E05@1"}
+{"item_id": "m08-10", "query_id": "m08", "recipe_id": "recipenlg:537554", "systems": "E03@3 LSA@3"}
+{"item_id": "m08-11", "query_id": "m08", "recipe_id": "recipenlg:1380767", "systems": "E04@3 FT@3"}
+{"item_id": "m08-12", "query_id": "m08", "recipe_id": "recipenlg:2006290", "systems": "E04@4"}
+{"item_id": "m08-13", "query_id": "m08", "recipe_id": "recipenlg:187536", "systems": "E05@2"}
+{"item_id": "m08-14", "query_id": "m08", "recipe_id": "recipenlg:2064424", "systems": "E01@5 E02@5"}
+{"item_id": "m08-15", "query_id": "m08", "recipe_id": "recipenlg:2128262", "systems": "E01@2 E02@2 E03@4 LSA@4 E04@1 FT@1"}
+{"item_id": "m09-01", "query_id": "m09", "recipe_id": "recipenlg:899642", "systems": "E04@3"}
+{"item_id": "m09-02", "query_id": "m09", "recipe_id": "recipenlg:55442", "systems": "LSA@2"}
+{"item_id": "m09-03", "query_id": "m09", "recipe_id": "recipenlg:2076231", "systems": "E05@3"}
+{"item_id": "m09-04", "query_id": "m09", "recipe_id": "recipenlg:308651", "systems": "E05@1"}
+{"item_id": "m09-05", "query_id": "m09", "recipe_id": "recipenlg:1621129", "systems": "FT@3"}
+{"item_id": "m09-06", "query_id": "m09", "recipe_id": "recipenlg:811381", "systems": "E03@3"}
+{"item_id": "m09-07", "query_id": "m09", "recipe_id": "recipenlg:1535155", "systems": "E01@5 E02@5"}
+{"item_id": "m09-08", "query_id": "m09", "recipe_id": "recipenlg:1970459", "systems": "FT@2"}
+{"item_id": "m09-09", "query_id": "m09", "recipe_id": "recipenlg:1148715", "systems": "E04@2 FT@4"}
+{"item_id": "m09-10", "query_id": "m09", "recipe_id": "recipenlg:275430", "systems": "E03@5"}
+{"item_id": "m09-11", "query_id": "m09", "recipe_id": "recipenlg:1232484", "systems": "E01@1 E02@1 E03@2"}
+{"item_id": "m09-12", "query_id": "m09", "recipe_id": "recipenlg:578658", "systems": "E05@2"}
+{"item_id": "m09-13", "query_id": "m09", "recipe_id": "recipenlg:1247577", "systems": "E03@4"}
+{"item_id": "m09-14", "query_id": "m09", "recipe_id": "recipenlg:2135284", "systems": "LSA@4"}
+{"item_id": "m09-15", "query_id": "m09", "recipe_id": "recipenlg:1717213", "systems": "LSA@5"}
+{"item_id": "m09-16", "query_id": "m09", "recipe_id": "recipenlg:1131143", "systems": "FT@5"}
+{"item_id": "m09-17", "query_id": "m09", "recipe_id": "recipenlg:205775", "systems": "E01@3 E02@3"}
+{"item_id": "m09-18", "query_id": "m09", "recipe_id": "recipenlg:1411063", "systems": "E05@4"}
+{"item_id": "m09-19", "query_id": "m09", "recipe_id": "recipenlg:2039844", "systems": "E04@4"}
+{"item_id": "m09-20", "query_id": "m09", "recipe_id": "recipenlg:1695821", "systems": "LSA@3"}
+{"item_id": "m09-21", "query_id": "m09", "recipe_id": "recipenlg:1234215", "systems": "FT@1"}
+{"item_id": "m09-22", "query_id": "m09", "recipe_id": "recipenlg:1699869", "systems": "E04@5"}
+{"item_id": "m09-23", "query_id": "m09", "recipe_id": "recipenlg:418226", "systems": "E05@5"}
+{"item_id": "m09-24", "query_id": "m09", "recipe_id": "recipenlg:1642667", "systems": "E01@4 E02@4 E03@1 LSA@1"}
+{"item_id": "m09-25", "query_id": "m09", "recipe_id": "recipenlg:253891", "systems": "E01@2 E02@2"}
+{"item_id": "m09-26", "query_id": "m09", "recipe_id": "recipenlg:547596", "systems": "E04@1"}
+{"item_id": "m10-01", "query_id": "m10", "recipe_id": "recipenlg:1211898", "systems": "E01@2 E02@2"}
+{"item_id": "m10-02", "query_id": "m10", "recipe_id": "recipenlg:771809", "systems": "E05@3"}
+{"item_id": "m10-03", "query_id": "m10", "recipe_id": "recipenlg:596077", "systems": "E04@4 FT@4"}
+{"item_id": "m10-04", "query_id": "m10", "recipe_id": "recipenlg:24060", "systems": "E03@4 E04@2 FT@3"}
+{"item_id": "m10-05", "query_id": "m10", "recipe_id": "recipenlg:258638", "systems": "E04@5"}
+{"item_id": "m10-06", "query_id": "m10", "recipe_id": "recipenlg:405391", "systems": "E01@1 E02@1 E03@1"}
+{"item_id": "m10-07", "query_id": "m10", "recipe_id": "recipenlg:489507", "systems": "LSA@5"}
+{"item_id": "m10-08", "query_id": "m10", "recipe_id": "recipenlg:1405655", "systems": "LSA@2"}
+{"item_id": "m10-09", "query_id": "m10", "recipe_id": "recipenlg:1608703", "systems": "E05@1"}
+{"item_id": "m10-10", "query_id": "m10", "recipe_id": "recipenlg:750259", "systems": "E01@3 E02@3 E04@1 E05@2 FT@1"}
+{"item_id": "m10-11", "query_id": "m10", "recipe_id": "recipenlg:1158435", "systems": "E05@5"}
+{"item_id": "m10-12", "query_id": "m10", "recipe_id": "recipenlg:800838", "systems": "FT@5"}
+{"item_id": "m10-13", "query_id": "m10", "recipe_id": "recipenlg:246853", "systems": "LSA@3"}
+{"item_id": "m10-14", "query_id": "m10", "recipe_id": "recipenlg:86012", "systems": "E05@4"}
+{"item_id": "m10-15", "query_id": "m10", "recipe_id": "recipenlg:35007", "systems": "E01@5 E02@5 E03@3 E04@3 FT@2"}
+{"item_id": "m10-16", "query_id": "m10", "recipe_id": "recipenlg:1058566", "systems": "E03@5"}
+{"item_id": "m10-17", "query_id": "m10", "recipe_id": "recipenlg:84790", "systems": "E01@4 E02@4 E03@2"}
+{"item_id": "m10-18", "query_id": "m10", "recipe_id": "recipenlg:853364", "systems": "LSA@4"}
+{"item_id": "m10-19", "query_id": "m10", "recipe_id": "recipenlg:2201099", "systems": "LSA@1"}
+{"item_id": "m11-01", "query_id": "m11", "recipe_id": "recipenlg:1067815", "systems": "LSA@4"}
+{"item_id": "m11-02", "query_id": "m11", "recipe_id": "recipenlg:1148858", "systems": "LSA@2"}
+{"item_id": "m11-03", "query_id": "m11", "recipe_id": "recipenlg:1651475", "systems": "E01@5 E02@5"}
+{"item_id": "m11-04", "query_id": "m11", "recipe_id": "recipenlg:1959712", "systems": "LSA@3"}
+{"item_id": "m11-05", "query_id": "m11", "recipe_id": "recipenlg:994964", "systems": "E04@1"}
+{"item_id": "m11-06", "query_id": "m11", "recipe_id": "recipenlg:2223166", "systems": "E03@5 E04@4"}
+{"item_id": "m11-07", "query_id": "m11", "recipe_id": "recipenlg:2082905", "systems": "FT@2"}
+{"item_id": "m11-08", "query_id": "m11", "recipe_id": "recipenlg:2143160", "systems": "FT@5"}
+{"item_id": "m11-09", "query_id": "m11", "recipe_id": "recipenlg:1878911", "systems": "FT@3"}
+{"item_id": "m11-10", "query_id": "m11", "recipe_id": "recipenlg:2128705", "systems": "E03@2"}
+{"item_id": "m11-11", "query_id": "m11", "recipe_id": "recipenlg:1375385", "systems": "E01@1 E02@1 E03@1 LSA@1 E04@5 FT@1"}
+{"item_id": "m11-12", "query_id": "m11", "recipe_id": "recipenlg:1611505", "systems": "E01@3 E02@3 E04@3 FT@4"}
+{"item_id": "m11-13", "query_id": "m11", "recipe_id": "recipenlg:1758713", "systems": "E01@2 E02@2 E03@3"}
+{"item_id": "m11-14", "query_id": "m11", "recipe_id": "recipenlg:1719451", "systems": "E05@5"}
+{"item_id": "m11-15", "query_id": "m11", "recipe_id": "recipenlg:822641", "systems": "LSA@5"}
+{"item_id": "m11-16", "query_id": "m11", "recipe_id": "recipenlg:1526159", "systems": "E04@2"}
+{"item_id": "m11-17", "query_id": "m11", "recipe_id": "recipenlg:2175269", "systems": "E01@4 E02@4 E03@4"}
+{"item_id": "m11-18", "query_id": "m11", "recipe_id": "recipenlg:735376", "systems": "E05@4"}
+{"item_id": "m11-19", "query_id": "m11", "recipe_id": "recipenlg:1405489", "systems": "E05@3"}
+{"item_id": "m11-20", "query_id": "m11", "recipe_id": "recipenlg:633973", "systems": "E05@1"}
+{"item_id": "m11-21", "query_id": "m11", "recipe_id": "recipenlg:1157801", "systems": "E05@2"}
+{"item_id": "m12-01", "query_id": "m12", "recipe_id": "recipenlg:1763835", "systems": "E05@5"}
+{"item_id": "m12-02", "query_id": "m12", "recipe_id": "recipenlg:1829209", "systems": "E05@4"}
+{"item_id": "m12-03", "query_id": "m12", "recipe_id": "recipenlg:220475", "systems": "E04@5"}
+{"item_id": "m12-04", "query_id": "m12", "recipe_id": "recipenlg:199991", "systems": "LSA@2"}
+{"item_id": "m12-05", "query_id": "m12", "recipe_id": "recipenlg:684294", "systems": "E01@2 E02@2"}
+{"item_id": "m12-06", "query_id": "m12", "recipe_id": "recipenlg:818754", "systems": "FT@2"}
+{"item_id": "m12-07", "query_id": "m12", "recipe_id": "recipenlg:191114", "systems": "FT@1"}
+{"item_id": "m12-08", "query_id": "m12", "recipe_id": "recipenlg:274177", "systems": "E04@3 E05@3"}
+{"item_id": "m12-09", "query_id": "m12", "recipe_id": "recipenlg:426270", "systems": "LSA@4 E04@1"}
+{"item_id": "m12-10", "query_id": "m12", "recipe_id": "recipenlg:964893", "systems": "E04@4 FT@4"}
+{"item_id": "m12-11", "query_id": "m12", "recipe_id": "recipenlg:447831", "systems": "LSA@3"}
+{"item_id": "m12-12", "query_id": "m12", "recipe_id": "recipenlg:792471", "systems": "E01@1 E02@1 E03@5"}
+{"item_id": "m12-13", "query_id": "m12", "recipe_id": "recipenlg:235924", "systems": "E03@4"}
+{"item_id": "m12-14", "query_id": "m12", "recipe_id": "recipenlg:120244", "systems": "FT@3"}
+{"item_id": "m12-15", "query_id": "m12", "recipe_id": "recipenlg:738633", "systems": "FT@5"}
+{"item_id": "m12-16", "query_id": "m12", "recipe_id": "recipenlg:709749", "systems": "E01@3 E02@3"}
+{"item_id": "m12-17", "query_id": "m12", "recipe_id": "recipenlg:858691", "systems": "E04@2"}
+{"item_id": "m12-18", "query_id": "m12", "recipe_id": "recipenlg:727690", "systems": "LSA@5"}
+{"item_id": "m12-19", "query_id": "m12", "recipe_id": "recipenlg:108561", "systems": "E03@1 LSA@1"}
+{"item_id": "m12-20", "query_id": "m12", "recipe_id": "recipenlg:228860", "systems": "E03@2"}
+{"item_id": "m12-21", "query_id": "m12", "recipe_id": "recipenlg:16544", "systems": "E01@5 E02@5"}
+{"item_id": "m12-22", "query_id": "m12", "recipe_id": "recipenlg:868823", "systems": "E01@4 E02@4"}
+{"item_id": "m12-23", "query_id": "m12", "recipe_id": "recipenlg:1931231", "systems": "E05@2"}
+{"item_id": "m12-24", "query_id": "m12", "recipe_id": "recipenlg:1756251", "systems": "E03@3 E05@1"}
+{"item_id": "m13-01", "query_id": "m13", "recipe_id": "recipenlg:1579798", "systems": "E01@2 E02@2 E03@2"}
+{"item_id": "m13-02", "query_id": "m13", "recipe_id": "recipenlg:1060192", "systems": "E05@5"}
+{"item_id": "m13-03", "query_id": "m13", "recipe_id": "recipenlg:1953317", "systems": "E01@5 E02@5"}
+{"item_id": "m13-04", "query_id": "m13", "recipe_id": "recipenlg:346392", "systems": "E04@3 E05@3"}
+{"item_id": "m13-05", "query_id": "m13", "recipe_id": "recipenlg:1411752", "systems": "E01@4 E02@4"}
+{"item_id": "m13-06", "query_id": "m13", "recipe_id": "recipenlg:1891141", "systems": "E01@3 E02@3 E03@5 E04@4 FT@2"}
+{"item_id": "m13-07", "query_id": "m13", "recipe_id": "recipenlg:1217460", "systems": "LSA@2"}
+{"item_id": "m13-08", "query_id": "m13", "recipe_id": "recipenlg:1924514", "systems": "E01@1 E02@1 E03@1 LSA@4 E04@1 FT@1"}
+{"item_id": "m13-09", "query_id": "m13", "recipe_id": "recipenlg:1878718", "systems": "LSA@3"}
+{"item_id": "m13-10", "query_id": "m13", "recipe_id": "recipenlg:1098747", "systems": "E03@4"}
+{"item_id": "m13-11", "query_id": "m13", "recipe_id": "recipenlg:2081221", "systems": "E05@4"}
+{"item_id": "m13-12", "query_id": "m13", "recipe_id": "recipenlg:944993", "systems": "FT@5"}
+{"item_id": "m13-13", "query_id": "m13", "recipe_id": "recipenlg:1518619", "systems": "E04@2 FT@3"}
+{"item_id": "m13-14", "query_id": "m13", "recipe_id": "recipenlg:1938821", "systems": "LSA@1"}
+{"item_id": "m13-15", "query_id": "m13", "recipe_id": "recipenlg:125480", "systems": "LSA@5"}
+{"item_id": "m13-16", "query_id": "m13", "recipe_id": "recipenlg:2123368", "systems": "E05@1"}
+{"item_id": "m13-17", "query_id": "m13", "recipe_id": "recipenlg:1287869", "systems": "E05@2"}
+{"item_id": "m13-18", "query_id": "m13", "recipe_id": "recipenlg:910837", "systems": "E04@5 FT@4"}
+{"item_id": "m13-19", "query_id": "m13", "recipe_id": "recipenlg:1429864", "systems": "E03@3"}
+{"item_id": "m14-01", "query_id": "m14", "recipe_id": "recipenlg:1401819", "systems": "E01@4 E02@4 E03@2 FT@5"}
+{"item_id": "m14-02", "query_id": "m14", "recipe_id": "recipenlg:1320395", "systems": "E03@1 FT@1"}
+{"item_id": "m14-03", "query_id": "m14", "recipe_id": "recipenlg:1298697", "systems": "E05@3"}
+{"item_id": "m14-04", "query_id": "m14", "recipe_id": "recipenlg:1190655", "systems": "E05@4"}
+{"item_id": "m14-05", "query_id": "m14", "recipe_id": "recipenlg:2108154", "systems": "LSA@4"}
+{"item_id": "m14-06", "query_id": "m14", "recipe_id": "recipenlg:2035499", "systems": "E01@5 E02@5 E04@3 FT@3"}
+{"item_id": "m14-07", "query_id": "m14", "recipe_id": "recipenlg:2022984", "systems": "E05@5"}
+{"item_id": "m14-08", "query_id": "m14", "recipe_id": "recipenlg:1368230", "systems": "E03@5"}
+{"item_id": "m14-09", "query_id": "m14", "recipe_id": "recipenlg:1326643", "systems": "E04@1"}
+{"item_id": "m14-10", "query_id": "m14", "recipe_id": "recipenlg:1283478", "systems": "E05@1"}
+{"item_id": "m14-11", "query_id": "m14", "recipe_id": "recipenlg:1339253", "systems": "E01@3 E02@3 E03@4"}
+{"item_id": "m14-12", "query_id": "m14", "recipe_id": "recipenlg:1365948", "systems": "E01@2 E02@2 E04@2 FT@2"}
+{"item_id": "m14-13", "query_id": "m14", "recipe_id": "recipenlg:17970", "systems": "LSA@5"}
+{"item_id": "m14-14", "query_id": "m14", "recipe_id": "recipenlg:1809374", "systems": "FT@4"}
+{"item_id": "m14-15", "query_id": "m14", "recipe_id": "recipenlg:1879172", "systems": "LSA@2"}
+{"item_id": "m14-16", "query_id": "m14", "recipe_id": "recipenlg:2131940", "systems": "LSA@1"}
+{"item_id": "m14-17", "query_id": "m14", "recipe_id": "recipenlg:1370621", "systems": "LSA@3"}
+{"item_id": "m14-18", "query_id": "m14", "recipe_id": "recipenlg:1760112", "systems": "E01@1 E02@1 E03@3"}
+{"item_id": "m14-19", "query_id": "m14", "recipe_id": "recipenlg:119416", "systems": "E04@5"}
+{"item_id": "m14-20", "query_id": "m14", "recipe_id": "recipenlg:1285283", "systems": "E04@4 E05@2"}
+{"item_id": "m15-01", "query_id": "m15", "recipe_id": "recipenlg:259414", "systems": "E05@2"}
+{"item_id": "m15-02", "query_id": "m15", "recipe_id": "recipenlg:136586", "systems": "E03@5"}
+{"item_id": "m15-03", "query_id": "m15", "recipe_id": "recipenlg:142681", "systems": "LSA@4"}
+{"item_id": "m15-04", "query_id": "m15", "recipe_id": "recipenlg:983220", "systems": "LSA@5"}
+{"item_id": "m15-05", "query_id": "m15", "recipe_id": "recipenlg:947527", "systems": "E01@3 E02@3 E03@3 LSA@3 E04@2 FT@3"}
+{"item_id": "m15-06", "query_id": "m15", "recipe_id": "recipenlg:1988686", "systems": "E04@4"}
+{"item_id": "m15-07", "query_id": "m15", "recipe_id": "recipenlg:222991", "systems": "E05@5"}
+{"item_id": "m15-08", "query_id": "m15", "recipe_id": "recipenlg:426705", "systems": "FT@5"}
+{"item_id": "m15-09", "query_id": "m15", "recipe_id": "recipenlg:206371", "systems": "E01@5 E02@5"}
+{"item_id": "m15-10", "query_id": "m15", "recipe_id": "recipenlg:1792158", "systems": "E01@4 E02@4"}
+{"item_id": "m15-11", "query_id": "m15", "recipe_id": "recipenlg:1677100", "systems": "E01@2 E02@2 E03@2 LSA@2 E04@1 FT@1"}
+{"item_id": "m15-12", "query_id": "m15", "recipe_id": "recipenlg:610688", "systems": "E05@1"}
+{"item_id": "m15-13", "query_id": "m15", "recipe_id": "recipenlg:13461", "systems": "E01@1 E02@1 E03@1 LSA@1 E04@3 FT@2"}
+{"item_id": "m15-14", "query_id": "m15", "recipe_id": "recipenlg:262010", "systems": "FT@4"}
+{"item_id": "m15-15", "query_id": "m15", "recipe_id": "recipenlg:509617", "systems": "E04@5"}
+{"item_id": "m15-16", "query_id": "m15", "recipe_id": "recipenlg:1155809", "systems": "E05@4"}
+{"item_id": "m15-17", "query_id": "m15", "recipe_id": "recipenlg:109386", "systems": "E03@4"}
+{"item_id": "m15-18", "query_id": "m15", "recipe_id": "recipenlg:1127613", "systems": "E05@3"}
+{"item_id": "m16-01", "query_id": "m16", "recipe_id": "recipenlg:1947791", "systems": "E01@3 E02@3 E03@3"}
+{"item_id": "m16-02", "query_id": "m16", "recipe_id": "recipenlg:1359513", "systems": "FT@4"}
+{"item_id": "m16-03", "query_id": "m16", "recipe_id": "recipenlg:1702656", "systems": "E01@4 E02@4"}
+{"item_id": "m16-04", "query_id": "m16", "recipe_id": "recipenlg:2215789", "systems": "E03@4 E04@2 FT@2"}
+{"item_id": "m16-05", "query_id": "m16", "recipe_id": "recipenlg:1774246", "systems": "E05@1"}
+{"item_id": "m16-06", "query_id": "m16", "recipe_id": "recipenlg:2177958", "systems": "E04@3 FT@3"}
+{"item_id": "m16-07", "query_id": "m16", "recipe_id": "recipenlg:1614314", "systems": "E01@1 E02@1"}
+{"item_id": "m16-08", "query_id": "m16", "recipe_id": "recipenlg:1939175", "systems": "E01@5 E02@5 E03@2"}
+{"item_id": "m16-09", "query_id": "m16", "recipe_id": "recipenlg:2200255", "systems": "LSA@5"}
+{"item_id": "m16-10", "query_id": "m16", "recipe_id": "recipenlg:2141340", "systems": "FT@5"}
+{"item_id": "m16-11", "query_id": "m16", "recipe_id": "recipenlg:1301539", "systems": "E04@5"}
+{"item_id": "m16-12", "query_id": "m16", "recipe_id": "recipenlg:2113403", "systems": "LSA@3"}
+{"item_id": "m16-13", "query_id": "m16", "recipe_id": "recipenlg:1479064", "systems": "E03@5"}
+{"item_id": "m16-14", "query_id": "m16", "recipe_id": "recipenlg:1473847", "systems": "E05@5"}
+{"item_id": "m16-15", "query_id": "m16", "recipe_id": "recipenlg:1473783", "systems": "E01@2 E02@2"}
+{"item_id": "m16-16", "query_id": "m16", "recipe_id": "recipenlg:2093034", "systems": "LSA@1"}
+{"item_id": "m16-17", "query_id": "m16", "recipe_id": "recipenlg:1952149", "systems": "E05@4"}
+{"item_id": "m16-18", "query_id": "m16", "recipe_id": "recipenlg:1845788", "systems": "LSA@2"}
+{"item_id": "m16-19", "query_id": "m16", "recipe_id": "recipenlg:2022567", "systems": "E04@4 E05@3"}
+{"item_id": "m16-20", "query_id": "m16", "recipe_id": "recipenlg:1832974", "systems": "E03@1 E04@1 FT@1"}
+{"item_id": "m16-21", "query_id": "m16", "recipe_id": "recipenlg:1948354", "systems": "LSA@4 E05@2"}
+{"item_id": "m17-01", "query_id": "m17", "recipe_id": "recipenlg:583819", "systems": "E04@1 FT@2"}
+{"item_id": "m17-02", "query_id": "m17", "recipe_id": "recipenlg:2101241", "systems": "FT@4"}
+{"item_id": "m17-03", "query_id": "m17", "recipe_id": "recipenlg:449751", "systems": "LSA@1"}
+{"item_id": "m17-04", "query_id": "m17", "recipe_id": "recipenlg:1040919", "systems": "E03@1"}
+{"item_id": "m17-05", "query_id": "m17", "recipe_id": "recipenlg:1898928", "systems": "E03@5 LSA@2"}
+{"item_id": "m17-06", "query_id": "m17", "recipe_id": "recipenlg:1872336", "systems": "E01@2 E02@2 E03@4 E04@3 FT@1"}
+{"item_id": "m17-07", "query_id": "m17", "recipe_id": "recipenlg:1339912", "systems": "LSA@4"}
+{"item_id": "m17-08", "query_id": "m17", "recipe_id": "recipenlg:2029670", "systems": "E01@1 E02@1 E04@4 FT@3"}
+{"item_id": "m17-09", "query_id": "m17", "recipe_id": "recipenlg:1691790", "systems": "E01@3 E02@3 FT@5"}
+{"item_id": "m17-10", "query_id": "m17", "recipe_id": "recipenlg:1290821", "systems": "E03@2"}
+{"item_id": "m17-11", "query_id": "m17", "recipe_id": "recipenlg:419904", "systems": "E05@2"}
+{"item_id": "m17-12", "query_id": "m17", "recipe_id": "recipenlg:1963383", "systems": "E01@5 E02@5 E04@2"}
+{"item_id": "m17-13", "query_id": "m17", "recipe_id": "recipenlg:717687", "systems": "E01@4 E02@4"}
+{"item_id": "m17-14", "query_id": "m17", "recipe_id": "recipenlg:480287", "systems": "E05@5"}
+{"item_id": "m17-15", "query_id": "m17", "recipe_id": "recipenlg:430833", "systems": "E05@3"}
+{"item_id": "m17-16", "query_id": "m17", "recipe_id": "recipenlg:1274500", "systems": "E05@4"}
+{"item_id": "m17-17", "query_id": "m17", "recipe_id": "recipenlg:1272135", "systems": "LSA@5"}
+{"item_id": "m17-18", "query_id": "m17", "recipe_id": "recipenlg:145411", "systems": "E03@3 E04@5"}
+{"item_id": "m17-19", "query_id": "m17", "recipe_id": "recipenlg:74785", "systems": "E05@1"}
+{"item_id": "m17-20", "query_id": "m17", "recipe_id": "recipenlg:549535", "systems": "LSA@3"}
+{"item_id": "m18-01", "query_id": "m18", "recipe_id": "recipenlg:413507", "systems": "E05@1"}
+{"item_id": "m18-02", "query_id": "m18", "recipe_id": "recipenlg:1407120", "systems": "LSA@1"}
+{"item_id": "m18-03", "query_id": "m18", "recipe_id": "recipenlg:364790", "systems": "E01@2 E02@2 E03@5"}
+{"item_id": "m18-04", "query_id": "m18", "recipe_id": "recipenlg:47995", "systems": "E04@5 FT@4"}
+{"item_id": "m18-05", "query_id": "m18", "recipe_id": "recipenlg:1756171", "systems": "E03@2 FT@2"}
+{"item_id": "m18-06", "query_id": "m18", "recipe_id": "recipenlg:537641", "systems": "E05@4"}
+{"item_id": "m18-07", "query_id": "m18", "recipe_id": "recipenlg:1672514", "systems": "LSA@2"}
+{"item_id": "m18-08", "query_id": "m18", "recipe_id": "recipenlg:363315", "systems": "E04@4"}
+{"item_id": "m18-09", "query_id": "m18", "recipe_id": "recipenlg:840871", "systems": "E01@5 E02@5 E03@3 FT@1"}
+{"item_id": "m18-10", "query_id": "m18", "recipe_id": "recipenlg:572432", "systems": "E04@1 FT@3"}
+{"item_id": "m18-11", "query_id": "m18", "recipe_id": "recipenlg:236408", "systems": "LSA@4"}
+{"item_id": "m18-12", "query_id": "m18", "recipe_id": "recipenlg:640170", "systems": "E01@3 E02@3"}
+{"item_id": "m18-13", "query_id": "m18", "recipe_id": "recipenlg:1829693", "systems": "LSA@5"}
+{"item_id": "m18-14", "query_id": "m18", "recipe_id": "recipenlg:2210199", "systems": "E04@2"}
+{"item_id": "m18-15", "query_id": "m18", "recipe_id": "recipenlg:609525", "systems": "E01@1 E02@1 E03@1 E05@3 FT@5"}
+{"item_id": "m18-16", "query_id": "m18", "recipe_id": "recipenlg:513609", "systems": "LSA@3 E04@3 E05@2"}
+{"item_id": "m18-17", "query_id": "m18", "recipe_id": "recipenlg:73500", "systems": "E05@5"}
+{"item_id": "m18-18", "query_id": "m18", "recipe_id": "recipenlg:580345", "systems": "E01@4 E02@4 E03@4"}
+{"item_id": "m19-01", "query_id": "m19", "recipe_id": "recipenlg:1846977", "systems": "E05@4"}
+{"item_id": "m19-02", "query_id": "m19", "recipe_id": "recipenlg:931547", "systems": "E05@2"}
+{"item_id": "m19-03", "query_id": "m19", "recipe_id": "recipenlg:784303", "systems": "E05@1"}
+{"item_id": "m19-04", "query_id": "m19", "recipe_id": "recipenlg:1384703", "systems": "E01@4 E02@4"}
+{"item_id": "m19-05", "query_id": "m19", "recipe_id": "recipenlg:1357895", "systems": "LSA@4 FT@3"}
+{"item_id": "m19-06", "query_id": "m19", "recipe_id": "recipenlg:1373555", "systems": "E01@2 E02@2 E03@1 LSA@1 E04@3 FT@2"}
+{"item_id": "m19-07", "query_id": "m19", "recipe_id": "recipenlg:1375334", "systems": "E01@3 E02@3 E03@3"}
+{"item_id": "m19-08", "query_id": "m19", "recipe_id": "recipenlg:142794", "systems": "LSA@3"}
+{"item_id": "m19-09", "query_id": "m19", "recipe_id": "recipenlg:1379412", "systems": "E03@4"}
+{"item_id": "m19-10", "query_id": "m19", "recipe_id": "recipenlg:2101540", "systems": "LSA@2"}
+{"item_id": "m19-11", "query_id": "m19", "recipe_id": "recipenlg:1234800", "systems": "E05@5"}
+{"item_id": "m19-12", "query_id": "m19", "recipe_id": "recipenlg:1353223", "systems": "LSA@5"}
+{"item_id": "m19-13", "query_id": "m19", "recipe_id": "recipenlg:1924808", "systems": "E05@3"}
+{"item_id": "m19-14", "query_id": "m19", "recipe_id": "recipenlg:1349850", "systems": "E04@5"}
+{"item_id": "m19-15", "query_id": "m19", "recipe_id": "recipenlg:1364592", "systems": "E04@1 FT@1"}
+{"item_id": "m19-16", "query_id": "m19", "recipe_id": "recipenlg:1354994", "systems": "E01@5 E02@5 E03@2"}
+{"item_id": "m19-17", "query_id": "m19", "recipe_id": "recipenlg:1317481", "systems": "FT@5"}
+{"item_id": "m19-18", "query_id": "m19", "recipe_id": "recipenlg:1330652", "systems": "E01@1 E02@1 E03@5"}
+{"item_id": "m19-19", "query_id": "m19", "recipe_id": "recipenlg:1739392", "systems": "E04@4"}
+{"item_id": "m19-20", "query_id": "m19", "recipe_id": "recipenlg:1137532", "systems": "E04@2 FT@4"}
+{"item_id": "m20-01", "query_id": "m20", "recipe_id": "recipenlg:1069791", "systems": "LSA@4"}
+{"item_id": "m20-02", "query_id": "m20", "recipe_id": "recipenlg:1879840", "systems": "LSA@2"}
+{"item_id": "m20-03", "query_id": "m20", "recipe_id": "recipenlg:1362825", "systems": "LSA@1"}
+{"item_id": "m20-04", "query_id": "m20", "recipe_id": "recipenlg:1333262", "systems": "E01@5 E02@5 E04@1 FT@2"}
+{"item_id": "m20-05", "query_id": "m20", "recipe_id": "recipenlg:2059523", "systems": "E05@1"}
+{"item_id": "m20-06", "query_id": "m20", "recipe_id": "recipenlg:1444660", "systems": "E03@3"}
+{"item_id": "m20-07", "query_id": "m20", "recipe_id": "recipenlg:1289363", "systems": "E01@4 E02@4 E03@2"}
+{"item_id": "m20-08", "query_id": "m20", "recipe_id": "recipenlg:2147785", "systems": "E04@2"}
+{"item_id": "m20-09", "query_id": "m20", "recipe_id": "recipenlg:60774", "systems": "E05@5"}
+{"item_id": "m20-10", "query_id": "m20", "recipe_id": "recipenlg:866347", "systems": "LSA@3"}
+{"item_id": "m20-11", "query_id": "m20", "recipe_id": "recipenlg:1138038", "systems": "E05@3"}
+{"item_id": "m20-12", "query_id": "m20", "recipe_id": "recipenlg:2185624", "systems": "E04@4"}
+{"item_id": "m20-13", "query_id": "m20", "recipe_id": "recipenlg:1818352", "systems": "E01@1 E02@1 E03@4 FT@1"}
+{"item_id": "m20-14", "query_id": "m20", "recipe_id": "recipenlg:1077971", "systems": "LSA@5"}
+{"item_id": "m20-15", "query_id": "m20", "recipe_id": "recipenlg:2107200", "systems": "E04@3 FT@5"}
+{"item_id": "m20-16", "query_id": "m20", "recipe_id": "recipenlg:271053", "systems": "E05@4"}
+{"item_id": "m20-17", "query_id": "m20", "recipe_id": "recipenlg:1380394", "systems": "E01@3 E02@3 E03@5"}
+{"item_id": "m20-18", "query_id": "m20", "recipe_id": "recipenlg:1240889", "systems": "FT@3"}
+{"item_id": "m20-19", "query_id": "m20", "recipe_id": "recipenlg:1181909", "systems": "E04@5 FT@4"}
+{"item_id": "m20-20", "query_id": "m20", "recipe_id": "recipenlg:1403751", "systems": "E01@2 E02@2 E03@1"}
+{"item_id": "m20-21", "query_id": "m20", "recipe_id": "recipenlg:235261", "systems": "E05@2"}

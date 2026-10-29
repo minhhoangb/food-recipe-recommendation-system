@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from src.baseline import MODELS, BundleError, fit_retriever, load_bundle, save_bundle
+from src.baseline import MODELS, BundleError, fit_retriever, load_bundle, main, save_bundle
 from src.config import load_config, processed_dir
 from src.utils import read_json, read_jsonl, write_json
 from tests.contract_utils import assert_retriever_contract
@@ -100,3 +100,31 @@ def test_real_pilot_bundle_passes_contract(model, tmp_path):
     retriever, info = fit_retriever(model, corpus, set(read_json(directory / "splits.json")["train"]))
     loaded, _ = load_bundle(save_bundle(retriever, info, cfg, tmp_path))
     assert_retriever_contract(loaded, {r["recipe_id"] for r in corpus}, QUERIES)
+
+
+@pytest.fixture
+def fixture_config(built_fixture, tmp_path):
+    _, _, out = built_fixture
+    config = tmp_path / "fixture.yaml"
+    config.write_text(f"paths:\n  processed_dir: {out.as_posix()}\ndata:\n  profile: main\n", encoding="utf-8")
+    return config
+
+
+def test_cli_tuned_tfidf_uses_the_config_params(fixture_config, tmp_path):
+    assert main(["--model", "tfidf", "--tuned", "--config", str(fixture_config), "--out", str(tmp_path)]) == 0
+    (bundle,) = tmp_path.glob("tfidf_tuned-main-*")
+    metrics = read_json(bundle / "metrics.json")
+    assert set(metrics["tfidf_params"]) == {"tokens", "min_df", "sublinear_tf", "norm"}
+    assert load_bundle(bundle)[1].model_name == "tfidf"
+
+
+def test_cli_tuned_only_for_tfidf(fixture_config):
+    with pytest.raises(SystemExit):
+        main(["--model", "bm25", "--tuned", "--config", str(fixture_config)])
+
+
+def test_word_tokens_change_the_vocabulary(corpus_and_train):
+    _, corpus, train_ids = corpus_and_train
+    words, _ = fit_retriever("tfidf", corpus, train_ids, {"tokens": "ingredient_and_words"})
+    names, _ = fit_retriever("tfidf", corpus, train_ids)
+    assert set(names.pipeline["tfidf"].vocabulary_) < set(words.pipeline["tfidf"].vocabulary_)

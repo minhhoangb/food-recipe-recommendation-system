@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from src.build_pairs import NoDuplicateBatchSampler, build_pairs, load_pairs, save_pairs_and_manifest
+from src.build_pairs import NoDuplicateBatchSampler, build_pairs, save_pairs_and_manifest
 from src.utils import read_json, sha256_file, write_json, write_jsonl
 
 

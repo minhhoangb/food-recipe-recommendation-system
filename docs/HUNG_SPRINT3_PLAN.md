@@ -29,8 +29,8 @@ serving bundle, the **config-driven model choice** and the **native vs Docker pa
 | c.2 | All bundle types load: tfidf, bm25, lsa, minilm pretrained, fine-tuned | done | `src/serving.py` | `model.joblib` -> lexical, `embeddings.npy` -> dense |
 | c.3 | `/model-info`: version, corpus hash, metrics (manifest or MLflow) | done | `api/app.py`, `src/serving.py` | the metrics come from the MLflow run of the bundle |
 | c.4 | A bundle with a wrong hash does not start | done | `src/serving.py`, `tests/test_serving.py` | the manifest hashes are checked at startup |
-| d.1 | Blind pool for the dev annotation | done | `scripts/build_pool.py` | `reports/manual_eval/pool_dev.csv` (278 rows, 20 queries, 4 systems) |
-| d.2 | The dev labels of Person 2 | to do | `reports/manual_eval/pool_dev.csv` | the annotator fills `relevance` and `annotator` |
+| d.1 | Blind pool for the dev annotation | done | `src/evaluate.py pool` | `reports/manual_eval/pool_dev.csv` (396 items, 20 queries, 7 systems including CPU one-epoch FT; refreshed 2026-10-29) |
+| d.2 | The dev labels of Person 2 | to do | `reports/manual_eval/pool_dev_hung.csv` | fill `relevance` and `notes`; `annotator` is assigned |
 | d.3 | Parity native vs Docker (same top-k, scores within a tolerance) | done | `scripts/check_parity.py`, `reports/parity.json` | 5/5 queries, max score difference 0.0 |
 
 ---
@@ -102,8 +102,9 @@ The log is `reports/parity.json`.
 
 ## D. Still open
 
-- The dev labels of Person 2 (`reports/manual_eval/pool_dev.csv`): the pool is built and
-  ready, the `relevance` and `annotator` columns are still empty.
-- The fine-tuned bundle was not measured: `minilm_finetuned` has no bundle on the main
-  corpus yet (Person 3 owns the fine-tuning run). The benchmark picks it up as soon as the
-  bundle exists in `models/`.
+- The dev labels of Person 2 (`reports/manual_eval/pool_dev_hung.csv`): 161 assigned
+  rows await human labels. See `reports/manual_eval/README.md` for the refreshed pool.
+- The CPU fine-tuned bundle now exists at `models/minilm_finetuned-E04-main-1f1f4ce5`;
+  its checkpoint is `models/minilm_finetuned-main-cpu1ep`. Validation retrieval metrics
+  are in `reports/e07_e08_finetune_main.md`. A dedicated inference benchmark for this
+  checkpoint remains pending; the earlier benchmark table above does not measure it.

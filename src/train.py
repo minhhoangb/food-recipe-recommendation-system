@@ -23,7 +23,7 @@ from mlflow.tracking import MlflowClient
 from omegaconf import DictConfig
 
 from src.build_pairs import build_pairs
-from src.config import fingerprint, load_config, processed_dir
+from src.config import load_config, processed_dir
 from src.contracts import BundleManifest, RecipeRecord
 from src.embeddings import (
     DEFAULT_BATCH_SIZE,
@@ -44,7 +44,7 @@ from src.evaluation import (
 from src.finetune import finetune_model
 from src.memory import peak_rss_mb
 from src.retrieval import DenseRetriever
-from src.utils import REPO_ROOT, read_jsonl, sha256_file
+from src.utils import read_jsonl, sha256_file
 
 
 def run_training_pipeline(
@@ -64,6 +64,8 @@ def run_training_pipeline(
     log_to_mlflow: bool = True,
 ) -> dict[str, Any]:
     """Run full fine-tuning, bundle serialization, evaluation, and MLflow logging."""
+    if include_negatives or hard_negatives:
+        raise ValueError("explicit negative sampling is not supported by build_pairs")
     directory = processed_dir(cfg)
     corpus_path = directory / "corpus.jsonl"
     if not corpus_path.exists():
@@ -73,12 +75,10 @@ def run_training_pipeline(
     corpus_sha = sha256_file(corpus_path)
 
     # 1. Build training pairs
-    pairs = build_pairs(
+    pairs, _ = build_pairs(
         directory,
         split="train",
         mode=mode,
-        include_negatives=include_negatives,
-        hard_negatives=hard_negatives,
         seed=int(cfg.seed),
     )
     if not pairs:
@@ -168,26 +168,30 @@ def _log_and_register_mlflow(
     manifest = BundleManifest.model_validate_json((bundle_dir / "manifest.json").read_text(encoding="utf-8"))
 
     with mlflow.start_run(run_name=result["run_id"]) as run:
-        mlflow.log_params({
-            "model_name": manifest.model_name,
-            "base_model": result["train_summary"]["base_model"],
-            "embedding_mode": result["mode"],
-            "corpus_sha256": manifest.corpus_sha256,
-            "config_sha256": manifest.config_sha256,
-            "profile": str(cfg.data.profile),
-            "epochs": result["train_summary"]["epochs"],
-            "batch_size": result["train_summary"]["batch_size"],
-            "learning_rate": result["train_summary"]["learning_rate"],
-            "n_train_examples": result["train_summary"]["n_examples"],
-            "embedding_dim": manifest.embedding_dim,
-            "experiment": "E07_finetuned",
-        })
-        mlflow.log_metrics({
-            **result["metrics"],
-            "train_seconds": result["train_summary"]["train_seconds"],
-            "encode_seconds": result["encode_seconds"],
-            "peak_rss_mb": result["peak_rss_mb"],
-        })
+        mlflow.log_params(
+            {
+                "model_name": manifest.model_name,
+                "base_model": result["train_summary"]["base_model"],
+                "embedding_mode": result["mode"],
+                "corpus_sha256": manifest.corpus_sha256,
+                "config_sha256": manifest.config_sha256,
+                "profile": str(cfg.data.profile),
+                "epochs": result["train_summary"]["epochs"],
+                "batch_size": result["train_summary"]["batch_size"],
+                "learning_rate": result["train_summary"]["learning_rate"],
+                "n_train_examples": result["train_summary"]["n_examples"],
+                "embedding_dim": manifest.embedding_dim,
+                "experiment": "E07_finetuned",
+            }
+        )
+        mlflow.log_metrics(
+            {
+                **{name.replace("@", "_at_"): value for name, value in result["metrics"].items()},
+                "train_seconds": result["train_summary"]["train_seconds"],
+                "encode_seconds": result["encode_seconds"],
+                "peak_rss_mb": result["peak_rss_mb"],
+            }
+        )
         mlflow.log_artifacts(str(bundle_dir), artifact_path="serving_bundle")
 
         run_id = run.info.run_id
@@ -233,7 +237,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: {directory}/corpus.jsonl missing; build or fetch data first", file=sys.stderr)
         return 1
 
-    print(f"Running fine-tuning pipeline on {cfg.data.profile} profile (mode={args.mode}, epochs={args.epochs})...")
+    print(
+        f"Running fine-tuning pipeline on {cfg.data.profile} profile "
+        f"(mode={args.mode}, epochs={args.epochs})..."
+    )
     result = run_training_pipeline(
         cfg,
         mode=args.mode,

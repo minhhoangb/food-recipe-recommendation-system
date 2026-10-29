@@ -16,4 +16,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - run: ruff check .
-      - run: python -m pytest
+      # coverage of Person 1's modules; extend --cov to other modules as their owners add tests
+      - run: >-
+          python -m pytest --cov=src.baseline --cov=src.features --cov=src.evaluate
+          --cov-report=term-missing --cov-fail-under=70

@@ -1,0 +1,30 @@
+{
+  "assignments": {
+    "hieu": 151,
+    "hoang": 172,
+    "hung": 161
+  },
+  "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+  "depth": 5,
+  "ft_bundle": "models/minilm_finetuned-E04-main-1f1f4ce5",
+  "ft_checkpoint": "models/minilm_finetuned-main-cpu1ep",
+  "ft_weights_sha256": "ecac4fdf79dce1a1e16fd1ace100d794103e4a1f15f9fe14da4f909f36a4cdd3",
+  "mlflow_run_id": "1c83d1d32d814732a9f0907ebdb1f50c",
+  "n_assignments": 484,
+  "n_double_label_items": 88,
+  "n_human_labels": 0,
+  "n_items": 396,
+  "n_queries": 20,
+  "query_sha256": "4ed23b2fb17a37e1f752f5738f031c3159363fe86fc8c8a8b615e65bd8fd1787",
+  "seed": 42,
+  "split": "dev",
+  "systems": [
+    "E01",
+    "E02",
+    "E03",
+    "E04",
+    "E05",
+    "FT",
+    "LSA"
+  ]
+}

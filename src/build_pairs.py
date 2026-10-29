@@ -1,6 +1,7 @@
 """Build training pairs from train recipes with make_query_ingredients and Hưng's document formatting.
 
-    python -m src.build_pairs --config configs/pilot.yaml --split train --mode ingredients --max-pairs 10000 --seed 42
+    python -m src.build_pairs --config configs/pilot.yaml --split train \
+        --mode ingredients --max-pairs 10000 --seed 42
 
 Guarantees:
   1. Only recipes from the specified split (train) are used; never validation or test recipes.
@@ -25,7 +26,7 @@ from torch.utils.data import Sampler
 
 from src.config import load_config, processed_dir
 from src.contracts import RecipeRecord
-from src.embeddings import EmbeddingMode, MODES, format_document, format_query
+from src.embeddings import MODES, EmbeddingMode, format_document, format_query
 from src.preprocess import raw_int_id
 from src.queries import make_query_ingredients
 from src.utils import REPO_ROOT, read_json, read_jsonl, sha256_file, write_json, write_jsonl
@@ -108,16 +109,18 @@ def build_pairs(
                 continue
             seen_pairs.add(dedup_key)
 
-            pairs.append({
-                "pair_id": f"pair-{len(pairs) + 1:06d}",
-                "query": q_text,
-                "positive": pos_text,
-                "recipe_id": r.recipe_id,
-                "group_id": r.group_id,
-                "split": split,
-                "mode": mode,
-                "seed": current_seed,
-            })
+            pairs.append(
+                {
+                    "pair_id": f"pair-{len(pairs) + 1:06d}",
+                    "query": q_text,
+                    "positive": pos_text,
+                    "recipe_id": r.recipe_id,
+                    "group_id": r.group_id,
+                    "split": split,
+                    "mode": mode,
+                    "seed": current_seed,
+                }
+            )
 
         if len(pairs) >= max_pairs:
             break
@@ -315,4 +318,5 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())
