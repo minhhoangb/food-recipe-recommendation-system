@@ -7,6 +7,8 @@ venv/
 .env
 .pytest_cache/
 .ruff_cache/
+.coverage
+htmlcov/
 
 # Data, models and generated files stay out of git (keep the folders)
 data/*
