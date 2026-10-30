@@ -158,10 +158,10 @@ Measured on `main` validation (500 queries over 50,000 recipes) using synthetic 
 | Exp ID | Pipeline Description | Recall@5 | Recall@10 | MRR@10 | Delta vs Baseline |
 |---|---|---|---|---|---|
 | **E04** | Pretrained MiniLM, ingredients | 0.5120 | 0.5760 | 0.4342 | Baseline |
-| **FT (E07)** | Fine-tuned MiniLM, ingredients, CPU one epoch | **0.7340** | **0.7980** | **0.6209** | **+43.0% MRR@10 (+0.1867)** |
+| **FT (E08)** | Fine-tuned MiniLM on main, ingredients, CPU one epoch | **0.7340** | **0.7980** | **0.6209** | **+43.0% MRR@10 (+0.1867)** |
 | **E05** | Pretrained MiniLM, title + ingredients | 0.2140 | 0.2620 | 0.1519 | Different representation |
 
-No E08 or hybrid pipeline was evaluated in this run. BM25 remains above FT on this proxy (MRR@10 0.7583). See [the full comparison](reports/comparison.csv), [error analysis](reports/error_analysis.md) and [dev judging assignments](reports/manual_eval/README.md).
+Experiment ids follow the team contract (E07 = pilot fine-tuning, E08 = main fine-tuning). No fine-tuned title + ingredients bundle and no hybrid pipeline were evaluated in this run. BM25 remains above FT on this proxy (MRR@10 0.7583). See [the full comparison](reports/comparison.csv), [error analysis](reports/error_analysis.md) and [dev judging assignments](reports/manual_eval/README.md).
 
 #### MLflow Tracking & Model Registry
 
@@ -183,7 +183,7 @@ Pass the exported fine-tuned checkpoint bundle via `--model-path`:
 # 1. Build training pairs on main (30,000 pairs, seed 42)
 python -m src.build_pairs --config configs/default.yaml --split train --mode ingredients --max-pairs 30000 --seed 42
 
-# 2. Build index bundle using the CPU one-epoch checkpoint (FT / E07)
+# 2. Build index bundle using the CPU one-epoch checkpoint (FT / E08)
 python -m src.embeddings --config configs/default.yaml --model-path models/minilm_finetuned-main-cpu1ep
 ```
 

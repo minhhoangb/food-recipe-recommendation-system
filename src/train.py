@@ -181,7 +181,7 @@ def _log_and_register_mlflow(
                 "learning_rate": result["train_summary"]["learning_rate"],
                 "n_train_examples": result["train_summary"]["n_examples"],
                 "embedding_dim": manifest.embedding_dim,
-                "experiment": "E07_finetuned",
+                "experiment": "E07_finetuned" if cfg.data.profile == "pilot" else "E08_finetuned",
             }
         )
         mlflow.log_metrics(
