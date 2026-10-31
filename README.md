@@ -189,11 +189,35 @@ python -m src.embeddings --config configs/default.yaml --model-path models/minil
 
 ### Production API & Model Monitoring (Person 3)
 
-`src/monitor.py` parses `RequestLogRecord` entries from `logs/requests.jsonl` to compute request throughput, error rates, p90/p95/p99 latency, zero-hit rate, and vocabulary drift:
+`src/monitor.py` calculates statistical drift via SciPy Kolmogorov-Smirnov (KS 2-sample test, $\alpha=0.05$) and operational metrics over `RequestLogRecord` entries from API request logs:
+- **Query Length & Token Drift:** KS test comparing query length distributions against reference queries.
+- **OOV (Out-Of-Vocabulary) Ingredients:** Percentage of requested ingredients not in training vocabulary (drift threshold > 5%).
+- **Missing Ingredients & Latency:** p50/p95/p99 latency (ms), zero-hit rate, and system error rate (threshold > 5%).
+- **Sample Sufficiency:** Returns `INSUFFICIENT_DATA` if sample size < `min_samples` (default: 10) instead of false positives.
+- **HTML & Markdown Reporting:** Generates a standalone, dark-themed HTML report with simulation disclaimers:
 
 ```bash
-python -m src.monitor --log-path logs/requests.jsonl --out reports/monitoring_report.md --mlflow
+# Monitor drift against reference queries and export HTML report
+python -m src.monitor --reference data/processed/pilot/queries.jsonl --requests logs/simulated_requests_drift.jsonl --out reports/monitoring_report.html
+
+# Run simulated drift scenarios (no-drift vs drifted)
+python scripts/simulate_drift.py
 ```
+
+*See simulation reports and analysis in [reports/drift_simulation.md](reports/drift_simulation.md), [reports/monitoring_nodrift_simulation.html](reports/monitoring_nodrift_simulation.html), and [reports/monitoring_drift_simulation.html](reports/monitoring_drift_simulation.html).*
+
+#### MLflow Model Registry & Instant Rollback
+
+The model registry uses aliases to manage deployments cleanly without redeploying code:
+- `@production`: Active model serving live user traffic (Version 2).
+- `@staging`: Candidate model undergoing validation/QA (Version 1).
+- **Offline Serving Decoupling:** Serving bundles (`models/<bundle_name>`) hold static `embeddings.npy` and `manifest.json`. The API (`src.serving` / `api.app`) runs independently without requiring an active MLflow tracking server.
+- **Single-command Rollback:**
+  ```bash
+  # Rollback @production alias to Version 1
+  python -m src.train --rollback 1 --alias production
+  ```
+*Detailed trial execution and SOP documented in [reports/mlflow_rollback_trial.md](reports/mlflow_rollback_trial.md).*
 
 ## Experiment results (Master Comparison Table)
 
@@ -423,5 +447,10 @@ docs/           implementation plans per owner
 - Seed 42 everywhere; `configs/default.yaml` holds every data parameter and is hashed into each manifest.
 - `python -m src.data_collection` reproduces the processed files exactly (hashes are in the manifest; `tests/test_data_collection.py::test_build_is_reproducible` checks it on a fixture).
 - `python -m pytest` runs offline in seconds. Tests that read the real processed data skip themselves if it is absent.
-- Training from scratch: run `python -m src.train --config configs/pilot.yaml`. Runs on CPU by default; automatically leverages CUDA when available (e.g. on Colab GPU).
+- Training from scratch: run `python src/train.py --config configs/pilot.yaml`. Supports multi-stage orchestration (`raw`, `processed`, `baseline`, `embeddings`, `pairs`, `finetune`, `evaluate`) with hash-based caching to avoid redundant computation.
+  - `--stage <name>`: Execute a single stage (e.g., `--stage pairs`).
+  - `--from-stage <name>`: Run sequentially starting from a specific stage.
+  - `--force`: Bypass hash caching and force re-computation.
+  - `--device cpu`: Guaranteed CPU pathway for environments without GPU.
+  - Missing raw dataset: Exits cleanly with clear data acquisition instructions (never performs silent background downloads).
 - Collaboration rules and file ownership: [CONTRIBUTING.md](CONTRIBUTING.md).
