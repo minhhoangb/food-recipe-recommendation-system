@@ -1,0 +1,34 @@
+{
+  "annotation_guide_sha256": "785847456f8375c5d717eb01f6fdb4b400b297baa2a551be5cac644501250fbf",
+  "annotator": "ai",
+  "canonicalization": "CRLF converted to LF; UTF-8 BOM preserved. Input raw hashes above describe the original local files.",
+  "cohen_kappa": null,
+  "human_verified": false,
+  "input_canonical_sha256": {
+    "reports/manual_eval/annotation_guide.md": "785847456f8375c5d717eb01f6fdb4b400b297baa2a551be5cac644501250fbf",
+    "reports/manual_eval/pool_dev.csv": "447f69bdd777df2536ef97c870ef9e8a98e9224c0e236d12830b4ad5da3e1c80"
+  },
+  "label_counts": {
+    "0": 116,
+    "1": 208,
+    "2": 72
+  },
+  "label_source": "ai",
+  "labels_sha256": "81c41c4d4d22bc09247d9390a84887aab51ac92a9ac62a055b6a6908244618d0",
+  "limitations": [
+    "Not independent judgments by Hoang, Hung and Hieu.",
+    "No human agreement or human-relevance score is claimed.",
+    "Ingredient forms, composite foods, optional components and intent require verification."
+  ],
+  "method": "Single AI review of titles, ingredient lists and preparation excerpts; full instructions checked for selected incomplete records. System keys were not consulted while assigning labels.",
+  "mlflow_run_id": "6c1bbc06ef8b4ae0b713b321cb2accea",
+  "n_ai_annotators": 1,
+  "n_human_annotators": 0,
+  "n_labels": 396,
+  "n_queries": 20,
+  "n_unsure": 20,
+  "pool_sha256": "f9db680decfd9e25ba61181f796e57ded5b3fe4f497940e31f1df0fe7f7c175f",
+  "independence": "AI artifacts are isolated from human judging files and must remain unopened until independent labels are locked.",
+  "input_revision": "3a5ca9b217d17d4580fa7ca0a3086926408a86eb",
+  "annotation_guide_note": "Hash records the guide at annotation time, before the dated independence clarification; relevance rules are unchanged."
+}

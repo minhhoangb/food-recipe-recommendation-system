@@ -1,0 +1,51 @@
+{
+  "bundle": "models/minilm_finetuned-E04-main-1f1f4ce5",
+  "checkpoint": "models/minilm_finetuned-main-cpu1ep",
+  "checkpoint_weights_sha256": "ecac4fdf79dce1a1e16fd1ace100d794103e4a1f15f9fe14da4f909f36a4cdd3",
+  "configured_training": {
+    "batch_size": 32,
+    "device": "cpu",
+    "epochs": 1,
+    "learning_rate": 2e-05,
+    "pair_seed": 42,
+    "warmup_steps": 50,
+    "weight_decay": 0.01
+  },
+  "limitations": [
+    "Historical training log imported into MLflow; this task did not retrain the model.",
+    "Pair sampling uses ingredient document frequencies over the full candidate corpus (src.build_pairs); positive recipes and groups are train-only.",
+    "The existing training loader shuffles pairs without the available NoDuplicateBatchSampler, so same-group false negatives are possible.",
+    "One checkpoint and one seed; no claim about variance across training runs."
+  ],
+  "mlflow_run_id": "0437841237734100a7c1a9b26725d908",
+  "observed_training": {
+    "peak_rss_mb": 2787.1,
+    "train_loss": 0.07921305292450798,
+    "train_seconds": 871.336,
+    "train_steps_per_second": 1.08
+  },
+  "pair_manifest": {
+    "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+    "created_utc": "2026-10-29T07:10:41Z",
+    "mode": "ingredients",
+    "n_pairs": 30000,
+    "pairs_file": "main_train_ingredients_pairs.jsonl",
+    "pairs_sha256": "9f465e8889eed9db418237e319b0f3066df24b93284b53843b5fb9d142db02c3",
+    "profile": "main",
+    "schema_version": "1",
+    "split": "train",
+    "splits_sha256": "35abfe794e8cd840d103657dfb613b31034870960fb513cf85032c810524de0a",
+    "stats": {
+      "max_pairs": 30000,
+      "mode": "ingredients",
+      "seed": 42,
+      "split": "train",
+      "total_pairs": 30000,
+      "unique_groups": 24214,
+      "unique_recipes": 30000
+    }
+  },
+  "training_source": "reports\\finetune_main.log",
+  "verified_group_overlap_with_validation_or_test": 0,
+  "verified_train_pairs": 30000
+}
