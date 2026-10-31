@@ -15,7 +15,7 @@ from fastapi.testclient import TestClient
 
 from api.app import app
 from src.config import load_config, processed_dir
-from src.utils import write_jsonl
+from src.utils import sha256_file, write_jsonl
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -236,23 +236,11 @@ def test_the_api_serves_a_dense_bundle(tmp_path, monkeypatch):
 
     monkeypatch.setattr(retrieval, "load_model", lambda: FakeEncoder())
 
-    vectors = np.eye(2, 8, dtype=np.float32)
-    bundle = save_bundle(
-        vectors,
-        ["r1", "r2"],
-        mode="ingredients",
-        profile="api",
-        cfg=OmegaConf.create({"seed": 42, "data": {"profile": "api"}}),
-        corpus_sha256="deadbeef",
-        truncated=0,
-        encode_seconds=1.0,
-        out_dir=tmp_path,
-    )
-
     profile_dir = tmp_path / "api"
     profile_dir.mkdir(parents=True, exist_ok=True)
+    corpus_file = profile_dir / "corpus.jsonl"
     write_jsonl(
-        profile_dir / "corpus.jsonl",
+        corpus_file,
         [
             {
                 "recipe_id": "r1",
@@ -270,6 +258,20 @@ def test_the_api_serves_a_dense_bundle(tmp_path, monkeypatch):
             },
         ],
     )
+
+    vectors = np.eye(2, 8, dtype=np.float32)
+    bundle = save_bundle(
+        vectors,
+        ["r1", "r2"],
+        mode="ingredients",
+        profile="api",
+        cfg=OmegaConf.create({"seed": 42, "data": {"profile": "api"}}),
+        corpus_sha256=sha256_file(corpus_file),
+        truncated=0,
+        encode_seconds=1.0,
+        out_dir=tmp_path,
+    )
+
     config = tmp_path / "config.yaml"
     config.write_text(
         f"data:\n  profile: api\npaths:\n  processed_dir: {tmp_path}\n", encoding="utf-8"

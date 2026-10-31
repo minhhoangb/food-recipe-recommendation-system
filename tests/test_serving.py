@@ -17,7 +17,7 @@ from omegaconf import OmegaConf
 from api.app import app
 from src.config import load_config
 from src.serving import BundleError, bundle_manifest, load_retriever
-from src.utils import read_json, write_json, write_jsonl
+from src.utils import read_json, read_jsonl, write_json, write_jsonl
 
 
 @pytest.fixture(scope="module")
@@ -78,29 +78,40 @@ def _config_with_bundle(processed: Path, bundle: Path, path: Path) -> Path:
     return config
 
 
-def _lexical_bundle(tmp_path: Path, corpus_sha: str = "deadbeef") -> Path:
-    """A tfidf bundle on disk, written the way `src.baseline` writes it."""
+def _lexical_bundle(tmp_path: Path, processed: Path | None = None, corpus_sha: str = "") -> Path:
+    """A tfidf bundle on disk, written the way `src.baseline` writes it.
+
+    With `processed` given, the bundle is built on the corpus already in that folder, so it
+    matches the corpus the app serves.
+    """
     from src.baseline import fit_retriever, save_bundle
 
-    processed = tmp_path / "processed"
+    if processed is None:
+        processed = tmp_path / "processed"
     profile_dir = processed / "api"
     profile_dir.mkdir(parents=True, exist_ok=True)
-    corpus = [
-        {
-            "recipe_id": "r1",
-            "title": "Chicken Rice",
-            "ingredients_normalized": ["chicken", "rice"],
-        },
-        {"recipe_id": "r2", "title": "Rice Bowl", "ingredients_normalized": ["rice"]},
-    ]
-    write_jsonl(profile_dir / "corpus.jsonl", corpus)
+    corpus_file = profile_dir / "corpus.jsonl"
+    if not corpus_file.exists():
+        write_jsonl(
+            corpus_file,
+            [
+                {
+                    "recipe_id": "r1",
+                    "title": "Chicken Rice",
+                    "ingredients_normalized": ["chicken", "rice"],
+                },
+                {"recipe_id": "r2", "title": "Rice Bowl", "ingredients_normalized": ["rice"]},
+            ],
+        )
+    corpus = list(read_jsonl(corpus_file))
+    train_ids = {r["recipe_id"] for r in corpus}
     cfg = load_config(
         "configs/default.yaml",
         {"data": {"profile": "api"}, "paths": {"processed_dir": str(processed)}},
     )
-    retriever, info = fit_retriever("tfidf", corpus, {"r1", "r2"})
+    retriever, info = fit_retriever("tfidf", corpus, train_ids)
     bundle = save_bundle(retriever, info, cfg, tmp_path)
-    if corpus_sha != "deadbeef":
+    if corpus_sha:
         manifest = read_json(bundle / "manifest.json")
         write_json(bundle / "manifest.json", {**manifest, "corpus_sha256": corpus_sha})
     return bundle
@@ -168,7 +179,7 @@ def test_a_tampered_bundle_is_rejected(tmp_path):
 def test_the_config_selects_the_bundle(api_client, tmp_path):
     """The bundle in the config is the one that serves; the env var overrides it."""
     _, processed = api_client
-    bundle = _lexical_bundle(tmp_path)
+    bundle = _lexical_bundle(tmp_path, processed)
     config = _config_with_bundle(processed, bundle, tmp_path)
     os.environ["API_CONFIG"] = str(config)
     try:
@@ -182,10 +193,24 @@ def test_the_config_selects_the_bundle(api_client, tmp_path):
         os.environ.pop("API_CONFIG", None)
 
 
+def test_a_bundle_of_another_corpus_does_not_start(api_client, tmp_path):
+    """A bundle built on another corpus must stop the app: its ids mean nothing here."""
+    _, processed = api_client
+    bundle = _lexical_bundle(tmp_path, corpus_sha="a" * 64)
+    config = _config_with_bundle(processed, bundle, tmp_path)
+    os.environ["API_CONFIG"] = str(config)
+    try:
+        with pytest.raises(Exception, match="another corpus"):
+            with TestClient(app):
+                pass
+    finally:
+        os.environ.pop("API_CONFIG", None)
+
+
 def test_a_bundle_with_a_wrong_hash_does_not_start(api_client, tmp_path):
     """A bundle whose file hash does not match its manifest must stop the app."""
     _, processed = api_client
-    bundle = _lexical_bundle(tmp_path)
+    bundle = _lexical_bundle(tmp_path, processed)
     with open(bundle / "model.joblib", "ab") as handle:
         handle.write(b"x")
     config = _config_with_bundle(processed, bundle, tmp_path)

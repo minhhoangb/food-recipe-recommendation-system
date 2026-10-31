@@ -1,18 +1,35 @@
 services:
+  # Fills the `bundles` volume from the host ./models folder, so a clean clone only needs the
+  # repository itself (the volume is empty on the first `up`). The app then reads the bundle
+  # from the volume, read-only.
+  init-bundles:
+    image: busybox:1.36
+    volumes:
+      - ./models:/src:ro
+      - bundles:/dst
+    # Copy the host's bundles into the volume; the app then reads them from there, read-only.
+    command: sh -c "cp -a /src/. /dst/ && ls /dst"
+    restart: "no"
+
   api:
     build: .
     image: food-recipe-api:cpu
     ports:
-      - "8000:8000"
+      # 8080 on the host, 8000 in the container. Change the left side to move the host port.
+      - "${API_PORT:-8080}:8000"
+    depends_on:
+      init-bundles:
+        condition: service_completed_successfully
     environment:
       # The served model comes from the config (serving.bundle) unless API_BUNDLE is set.
-      API_CONFIG: ${API_CONFIG:-configs/default.yaml}
+      API_CONFIG: ${API_CONFIG:-configs/production.yaml}
       API_BUNDLE: ${API_BUNDLE:-}
       API_REQUEST_LOG: /app/logs/requests.db
     volumes:
       # The processed corpus and the serving bundles are read-only for the app.
       - ./data:/app/data:ro
-      - ./models:/app/models:ro
+      - bundles:/app/models:ro
+      # The request log is a named volume, so it survives `docker compose down`.
       - api_logs:/app/logs
     restart: unless-stopped
 
@@ -37,4 +54,5 @@ services:
 
 volumes:
   api_logs:
+  bundles:
   mlflow_data:

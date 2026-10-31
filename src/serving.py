@@ -16,7 +16,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from src.utils import read_json
+from src.utils import read_json, sha256_file
 
 
 class BundleError(RuntimeError):
@@ -51,6 +51,22 @@ def bundle_manifest(bundle: str | Path) -> dict:
     if not manifest_path.exists():
         raise BundleError(f"{manifest_path} is missing")
     return read_json(manifest_path)
+
+
+def check_bundle_corpus(bundle: str | Path, corpus_path: str | Path) -> None:
+    """Raise when the bundle was built from another corpus than the one being served.
+
+    The result ids of a bundle are positions in its own corpus, so serving it over a
+    different corpus silently returns the wrong recipes.
+    """
+    manifest = bundle_manifest(bundle)
+    expected = sha256_file(corpus_path)
+    if manifest.get("corpus_sha256") != expected:
+        raise BundleError(
+            f"{bundle} was built from another corpus than {corpus_path} "
+            f"({manifest.get('corpus_sha256', '?')[:12]} != {expected[:12]}); "
+            "point serving.bundle at a bundle of this corpus"
+        )
 
 
 def bundle_metrics(bundle: str | Path, tracking_uri: str = "sqlite:///mlflow.db") -> dict | None:

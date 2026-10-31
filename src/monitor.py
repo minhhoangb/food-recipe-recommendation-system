@@ -1,8 +1,9 @@
 """Production monitoring for the recommendation API from request logs.
 
-    python -m src.monitor --log-path logs/requests.jsonl --out reports/monitoring_report.md
+    python -m src.monitor --log-path logs/requests.db --out reports/monitoring_report.md
 
-Reads lines of RequestLogRecord from logs/requests.jsonl and computes:
+Reads the `RequestLogRecord` rows of the API's request log (SQLite by default, the format
+`api/request_log.py` writes; a JSONL file is accepted too) and computes:
   - Request volume & throughput
   - Success and error rates
   - Latency distribution (p50, p90, p95, p99)
@@ -25,15 +26,21 @@ from typing import Any
 from src.contracts import RequestLogRecord
 from src.utils import REPO_ROOT, read_jsonl
 
-DEFAULT_LOG_PATH = REPO_ROOT / "logs" / "requests.jsonl"
+DEFAULT_LOG_PATH = REPO_ROOT / "logs" / "requests.db"
 DEFAULT_REPORT_PATH = REPO_ROOT / "reports" / "monitoring_report.md"
 
 
 def load_request_logs(path: Path | str) -> list[RequestLogRecord]:
-    """Load and validate RequestLogRecords from a JSONL file."""
+    """Load and validate RequestLogRecords from the request log.
+
+    The API writes SQLite (`API_REQUEST_LOG`, see `api/request_log.py`); a JSONL file is
+    also accepted, because both hold the same `RequestLogRecord` schema.
+    """
     p = Path(path)
     if not p.exists():
         return []
+    if p.suffix in {".db", ".sqlite", ".sqlite3"}:
+        return _load_request_logs_sqlite(p)
     records: list[RequestLogRecord] = []
     for line in read_jsonl(p):
         try:
@@ -41,6 +48,40 @@ def load_request_logs(path: Path | str) -> list[RequestLogRecord]:
         except Exception:
             continue
     return records
+
+
+def _load_request_logs_sqlite(path: Path) -> list[RequestLogRecord]:
+    """Read the rows of the API's SQLite request log."""
+    import sqlite3
+
+    from api.request_log import COLUMNS, TABLE
+
+    records: list[RequestLogRecord] = []
+    with sqlite3.connect(path, timeout=30.0) as connection:
+        connection.row_factory = sqlite3.Row
+        try:
+            rows = connection.execute(f"SELECT {', '.join(COLUMNS)} FROM {TABLE}").fetchall()
+        except sqlite3.Error:
+            return []
+    for row in rows:
+        record = dict(row)
+        record["ingredients"] = _split(record["ingredients"])
+        record["result_ids"] = _split(record["result_ids"])
+        record["scores"] = [float(s) for s in _split(record["scores"])]
+        try:
+            records.append(RequestLogRecord.model_validate(record))
+        except Exception:
+            continue
+    return records
+
+
+def _split(value: Any) -> list[str]:
+    """The log stores list fields as comma-separated strings."""
+    if isinstance(value, list):
+        return [str(item) for item in value]
+    if value is None or value == "":
+        return []
+    return [part for part in str(value).split(",") if part]
 
 
 def compute_monitoring_metrics(records: list[RequestLogRecord]) -> dict[str, Any]:
