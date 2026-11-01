@@ -2,8 +2,8 @@
 
     python -m src.evaluate --bundle models/tfidf-pilot-xxxx --split validation --config configs/pilot.yaml
     python -m src.evaluate pool --config configs/default.yaml --split dev \
-        --system E01=models/tfidf-main-1f1f4ce5 --system E07=models/minilm_finetuned-E04-main-1f1f4ce5 \
-        --encoder E07=models/minilm_finetuned-main-cpu1ep
+        --system E01=models/tfidf-main-1f1f4ce5 --system E08=models/minilm_finetuned-E04-main-1f1f4ce5 \
+        --encoder E08=models/minilm_finetuned-main-cpu1ep
 
 Metrics (ranx): Recall@5, Recall@10, MRR@10 against the synthetic qrels (origin-recipe proxy).
 `test` is refused unless --allow-test is given: read it once, after the configuration is frozen.
