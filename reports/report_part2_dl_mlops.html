@@ -1,0 +1,342 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>report part2 dl mlops</title><style>
+@page { size: A4; margin: 18mm 17mm; }
+body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10.5pt; line-height: 1.45; color: #111; }
+h1 { font-size: 18pt; margin: 0 0 4pt; }
+h2 { font-size: 14pt; margin-top: 16pt; border-bottom: 1px solid #999; }
+h3 { font-size: 11.5pt; margin: 12pt 0 4pt; } p, li { text-align: justify; }
+h1, h2, h3 { break-after: avoid; }
+p { orphans: 3; widows: 3; }
+table { border-collapse: collapse; width: 100%; margin: 6pt 0; font-size: 9pt; page-break-inside: avoid; }
+th, td { border: 1px solid #aaa; padding: 3pt 5pt; vertical-align: top; text-align: left; }
+th { background: #eee; }
+img { display: block; max-width: 78%; max-height: 72mm; margin: 6pt auto; page-break-inside: avoid; }
+code { font-family: Consolas, monospace; font-size: 9pt; }
+</style></head><body><h1>BÁO CÁO PHẦN 2: DEEP LEARNING &amp; MLOPS CHO HỆ THỐNG GỢI Ý CÔNG THỨC NẤU ĂN</h1>
+<p><strong>Tác giả:</strong> Nguyễn Minh Hiếu (Person 3) — Vai trò: Fine-Tuning + MLflow + Monitoring<br />
+<strong>Trạng thái đồ án:</strong> <code>FINAL</code> | <code>AI-labeled</code><br />
+<strong>Nhãn ghi nhận đóng góp AI (AI Attribution):</strong><br />
+Báo cáo kỹ thuật và các thành phần mã nguồn được đồng phát triển cùng trợ lý lập trình <strong>Antigravity AI (Gemini 2.5 Flash / DeepMind)</strong>. Toàn bộ thực nghiệm, kiểm thử thống kê, biểu đồ và tham số đo lường đều được sinh ra từ các lần chạy thực tế trong repository (<code>recipe-retrieval</code> MLflow tracking database và pipeline thực thi cục bộ).<br />
+<strong>Ngày hoàn thành:</strong> 2026-11-01<br />
+<strong>Mã commit &amp; Checkpoint:</strong> <code>ecac4fdf79dce1a1e16fd1ace100d794103e4a1f15f9fe14da4f909f36a4cdd3</code></p>
+<hr />
+<h2>1. Kiến trúc Mô hình Deep Learning: all-MiniLM-L6-v2</h2>
+<p>Trong bài toán tìm kiếm công thức nấu ăn dựa trên nguyên liệu (Ingredient-based Recipe Retrieval), hệ thống sử dụng kiến trúc <strong>Bi-Encoder</strong> (Dual-Encoder) dựa trên mô hình ngôn ngữ biến áp thu nhỏ <strong>sentence-transformers/all-MiniLM-L6-v2</strong>.</p>
+<pre><code>                           +-------------------------------------+
+                           |      Query Text (Ingredients)       |
+                           +-------------------------------------+
+                                              |
+                                              v
+                           +-------------------------------------+
+                           |    WordPiece Tokenizer (Vocab 30k)  |
+                           +-------------------------------------+
+                                              |
+                                              v
+                           +-------------------------------------+
+                           |   MiniLM-L6-v2 Transformer (6 L)    |
+                           |   Hidden Dim: 384, Heads: 12        |
+                           +-------------------------------------+
+                                              |
+                                              v
+                           +-------------------------------------+
+                           |       Mean Pooling Layer            |
+                           +-------------------------------------+
+                                              |
+                                              v
+                           +-------------------------------------+
+                           |       L2 Normalization Layer        |
+                           +-------------------------------------+
+                                              |
+                                              v
+                                   Query Vector q in R^384
+                                              |
+                                              v
+                 Cosine Similarity: s(q, d) = &lt;q, d&gt; in [-1.0, 1.0]
+                                              ^
+                                              |
+                                   Doc Vector d in R^384
+                                              ^
+                                              |
+                           +-------------------------------------+
+                           |       L2 Normalization Layer        |
+                           +-------------------------------------+
+                                              |
+                                              v
+                           +-------------------------------------+
+                           |       Mean Pooling Layer            |
+                           +-------------------------------------+
+                                              |
+                                              v
+                           +-------------------------------------+
+                           |   MiniLM-L6-v2 Transformer (6 L)    |
+                           +-------------------------------------+
+                                              |
+                                              v
+                           +-------------------------------------+
+                           |      Recipe Corpus (Ingredients)    |
+                           +-------------------------------------+
+</code></pre>
+<h3>1.1. Chi tiết Thông số Kiến trúc</h3>
+<p>MiniLM-L6-v2 là phiên bản chưng cất tri thức (Knowledge Distillation) từ kiến trúc BERT-base với các đặc tính kỹ thuật tối ưu cho môi trường tài nguyên giới hạn:</p>
+<ul>
+<li><strong>Số lớp Transformer ($L$):</strong> 6 lớp (so với 12 lớp của BERT-base), giúp giảm 50% độ trễ tính toán khi inference.</li>
+<li><strong>Kích thước ẩn ($d_{\text{model}}$):</strong> 384 chiều (so với 768 chiều của BERT), giảm 75% kích thước ma trận tương đồng tích vô hướng và bộ nhớ lưu trữ vector index.</li>
+<li><strong>Số đầu Attention ($A$):</strong> 12 heads, mỗi head có chiều $d_k = 32$.</li>
+<li><strong>Kích thước lớp Feed-Forward ($d_{\text{ff}}$):</strong> 1,536 chiều, sử dụng hàm kích hoạt GELU.</li>
+<li><strong>Tổng số lượng tham số huấn luyện:</strong> Xấp xỉ <strong>22.7 triệu tham số</strong> (22,713,216 parameters).</li>
+<li><strong>Độ dài chuỗi tối đa ($T_{\text{max}}$):</strong> 128 tokens. Đối với tập ngữ liệu 50,000 công thức nấu ăn ở chế độ <code>ingredients</code>, chỉ duy nhất 1 công thức bị cắt cụt (truncation), đảm bảo bảo toàn 99.998% thông tin ngữ nghĩa.</li>
+</ul>
+<h3>1.2. Cơ chế Biểu diễn Vector và Pooling</h3>
+<p>Để chuyển đổi ma trận đầu ra của lớp Transformer cuối cùng $H \in \mathbb{R}^{T \times 384}$ thành một vector embedding đại diện duy nhất $u \in \mathbb{R}^{384}$, hệ thống áp dụng cơ chế <strong>Mean Pooling</strong> kết hợp với attention mask để triệt tiêu ảnh hưởng của padding tokens:</p>
+<p>$$u = \frac{\sum_{t=1}^{T} m_t \cdot H_t}{\sum_{t=1}^{T} m_t}$$</p>
+<p>Trong đó $m_t \in {0, 1}$ là attention mask tại vị trí token $t$. Sau đó, vector được chuẩn hóa theo chuẩn $L_2$:</p>
+<p>$$e = \frac{u}{|u|_2}$$</p>
+<p>Nhờ phép chuẩn hóa $L_2$, khoảng cách cosine similarity giữa query $q$ và văn bản công thức $d$ được tính toán đơn giản và cực kỳ nhanh chóng thông qua tích vô hướng chuẩn (Dot Product):</p>
+<p>$$\text{Sim}(q, d) = \langle e_q, e_d \rangle = \sum_{k=1}^{384} e_{q, k} \cdot e_{d, k}$$</p>
+<hr />
+<h2>2. Hàm Mục tiêu Huấn luyện: MultipleNegativesRankingLoss (MNRL)</h2>
+<h3>2.1. Bản chất Toán học và Cơ chế In-Batch Negatives</h3>
+<p>Mô hình được tinh chỉnh theo phương pháp học tương phản (Contrastive Representation Learning) sử dụng hàm mất mát <strong>MultipleNegativesRankingLoss (MNRL)</strong>. Hàm loss này tối ưu hóa xác suất của cặp dương tính (positive pair) so với toàn bộ các ứng viên âm tính khác được lấy ngẫu nhiên ngay trong cùng một batch (In-Batch Negative Sampling).</p>
+<p>Cho một mini-batch gồm $B$ cặp huấn luyện ${(q_i, d_i^+)}<em>{i=1}^B$, trong đó $q_i$ là danh sách nguyên liệu truy vấn và $d_i^+$ là công thức gốc tương ứng. Với mỗi query $q_i$, tài liệu $d_i^+$ là positive duy nhất, còn $B - 1$ tài liệu ${d_j^+}</em>{j \neq i}$ của các query khác trong batch đóng vai trò là các negative mẫu:</p>
+<p>$$\mathcal{L}<em>{\text{MNRL}} = -\frac{1}{B} \sum</em>{i=1}^{B} \log \frac{\exp\left(\frac{\text{Sim}(q_i, d_i^+)}{\tau}\right)}{\sum_{j=1}^{B} \exp\left(\frac{\text{Sim}(q_i, d_j^+)}{\tau}\right)}$$</p>
+<p>Trong đó:</p>
+<ul>
+<li>$\text{Sim}(q, d) = \langle e_q, e_d \rangle$ là độ tương đồng cosine giữa vector query và vector recipe.</li>
+<li>$\tau$ là tham số nhiệt độ (temperature scaling), được cố định ở mức $\tau = 0.05$ (hoặc tương đương hệ số nhân nghịch đảo scale 20.0), giúp làm sắc nét phân phối xác suất softmax và thúc đẩy gradient đẩy các negative ra xa.</li>
+<li>Với kích thước batch $B = 32$, mỗi bước tối ưu hóa mô hình được học từ 1 positive và 31 hard negatives tự nhiên mà không cần tiêu tốn chi phí tính toán để khai thác negative offline.</li>
+</ul>
+<h3>2.2. Kiểm soát Xung đột Nhãn Âm (False Negative Collision)</h3>
+<p>Khi lấy negative tự do trong batch, có nguy cơ xuất hiện 2 công thức cùng chung một biến thể công thức (ví dụ 2 công thức bánh mì chuối thuộc cùng một cụm). Trong kiến trúc pipeline, tập dữ liệu huấn luyện được lọc và kiểm tra overlap thông qua <code>group_id</code>. Toàn bộ 30,000 cặp huấn luyện không có bất kỳ sự trùng lặp nhóm nào với tập validation (500 queries) và test splits (<code>verified_group_overlap = 0</code>).</p>
+<hr />
+<h2>3. Kết quả Thực nghiệm &amp; Đánh giá Regularization (Ablation Study)</h2>
+<h3>3.1. Bảng Tổng hợp Hiệu năng Mô hình</h3>
+<p>Tất cả các số liệu được đánh giá trên tập <strong>Main Validation Split</strong> (500 queries, 50,000 recipes) thông qua thư viện chuẩn hóa IR <code>ranx</code>:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Mã hệ thống</th>
+<th style="text-align:left">Loại kiến trúc</th>
+<th style="text-align:left">Dữ liệu đầu vào</th>
+<th style="text-align:center">MRR@10</th>
+<th style="text-align:center">Recall@5</th>
+<th style="text-align:center">Recall@10</th>
+<th style="text-align:center">Thời gian mã hóa (s)</th>
+<th style="text-align:left">MLflow Run ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>E01</strong></td>
+<td style="text-align:left">TF-IDF Standard</td>
+<td style="text-align:left">ingredients</td>
+<td style="text-align:center">0.6567</td>
+<td style="text-align:center">0.7760</td>
+<td style="text-align:center">0.8260</td>
+<td style="text-align:center">—</td>
+<td style="text-align:left"><code>dev-baseline</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>E03</strong></td>
+<td style="text-align:left">BM25 Okapi</td>
+<td style="text-align:left">ingredients</td>
+<td style="text-align:center"><strong>0.7583</strong></td>
+<td style="text-align:center"><strong>0.8560</strong></td>
+<td style="text-align:center"><strong>0.9100</strong></td>
+<td style="text-align:center">—</td>
+<td style="text-align:left"><code>dev-baseline</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>E04</strong></td>
+<td style="text-align:left">Pretrained MiniLM</td>
+<td style="text-align:left">ingredients</td>
+<td style="text-align:center">0.4342</td>
+<td style="text-align:center">0.5120</td>
+<td style="text-align:center">0.5760</td>
+<td style="text-align:center">238.9s</td>
+<td style="text-align:left"><code>c396f1f47b60</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>E05</strong></td>
+<td style="text-align:left">Pretrained MiniLM</td>
+<td style="text-align:left">title + ingredients</td>
+<td style="text-align:center">0.1519</td>
+<td style="text-align:center">0.2140</td>
+<td style="text-align:center">0.2620</td>
+<td style="text-align:center">254.1s</td>
+<td style="text-align:left"><code>baseline-e05</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>FT (E07)</strong></td>
+<td style="text-align:left"><strong>Fine-Tuned MiniLM</strong></td>
+<td style="text-align:left"><strong>ingredients</strong></td>
+<td style="text-align:center"><strong>0.6209</strong></td>
+<td style="text-align:center"><strong>0.7340</strong></td>
+<td style="text-align:center"><strong>0.7980</strong></td>
+<td style="text-align:center"><strong>97.1s</strong></td>
+<td style="text-align:left"><code>9d465a30cc71</code></td>
+</tr>
+</tbody>
+</table>
+<p><img src="figures/mlflow_ablation_curves.png" alt="MLflow Ablation Curves" /></p>
+<h3>3.2. Đánh giá Tác động của Regularization (Weight Decay Ablation)</h3>
+<p>Để khảo sát mức độ ổn định và khả năng khái quát của mô hình, hai cấu hình huấn luyện được chạy đối chứng trên cùng 30,000 cặp dữ liệu với $B=32$, $LR=2\times 10^{-5}$:</p>
+<ol>
+<li><strong>Cấu hình Không Regularization (<code>wd = 0.0</code> - Run ID <code>9a7cf537</code>):</strong>
+<ul>
+<li>Train loss giảm rất sâu xuống <strong>0.0210</strong>, tuy nhiên Eval loss vọt lên <strong>1.1800</strong>.</li>
+<li>Khoảng cách khái quát hóa (Generalization Gap) rất lớn: $\Delta = 1.159$.</li>
+<li>MRR@10 trên tập validation bị suy giảm, chỉ đạt <strong>0.4980</strong>.</li>
+</ul>
+</li>
+<li><strong>Cấu hình Có Regularization (<code>wd = 0.01</code> - Run ID <code>b0e007bc</code> / <code>04378412</code>):</strong>
+<ul>
+<li>Áp dụng trọng số phân rã $L_2$ (Decoupled Weight Decay của AdamW) với hệ số $0.01$.</li>
+<li>Train loss hội tụ ở mức <strong>0.0792</strong>, trong khi Eval loss được ghìm chặt ở mức <strong>0.4100</strong>.</li>
+<li>Generalization Gap thu hẹp còn $\Delta = 0.328$ (giảm hơn 71% nguy cơ overfit).</li>
+<li>Validation MRR@10 đạt đỉnh <strong>0.6209</strong> (tăng +24.7% so với cấu hình không có weight decay).</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2>4. Hệ thống MLOps: MLflow Tracking, Model Registry &amp; Quy trình Rollback</h2>
+<p><img src="figures/mlflow_runs_overview.png" alt="MLflow Runs Overview" /></p>
+<h3>4.1. Kiến trúc Quản lý Thực nghiệm (MLflow Tracking)</h3>
+<p>Hệ thống sử dụng SQLite làm backend store cục bộ độc lập (<code>sqlite:///mlflow.db</code>) phục vụ cho dự án <code>recipe-retrieval</code> (Experiment ID: <code>1</code>). Toàn bộ 13 lượt chạy thực nghiệm bao gồm huấn luyện, kiểm thử tham số regularization, baseline pretrained và phân tích lỗi validation đều được ghi nhận đầy đủ siêu dữ liệu (metadata), tham số siêu hình ảnh và metrics đánh giá.</p>
+<h3>4.2. Model Registry &amp; Phân bổ Alias</h3>
+<p>Mô hình <code>minilm_finetuned</code> được đăng ký chính thức trên MLflow Model Registry với 2 phiên bản cốt lõi:</p>
+<ul>
+<li><strong>Phiên bản 2 (Version 2) — Alias <code>@production</code>:</strong> Checkpoint được fine-tune tối ưu với 30,000 cặp, đạt MRR@10 = 0.6209 trên validation split, được gắn thẻ <code>owner: Person 3 (Hiếu)</code>, <code>environment: dev</code>, <code>status: validated</code>.</li>
+<li><strong>Phiên bản 1 (Version 1) — Alias <code>@staging</code>:</strong> Checkpoint ban đầu / baseline phục vụ cho quá trình kiểm thử canary và đối chứng hồi quy.</li>
+</ul>
+<p><img src="figures/mlflow_model_registry.png" alt="MLflow Model Registry UI" /></p>
+<h3>4.3. Quy trình Thử nghiệm Rollback Thực tế (Trial Log &amp; SOP)</h3>
+<p>Nhật ký thử nghiệm rollback thực tế được ghi nhận tại <code>reports/mlflow_rollback_trial.md</code>:</p>
+<ol>
+<li><strong>Lệnh thực thi rollback một dòng lệnh:</strong><pre><code class="language-bash">python -m src.train --rollback 1 --alias production
+</code></pre>
+</li>
+<li><strong>Cơ chế hoạt động:</strong> Lệnh thực hiện cập nhật trường alias <code>production</code> từ Version 2 về Version 1 trực tiếp trong cơ sở dữ liệu SQLite trong thời gian chưa đầy <strong>10ms</strong>, loại bỏ hoàn toàn yêu cầu phải build lại image hoặc redeploy container.</li>
+<li><strong>Tính độc lập của API khi MLflow Server Tắt (Decoupled Offline Serving):</strong>
+<ul>
+<li>API phục vụ (<code>src.serving</code> / <code>api.app</code>) không kết nối trực tiếp với MLflow tracking server trong quá trình xử lý request. Thay vào đó, nó đọc trực tiếp từ thư mục bundle cố định (<code>models/minilm_finetuned-E04-main-1f1f4ce5/</code>), nơi đã có sẵn file <code>embeddings.npy</code>, <code>recipe_ids.json</code> và <code>manifest.json</code>.</li>
+<li>Đã kiểm tra thực tế: Khi tắt hoàn toàn MLflow tracking server, API vẫn khởi động, nạp mô hình vào bộ nhớ RAM và phục vụ gợi ý bình thường với độ trễ &lt; 5ms.</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2>5. Giám sát Vận hành (Production Monitoring &amp; Drift Detection)</h2>
+<p><img src="figures/monitoring_real_latency_oov.png" alt="Monitoring Latency and OOV" /></p>
+<h3>5.1. Thu thập Nhật ký Yêu cầu Thực tế (Real API Logs)</h3>
+<p>Để đánh giá mô hình trong điều kiện vận hành thực tế, một phiên mô phỏng với <strong>50 requests đa dạng</strong> đã được gửi qua API và ghi nhận vào cơ sở dữ liệu <code>sqlite:///logs/real_requests.db</code>. Các nhóm request bao gồm:</p>
+<ul>
+<li>20 truy vấn nguyên liệu gia đình phổ biến (chicken, onion, olive oil, ...).</li>
+<li>12 truy vấn dài ($N \ge 6$ nguyên liệu).</li>
+<li>10 truy vấn nguyên liệu mới lạ ngoài từ vựng huấn luyện (dragonfruit, matcha, chia seeds, truffle oil, ...).</li>
+<li>5 truy vấn đơn nguyên liệu.</li>
+<li>3 yêu cầu cố tình sai định dạng để kiểm thử mã lỗi HTTP 422.</li>
+</ul>
+<h3>5.2. Các Phương pháp Kiểm định Thống kê &amp; Ngưỡng Giám sát</h3>
+<ol>
+<li><strong>Kiểm định Độ dài Truy vấn (Kolmogorov-Smirnov 2-Sample Test):</strong>
+<ul>
+<li>So sánh phân phối độ dài truy vấn quan sát thực tế ($N=50$) với tập tham chiếu ($N=500$).</li>
+<li>Kết quả: Thống kê $KS = 0.6733$, $p\text{-value} = 0.0000 &lt; 0.05$.</li>
+<li>Kết luận: <strong>Phát hiện Dịch chuyển Phân phối Đầu vào (Input Data Drift)</strong> do sự xuất hiện của các phiên truy vấn dài có chủ đích.</li>
+</ul>
+</li>
+<li><strong>Tỉ lệ Nguyên liệu Ngoài Từ vựng (OOV Rate):</strong>
+<ul>
+<li>Công thức: $\text{OOV Rate} = \frac{\text{Số token nguyên liệu không có trong từ điển train}}{\text{Tổng số token nguyên liệu}}$.</li>
+<li>Ngưỡng cảnh báo: $\text{OOV Rate} &gt; 5.0%$.</li>
+<li>Thực tế ghi nhận: $50.0%$ (do cố tình kích hoạt các nguyên liệu đặc thù như spirulina, kimchi, burrata).</li>
+</ul>
+</li>
+<li><strong>Chỉ số Sức khỏe Vận hành Hệ thống (System Health &amp; SLA):</strong>
+<ul>
+<li>Tỉ lệ thành công: <strong>94.00%</strong> (ghi nhận 3 lỗi HTTP 422 do validation chặn đúng thiết kế).</li>
+<li>Độ trễ phản hồi: Trung bình <strong>11.56 ms</strong>, phân vị $p50 = 2.17\text{ ms}$, $p95 = 3.07\text{ ms}$ (đáp ứng nghiêm ngặt cam kết SLA $&lt; 100\text{ ms}$).</li>
+</ul>
+</li>
+</ol>
+<h3>5.3. Hạn chế Cốt lõi của Giám sát Không Nhãn (Limitations)</h3>
+<blockquote>
+<p>[!WARNING]
+<strong>Tuyên bố Giới hạn Trách nhiệm:</strong>
+Toàn bộ các chỉ số thu thập từ <code>request_log</code> đều dựa trên dữ liệu không có nhãn đánh giá con người (Unlabeled Inference Logs). Do đó, việc phát hiện Statistical Drift hay OOV Rate chỉ mang ý nghĩa cảnh báo <strong>sự biến thiên trong hành vi người dùng (User Distribution Shift)</strong> hoặc sự xuất hiện của xu hướng ẩm thực mới, <strong>tuyệt đối không được suy diễn trực tiếp thành sự suy giảm độ chính xác tìm kiếm (Relevance Decay / nDCG Drop)</strong>. Để khẳng định mô hình bị thoái hóa chất lượng, cần triển khai đánh giá thủ công hoặc cơ chế phản hồi click ngầm (Implicit Feedback).</p>
+</blockquote>
+<hr />
+<h2>6. Ma trận Truy nguyên (Traceability &amp; Provenance Matrix)</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Hạng mục / Hiện vật</th>
+<th style="text-align:left">Đường dẫn lưu trữ</th>
+<th style="text-align:left">Khóa Checksum / SHA-256</th>
+<th style="text-align:left">Run ID / Nguồn gốc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Model Checkpoint</strong></td>
+<td style="text-align:left"><code>models/minilm_finetuned-main-cpu1ep</code></td>
+<td style="text-align:left"><code>ecac4fdf...cdd3</code></td>
+<td style="text-align:left"><code>0437841237734100a7c1a9b26725d908</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Corpus Serving Bundle</strong></td>
+<td style="text-align:left"><code>models/minilm_finetuned-E04-main-1f1f4ce5</code></td>
+<td style="text-align:left"><code>1f1f4ce5...9b46</code></td>
+<td style="text-align:left"><code>finetune_cpu1ep_provenance.json</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Dataset Train Pairs</strong></td>
+<td style="text-align:left"><code>data/processed/main_train_pairs.jsonl</code></td>
+<td style="text-align:left"><code>9f465e88...02c3</code></td>
+<td style="text-align:left">30,000 cặp, seed 42, split train</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Best FT Validation Run</strong></td>
+<td style="text-align:left">MLflow Experiment ID: 1</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left"><code>9d465a30cc7141bfa089739eb0e756cc</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Ablation wd=0.01</strong></td>
+<td style="text-align:left">MLflow Experiment ID: 1</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left"><code>b0e007bc43524a7da08bbdb50d2ac42d</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Ablation wd=0.0</strong></td>
+<td style="text-align:left">MLflow Experiment ID: 1</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left"><code>9a7cf537979246a4a25087e5f5c8cf77</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Pretrained Baseline E04</strong></td>
+<td style="text-align:left">MLflow Experiment ID: 1</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left"><code>c396f1f47b6047cfbbea3f699921226b</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Locked Model Manifest</strong></td>
+<td style="text-align:left"><code>reports/model_manifest_locked.json</code></td>
+<td style="text-align:left">JSON Schema 1.0.0</td>
+<td style="text-align:left">Khóa trạng thái production 2026-11-01</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Real Monitoring Report</strong></td>
+<td style="text-align:left"><code>reports/monitoring_real_report.md</code></td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">SQLite <code>logs/real_requests.db</code> (50 Qs)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>Xác nhận Hoàn thành Nhiệm vụ:</strong></p>
+<ul>
+<li>Người thực hiện: <strong>Nguyễn Minh Hiếu</strong> (Person 3)</li>
+<li>Vai trò: Fine-Tuning + MLflow + Monitoring</li>
+<li>Nhãn nộp bài: <code>FINAL</code> | <code>AI-labeled</code></li>
+<li>Toàn bộ cam kết DoD về Bảng phân tích FT, Báo cáo Giám sát Log thật, Bằng chứng MLflow UI và Báo cáo DL/MLOps tối thiểu 5 trang đã được đáp ứng hoàn chỉnh.</li>
+</ul>
+</body></html>

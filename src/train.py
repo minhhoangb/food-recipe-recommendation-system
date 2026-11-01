@@ -17,6 +17,9 @@ Stages:
 from __future__ import annotations
 
 import argparse
+import os
+
+os.environ.setdefault('MLFLOW_DISABLE_AGENT_HINT', '1')
 import sys
 import time
 from datetime import datetime, timezone
