@@ -38,16 +38,54 @@ KS_ALPHA_THRESHOLD = 0.05  # significance level alpha for KS test
 
 
 def load_request_logs(path: Path | str) -> list[RequestLogRecord]:
-    """Load and validate RequestLogRecords from a JSONL file."""
+    """Load and validate RequestLogRecords from a JSONL or SQLite file."""
     p = Path(path)
     if not p.exists():
         return []
     records: list[RequestLogRecord] = []
-    for line in read_jsonl(p):
+    if p.suffix.lower() in (".db", ".sqlite"):
+        import json
+        import sqlite3
+
         try:
-            records.append(RequestLogRecord.model_validate(line))
-        except Exception:
-            continue
+            with sqlite3.connect(p) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.execute("SELECT * FROM request_log")
+                for row in cursor.fetchall():
+                    d = dict(row)
+                    for k in ("ingredients", "result_ids", "scores"):
+                        val = d.get(k)
+                        if isinstance(val, str):
+                            val_str = val.strip()
+                            if not val_str:
+                                d[k] = []
+                            elif val_str.startswith('[') and val_str.endswith(']'):
+                                try:
+                                    d[k] = json.loads(val_str)
+                                except Exception:
+                                    d[k] = []
+                            else:
+                                parts = [p_item.strip() for p_item in val_str.split(',') if p_item.strip()]
+                                if k == 'scores':
+                                    try:
+                                        d[k] = [float(p_item) for p_item in parts]
+                                    except ValueError:
+                                        d[k] = []
+                                else:
+                                    d[k] = parts
+                    try:
+                        records.append(RequestLogRecord.model_validate(d))
+                    except Exception:
+                        continue
+        except Exception as e:
+            print(f"warning: Error reading SQLite logs from {p}: {e}", file=sys.stderr)
+            return []
+    else:
+        for line in read_jsonl(p):
+            try:
+                records.append(RequestLogRecord.model_validate(line))
+            except Exception:
+                continue
     return records
 
 
