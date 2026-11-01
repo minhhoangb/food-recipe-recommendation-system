@@ -4,7 +4,7 @@
                           --requests logs/requests.jsonl \
                           --out reports/monitoring_report.html
 
-Computes:
+Reads API request logs from SQLite (default) or JSONL and computes:
   - Request volume & throughput
   - Success and error rates
   - Latency distribution (mean, p50, p90, p95, p99)
@@ -29,7 +29,7 @@ from scipy.stats import ks_2samp
 from src.contracts import RequestLogRecord
 from src.utils import REPO_ROOT, read_jsonl
 
-DEFAULT_LOG_PATH = REPO_ROOT / "logs" / "requests.jsonl"
+DEFAULT_LOG_PATH = REPO_ROOT / "logs" / "requests.db"
 DEFAULT_REPORT_PATH = REPO_ROOT / "reports" / "monitoring_report.html"
 DEFAULT_MIN_SAMPLE_SIZE = 10
 OOV_DRIFT_THRESHOLD = 0.05  # 5% of tokens unseen in train/reference vocab
@@ -43,7 +43,7 @@ def load_request_logs(path: Path | str) -> list[RequestLogRecord]:
     if not p.exists():
         return []
     records: list[RequestLogRecord] = []
-    if p.suffix.lower() in (".db", ".sqlite"):
+    if p.suffix.lower() in (".db", ".sqlite", ".sqlite3"):
         import json
         import sqlite3
 

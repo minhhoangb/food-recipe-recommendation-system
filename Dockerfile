@@ -28,7 +28,7 @@ COPY fe ./fe
 # reads them at startup and never writes to them.
 # The served model is chosen by the config (serving.bundle) or by API_BUNDLE; API_BACKEND
 # is left unset on purpose, so the bundle in the config wins.
-ENV API_CONFIG=configs/default.yaml \
+ENV API_CONFIG=configs/production.yaml \
     API_REQUEST_LOG=/app/logs/requests.db
 
 EXPOSE 8000

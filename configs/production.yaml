@@ -1,0 +1,11 @@
+# Production profile: the main corpus and the bundle the API serves in the demo.
+# Merged over default.yaml, like configs/pilot.yaml.
+#
+# The bundle must be built from the main corpus; the API refuses to start when the bundle and
+# the corpus do not match (the result ids of a bundle are positions in its own corpus).
+data:
+  profile: main
+
+serving:
+  # Pretrained MiniLM over the main corpus (E04), the dense backend of the demo.
+  bundle: models/minilm_pretrained-E04-main-1f1f4ce5

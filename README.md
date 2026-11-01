@@ -56,6 +56,29 @@ The first run downloads the pretrained weights (~90 MB) into the Hugging Face ca
 that the pipeline is offline. `src/embeddings.py` and `src/retrieval.py` never ask for
 CUDA (`device="cpu"`), so Colab's CPU runtime is enough.
 
+### Getting the data and the serving bundle
+
+The API needs two things on disk: the processed corpus and the serving bundle. Both are
+**not** in git, so a clean clone starts without them.
+
+```bash
+# 1. the processed corpus (see the Dataset section below)
+python scripts/fetch_artifacts.py      # or: python -m src.data_collection --raw-path <csv>
+python scripts/verify_data.py
+
+# 2. the serving bundle (the pretrained MiniLM encoder over the main corpus, E04)
+python -m src.embeddings --config configs/default.yaml --mode ingredients
+```
+
+Step 2 writes `models/minilm_pretrained-E04-main-<corpus-sha8>/` (74 MB: `embeddings.npy`,
+`recipe_ids.json`, `manifest.json`). Without it the app still starts and serves TF-IDF over
+the corpus; with it, `configs/production.yaml` points at it and the API serves the dense
+backend.
+
+> **Windows note:** if pip fails with *"An Application Control policy has blocked this
+> file"*, the wheels were downloaded with the Mark-of-the-Web flag. Run
+> `Get-ChildItem .venv -Recurse -Include *.pyd,*.dll | Unblock-File` once after the install.
+
 ## Dataset
 
 - **RecipeNLG** (Bien et al., INLG 2020), about 2.23 million recipes, 7 columns: `title, ingredients, directions, link, source, NER` plus an index. Project page: https://recipenlg.cs.put.poznan.pl/ (also mirrored on Kaggle). Read the dataset's own terms of use before redistributing anything; this repository does not redistribute the raw file and no licence has been assumed here.
@@ -99,16 +122,29 @@ representations are supported:
 | `title_ingredients` | E05 | `"Garlic Chicken. Ingredients: garlic, rice, olive oil"` |
 
 ```bash
-# E04 bundle -> models/minilm_pretrained-E04-pilot-<corpus-sha8>/
-python -m src.embeddings --config configs/pilot.yaml --mode ingredients
+# E04 bundle -> models/minilm_pretrained-E04-main-<corpus-sha8>/  (the production bundle)
+python -m src.embeddings --config configs/default.yaml --mode ingredients
 # E05 bundle
-python -m src.embeddings --config configs/pilot.yaml --mode title_ingredients
+python -m src.embeddings --config configs/default.yaml --mode title_ingredients
+# the pilot corpus instead
+python -m src.embeddings --config configs/pilot.yaml --mode ingredients
 ```
 
 Each bundle holds `embeddings.npy` (float32, one row per recipe, L2-normalised),
 `recipe_ids.json` (the same order) and `manifest.json` (a `BundleManifest` plus the
 embedding mode, `max_seq_length`, the truncated-document count and the measured encode
 time). The bundles live under `models/` and are **not** committed to git.
+
+### The config profiles
+
+| File | Corpus | Serving bundle |
+| --- | --- | --- |
+| `configs/default.yaml` | main (50.000 recipes) | none (the reference TF-IDF retriever) |
+| `configs/pilot.yaml` | pilot (5.000 recipes, a subset of main) | none |
+| `configs/production.yaml` | main (50.000 recipes) | `models/minilm_pretrained-E04-main-1f1f4ce5` (E04) |
+
+`configs/default.yaml` is the base every other file is merged over. `configs/pilot.yaml`
+and `configs/production.yaml` only change what they need, so a new profile stays short.
 
 `src/retrieval.py` loads a bundle and searches it by cosine similarity
 (`sentence_transformers.util.semantic_search` over normalised vectors). The corpus is
@@ -229,28 +265,29 @@ The FastAPI app lives in `api/app.py`. The retriever and the corpus metadata are
 **once** at startup (the lifespan), not per request.
 
 ```bash
-# reference backend (TF-IDF over the processed corpus; no model download)
+# the production bundle (the dense MiniLM backend over the main corpus)
+set API_CONFIG=configs/production.yaml
 uvicorn api.app:app --reload
 
-# a bundle: the model is chosen in the config (serving.bundle), not in the code
-set API_CONFIG=configs/default.yaml
+# the reference backend (TF-IDF over the processed corpus; no model download)
+set API_BACKEND=reference
 uvicorn api.app:app --reload
 
 # the env var overrides the config
-set API_BUNDLE=models/minilm_pretrained-E04-main-1f1f4ce5
+set API_BUNDLE=models/bm25-main-1f1f4ce5
 uvicorn api.app:app --reload
 ```
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `API_BACKEND` | from the config | `reference` (TF-IDF) or `bundle` (the bundle of `serving.bundle`) |
-| `API_CONFIG` | `configs/pilot.yaml` | which processed profile to serve |
+| `API_CONFIG` | `configs/production.yaml` | which config (and so which corpus and bundle) to serve |
 | `API_BUNDLE` | - | bundle folder; overrides `serving.bundle` from the config |
 | `API_REQUEST_LOG` | `logs/requests.db` | SQLite request log (`""` disables it) |
 
 ### Choosing the model with the config
 
-`serving.bundle` in `configs/default.yaml` (or in any profile file) says which bundle the
+`serving.bundle` in the config (or in any profile file) says which bundle the
 API serves. The folder decides the loader: `model.joblib` is a lexical bundle (tfidf, bm25,
 lsa, written by `src.baseline`), `embeddings.npy` is a dense one (MiniLM, written by
 `src.embeddings`). Both are checked against their manifest before the app answers a single
@@ -264,6 +301,9 @@ serving:
 `/model-info` then reports the model, the bundle, the corpus hash and the validation
 metrics of the run that produced the bundle (read from the manifest or from MLflow).
 
+The bundle must come from the same corpus the app serves: the result ids of a bundle are
+positions in its own corpus, so the API refuses to start when the two do not match.
+
 Endpoints (`src/contracts.py` owns the request/response schemas):
 
 | Endpoint | Method | What it does |
@@ -273,22 +313,169 @@ Endpoints (`src/contracts.py` owns the request/response schemas):
 | `/predict` | POST | one ingredient list -> `top_k` recipes with matched/missing ingredients |
 | `/batch-predict` | POST | up to 20 instances; the order of the input is preserved |
 | `/` | GET | the web UI (`fe/index.html`) |
+| `/docs` | GET | the interactive OpenAPI documentation (Swagger UI) |
+| `/openapi.json` | GET | the OpenAPI schema itself |
 
 A bad request returns **422** with the reason (e.g. `top_k` out of range, an ingredient
 list that normalises to nothing). `top_k` is an integer in `[1, 20]`, a batch holds at
 most 20 instances.
 
-```bash
-curl http://127.0.0.1:8000/health
+### The endpoints, with real responses
 
+`GET /health` — the liveness probe:
+
+```json
+{"status":"ok","model":"minilm_pretrained","model_version":"1"}
+```
+
+`GET /model-info` — which model serves, and how it scored:
+
+```json
+{
+  "model": "minilm_pretrained",
+  "model_version": "1",
+  "backend": "dense",
+  "config": "configs/production.yaml",
+  "corpus_recipes": 50000,
+  "bundle": "models/minilm_pretrained-E04-main-1f1f4ce5",
+  "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+  "metrics": {
+    "recall@5": 0.292,
+    "recall@10": 0.38,
+    "mrr@10": 0.22871746031746035,
+    "n_queries": 500.0,
+    "latency_ms": 58.23839660000522,
+    "wall_seconds": 29.24
+  }
+}
+```
+
+`POST /predict`:
+
+```bash
 curl -X POST http://127.0.0.1:8000/predict \
   -H "Content-Type: application/json" \
-  -d '{"ingredients": ["chicken", "rice"], "top_k": 3}'
+  -d '{"ingredients": ["chicken", "rice", "garlic"], "top_k": 2}'
+```
 
+```json
+{
+  "model": "minilm_pretrained",
+  "model_version": "1",
+  "latency_ms": 845.99,
+  "results": [
+    {
+      "recipe_id": "recipenlg:7642",
+      "title": "Chicken And Rice",
+      "score": 0.8863415718078613,
+      "matched_ingredients": ["chicken", "rice", "garlic"],
+      "missing_ingredients": ["onion", "salt"],
+      "directions": [
+        "Boil chicken with skin on until done when it is done remove from broth and take off bone.",
+        "Cut up onion put into broth.",
+        "Add minced garlic; cook for 5 minutes.",
+        "Add rice and",
+        "cook until done. Add the chicken to the ingredients add salt to taste.",
+        "Serve with pears or bread."
+      ],
+      "link": "https://www.cookbooks.com/Recipe-Details.aspx?id=709588"
+    },
+    {
+      "recipe_id": "recipenlg:1553265",
+      "title": "Tastier Brown Rice Pilaf",
+      "score": 0.8497336506843567,
+      "matched_ingredients": ["chicken", "garlic"],
+      "missing_ingredients": ["butter", "onion", "brown rice", "salt"],
+      "directions": [
+        "Melt butter in a large sauce pan. Saute onion and garlic (roasted and fresh) in butter over medium heat, stirring frequently, until onion is translucent. Add rice and cook, stirring frequently, until a brown fond has formed on the bottom of the pan.",
+        "Add stock and some salt, stir, and bring to a boil. Reduce to simmer (low) and cover to cook, about 15-20 minutes with regular rice, 10 minutes for the faster cooking rice.",
+        "When rice is cooked, turn off heat, add parmigiano and green onions and fluff with a fork.",
+        "Yum!"
+      ],
+      "link": "https://tastykitchen.com/recipes/sidedides/tastier-brown-rice-pilaf/"
+    }
+  ],
+  "note": null
+}
+```
+
+`POST /batch-predict` — the order of the input is preserved:
+
+```bash
 curl -X POST http://127.0.0.1:8000/batch-predict \
   -H "Content-Type: application/json" \
-  -d '{"instances": [{"ingredients": ["chicken"], "top_k": 3}, {"ingredients": ["rice"], "top_k": 3}]}'
+  -d '{"instances": [{"ingredients": ["chicken", "rice"], "top_k": 1}, {"ingredients": ["tomato", "basil"], "top_k": 1}]}'
 ```
+
+```json
+{
+  "predictions": [
+    {
+      "model": "minilm_pretrained",
+      "model_version": "1",
+      "latency_ms": 203.56,
+      "results": [
+        {
+          "recipe_id": "recipenlg:2199670",
+          "title": "Shaun the Sheep Character Bento",
+          "score": 0.7940338850021362,
+          "matched_ingredients": ["rice"],
+          "missing_ingredients": ["cheese"],
+          "directions": [
+            "Make 2 bento sized rice balls.",
+            "Add your choice of filling.",
+            "Set aside a small amount of rice.",
+            "Cut the nori into Shaun's face with scissors, and for the pupils, use a hole puncher to punch them out or cut them out freehand.",
+            "For the eyeballs, use the tip of a straw to punch out the cheese .",
+            "Attach the facial features to the rice ball, place the remaining rice as the fluffy wool on the forehead and there you have Shaun!"
+          ],
+          "link": "https://cookpad.com/us/recipes/151775-shaun-the-sheep-character-bento"
+        }
+      ],
+      "note": null
+    },
+    {
+      "model": "minilm_pretrained",
+      "model_version": "1",
+      "latency_ms": 128.63,
+      "results": [
+        {
+          "recipe_id": "recipenlg:2116245",
+          "title": "My Best Sandwich Ever",
+          "score": 0.845429003238678,
+          "matched_ingredients": ["tomato", "basil"],
+          "missing_ingredients": ["salad"],
+          "directions": [
+            "On a frying pan, cook the steak a few minutes on each side, according to your taste.",
+            "(Rare for me, Im a meat-eater.)",
+            "Split the baguette in half lengthwise.",
+            "Spread the bottom part of the baguette with the pesto rosso.",
+            "Top with basil, tomato, steak and Romaine leaves.",
+            "Cap with the baguette top.",
+            "Close your eyes, take a bite and enjoy!"
+          ],
+          "link": "https://tastykitchen.com/recipes/main-courses/my-best-sandwich-ever/"
+        }
+      ],
+      "note": null
+    }
+  ]
+}
+```
+
+A bad request, answered with **422** and the reason:
+
+```bash
+curl -X POST http://127.0.0.1:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"ingredients": [], "top_k": 3}'
+```
+
+```json
+{"detail":[{"type":"too_short","loc":["body","ingredients"],"msg":"List should have at least 1 item after validation, not 0","input":[],"ctx":{"field_type":"List","min_length":1,"actual_length":0}}]}
+```
+
+In Python:
 
 ```python
 import requests
@@ -298,6 +485,7 @@ response = requests.post(
     json={"ingredients": ["chicken", "rice"], "top_k": 3},
     timeout=30,
 )
+response.raise_for_status()
 for result in response.json()["results"]:
     print(result["title"], result["matched_ingredients"], result["missing_ingredients"])
 ```
@@ -306,7 +494,11 @@ Every request is appended to the SQLite request log
 (`RequestLogRecord` from `src/contracts.py`): request id, timestamp, endpoint, model,
 normalised ingredients, `top_k`, result ids, scores, latency and status code. SQLite is
 used because it is safe with several workers writing at the same time (WAL mode + a busy
-timeout).
+timeout). `src/monitor.py` reads that log:
+
+```bash
+python -m src.monitor --log-path logs/requests.db --out reports/monitoring_report.md
+```
 
 ### recommend() and the E06 rerank
 
@@ -377,22 +569,40 @@ docker compose up --build          # API on http://127.0.0.1:8000
 docker compose --profile mlflow up  # optional MLflow UI on http://127.0.0.1:5000
 ```
 
-- `data/` and `models/` are mounted read-only; the request log goes to the `api_logs`
-  volume.
-- The health check (`HEALTHCHECK` in the `Dockerfile`) calls `/health` every 30 s.
-- To serve a bundle, point the config at it (or set `API_BUNDLE`):
+What happens on the first `up`:
+
+1. The `init-bundles` service copies the host's `models/` folder into the named volume
+   `bundles` (a no-op when the volume already holds them).
+2. The `api` service starts only after that copy is done (`service_completed_successfully`),
+   and reads the bundle from the volume, read-only.
+3. `data/` is bind-mounted read-only; the request log goes to the `api_logs` volume, so it
+   survives `docker compose down`.
+
+So a clean clone needs the repository, `data/processed/` and `models/` on the host, but
+nothing else: no bundle has to be baked into the image.
+
+- The health check (`HEALTHCHECK` in the `Dockerfile`) calls `/health` every 30 s; the
+  container is only "healthy" once the bundle has loaded.
+- The served model comes from the config (`configs/production.yaml` by default). To serve
+  another bundle, point the config at it or set `API_BUNDLE`:
 
 ```bash
-API_BUNDLE=models/minilm_pretrained-E04-main-1f1f4ce5 \
-  API_CONFIG=configs/default.yaml docker compose up --build
+API_BUNDLE=models/bm25-main-1f1f4ce5 \
+  API_CONFIG=configs/production.yaml docker compose up --build
 ```
 
-The image size is reported in `reports/e04_e05_main_benchmark.md` after the build
-(torch CPU wheels are the bulk of it).
+- The image bakes in the ingredient-parser NLTK resource **and** the MiniLM weights, so the
+  dense backend also starts without network access. The corpus and the bundles are still
+  mounted at runtime, never baked in.
 
-The image bakes in the ingredient-parser NLTK resource **and** the MiniLM weights, so the
-dense backend also starts without network access. The corpus and the bundles are still
-mounted at runtime (`data/`, `models/`), never baked in.
+To rebuild the `bundles` volume from scratch (after changing the host's `models/`):
+
+```bash
+docker compose down -v && docker compose up --build
+```
+
+The image size is reported in `reports/benchmark.md` after the build (torch CPU wheels are
+the bulk of it).
 
 ### Native vs Docker parity
 
@@ -403,11 +613,9 @@ ids (same order) and the scores (within a tolerance); the log of the check is
 
 ```bash
 # native
-API_CONFIG=configs/default.yaml API_BUNDLE=models/bm25-main-1f1f4ce5 \
-  uvicorn api.app:app --port 8010
+API_CONFIG=configs/production.yaml uvicorn api.app:app --port 8010
 # container
-API_BUNDLE=models/bm25-main-1f1f4ce5 API_CONFIG=configs/default.yaml \
-  docker compose up -d --build
+docker compose up -d --build
 python scripts/check_parity.py --native http://127.0.0.1:8010 --docker http://127.0.0.1:8000
 ```
 
@@ -425,21 +633,24 @@ Experiments are recorded in `recipe-retrieval`. Serving bundles are saved as art
 ## Repository structure
 
 ```
-api/            FastAPI app                                  (Person 2)
-configs/        default.yaml, pilot.yaml
+api/            FastAPI app, request_log.py                    (Person 2)
+configs/        default.yaml, pilot.yaml, production.yaml
 data/raw/       original CSV, never modified (git-ignored)
 data/processed/ corpus.jsonl, splits.json, queries.jsonl, qrels.jsonl, manifest per profile
-fe/             static web UI (index.html)                   (Person 2)
+fe/             static web UI (index.html)                    (Person 2)
 models/         serving bundles (git-ignored)
 notebooks/      00_colab_bootstrap.ipynb, 02_finetune_colab.ipynb, EDA
 reports/        figures, final report, monitoring_report.md, benchmark.json
+                manual_eval/  the dev judging pool and the annotation logs
 scripts/        verify_data.py, package_artifacts.py, fetch_artifacts.py
-                shoot_ui.py, check_parity.py                  (Person 2)
+                shoot_ui.py, check_parity.py, apply_labels.py  (Person 2)
 src/            contracts, config, utils, normalize, preprocess, data_collection, queries, reference
                 embeddings, retrieval, evaluation, memory, serving, benchmark  (Person 2)
                 build_pairs, finetune, train, monitor        (Person 3)
 tests/          pytest suite, tests/fixtures (hand-written, not RecipeNLG)
 docs/           implementation plans per owner
+Dockerfile      CPU-only image of the API
+docker-compose.yml  api + the bundles volume + the optional MLflow UI
 ```
 
 ## Reproducibility

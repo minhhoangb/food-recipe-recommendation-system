@@ -76,17 +76,18 @@ def test_train_cli_stage_flag(built_fixture, fixture_csv, tmp_path):
 
 def test_registry_rollback(tmp_path: Path):
     uri = f"sqlite:///{(tmp_path / 'registry_test.db').as_posix()}"
-    mlflow.set_tracking_uri(uri)
     client = mlflow.tracking.MlflowClient(uri)
 
     model_name = "test_rollback_model"
     # Create empty registered model
     client.create_registered_model(model_name)
     # Create 2 dummy runs & model versions
-    with mlflow.start_run() as r1:
-        mlflow.log_param("version", "1")
-    with mlflow.start_run() as r2:
-        mlflow.log_param("version", "2")
+    experiment_id = client.create_experiment("rollback-test")
+    r1 = client.create_run(experiment_id)
+    r2 = client.create_run(experiment_id)
+    for version, run in enumerate((r1, r2), 1):
+        client.log_param(run.info.run_id, "version", str(version))
+        client.set_terminated(run.info.run_id)
 
     client.create_model_version(model_name, source=f"runs:/{r1.info.run_id}/model", run_id=r1.info.run_id)
     client.create_model_version(model_name, source=f"runs:/{r2.info.run_id}/model", run_id=r2.info.run_id)

@@ -13,7 +13,7 @@ The backend and the paths are read from the environment so Docker and a local ru
 behave the same:
 
     API_BACKEND=reference|dense|bundle   (bundle: whatever serving.bundle points at)
-    API_CONFIG=configs/pilot.yaml
+    API_CONFIG=configs/production.yaml
     API_BUNDLE=models/bm25-main-1f1f4ce5  (overrides serving.bundle)
     API_REQUEST_LOG=logs/requests.db
 
@@ -48,7 +48,7 @@ from src.contracts import (
 from src.normalize import normalize_ingredients
 from src.predict import load_corpus_metadata, recommend
 
-DEFAULT_CONFIG = "configs/pilot.yaml"
+DEFAULT_CONFIG = "configs/production.yaml"
 DEFAULT_LOG = "logs/requests.db"
 
 
@@ -69,13 +69,20 @@ async def lifespan(app: FastAPI):
     backend = _env("API_BACKEND", "").lower() or ("bundle" if bundle else "reference")
 
     if backend in ("bundle", "dense"):
-        from src.serving import bundle_kind, load_retriever
+        from src.serving import bundle_kind, check_bundle_corpus, load_retriever
 
         if not bundle:
             raise RuntimeError(
                 "API_BACKEND=dense needs API_BUNDLE=<models/run_id> or serving.bundle in the config; "
                 "build one with: python -m src.embeddings --config <config> --mode ingredients"
             )
+        if not Path(bundle).exists():
+            raise RuntimeError(
+                f"the serving bundle {bundle} is not on this machine. Build it with: "
+                "python -m src.embeddings --config <config> --mode ingredients, "
+                "or set API_BACKEND=reference to serve TF-IDF over the corpus instead."
+            )
+        check_bundle_corpus(bundle, corpus_path)
         app.state.retriever = load_retriever(bundle)
         app.state.bundle = bundle
         app.state.backend = bundle_kind(bundle)

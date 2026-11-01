@@ -2,33 +2,33 @@
   "all_ok": true,
   "docker": {
     "model_info": {
-      "backend": "lexical",
-      "bundle": "models/bm25-main-1f1f4ce5",
-      "config": "configs/default.yaml",
+      "backend": "dense",
+      "bundle": "models/minilm_pretrained-E04-main-1f1f4ce5",
+      "config": "configs/production.yaml",
       "corpus_recipes": 50000,
       "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
       "metrics": null,
-      "model": "bm25",
+      "model": "minilm_pretrained",
       "model_version": "1"
     },
-    "url": "http://127.0.0.1:8030"
+    "url": "http://127.0.0.1:8080"
   },
   "native": {
     "model_info": {
-      "backend": "lexical",
-      "bundle": "models/bm25-main-1f1f4ce5",
-      "config": "configs/default.yaml",
+      "backend": "dense",
+      "bundle": "models/minilm_pretrained-E04-main-1f1f4ce5",
+      "config": "configs/production.yaml",
       "corpus_recipes": 50000,
       "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
       "metrics": {
-        "fit_seconds": 13.457,
-        "latency_ms": 57.735402400023304,
-        "mrr@10": 0.7583134920634921,
+        "latency_ms": 58.23839660000522,
+        "mrr@10": 0.22871746031746035,
         "n_queries": 500.0,
-        "recall@10": 0.91,
-        "recall@5": 0.856
+        "recall@10": 0.38,
+        "recall@5": 0.292,
+        "wall_seconds": 29.24
       },
-      "model": "bm25",
+      "model": "minilm_pretrained",
       "model_version": "1"
     },
     "url": "http://127.0.0.1:8010"
@@ -37,24 +37,24 @@
     {
       "docker_ids": [
         "recipenlg:7642",
-        "recipenlg:1450605",
-        "recipenlg:263382",
-        "recipenlg:642207",
-        "recipenlg:1247577"
+        "recipenlg:1553265",
+        "recipenlg:351809",
+        "recipenlg:1960247",
+        "recipenlg:959181"
       ],
       "ingredients": [
         "chicken",
         "rice",
         "garlic"
       ],
-      "max_score_diff": 0.0,
+      "max_score_diff": 1.1920928955078125e-07,
       "n_results": 5,
       "native_ids": [
         "recipenlg:7642",
-        "recipenlg:1450605",
-        "recipenlg:263382",
-        "recipenlg:642207",
-        "recipenlg:1247577"
+        "recipenlg:1553265",
+        "recipenlg:351809",
+        "recipenlg:1960247",
+        "recipenlg:959181"
       ],
       "ok": true,
       "same_ids": true,
@@ -62,25 +62,25 @@
     },
     {
       "docker_ids": [
-        "recipenlg:1022072",
-        "recipenlg:1788062",
+        "recipenlg:2116245",
+        "recipenlg:416520",
         "recipenlg:1821122",
-        "recipenlg:1869840",
-        "recipenlg:1039055"
+        "recipenlg:1249010",
+        "recipenlg:1373392"
       ],
       "ingredients": [
         "pasta",
         "tomato",
         "basil"
       ],
-      "max_score_diff": 0.0,
+      "max_score_diff": 1.1920928955078125e-07,
       "n_results": 5,
       "native_ids": [
-        "recipenlg:1022072",
-        "recipenlg:1788062",
+        "recipenlg:2116245",
+        "recipenlg:416520",
         "recipenlg:1821122",
-        "recipenlg:1869840",
-        "recipenlg:1039055"
+        "recipenlg:1249010",
+        "recipenlg:1373392"
       ],
       "ok": true,
       "same_ids": true,
@@ -89,24 +89,24 @@
     {
       "docker_ids": [
         "recipenlg:1184661",
-        "recipenlg:1985424",
         "recipenlg:2013553",
-        "recipenlg:509213",
-        "recipenlg:513790"
+        "recipenlg:513790",
+        "recipenlg:1985424",
+        "recipenlg:509213"
       ],
       "ingredients": [
         "egg",
         "milk",
         "flour"
       ],
-      "max_score_diff": 0.0,
+      "max_score_diff": 1.7881393432617188e-07,
       "n_results": 5,
       "native_ids": [
         "recipenlg:1184661",
-        "recipenlg:1985424",
         "recipenlg:2013553",
-        "recipenlg:509213",
-        "recipenlg:513790"
+        "recipenlg:513790",
+        "recipenlg:1985424",
+        "recipenlg:509213"
       ],
       "ok": true,
       "same_ids": true,
@@ -114,25 +114,25 @@
     },
     {
       "docker_ids": [
-        "recipenlg:1641160",
-        "recipenlg:1270429",
-        "recipenlg:1786456",
-        "recipenlg:1846645",
-        "recipenlg:1863982"
+        "recipenlg:746110",
+        "recipenlg:435004",
+        "recipenlg:1740119",
+        "recipenlg:843375",
+        "recipenlg:699679"
       ],
       "ingredients": [
         "beef",
         "onion",
         "carrot"
       ],
-      "max_score_diff": 0.0,
+      "max_score_diff": 1.1920928955078125e-07,
       "n_results": 5,
       "native_ids": [
-        "recipenlg:1641160",
-        "recipenlg:1270429",
-        "recipenlg:1786456",
-        "recipenlg:1846645",
-        "recipenlg:1863982"
+        "recipenlg:746110",
+        "recipenlg:435004",
+        "recipenlg:1740119",
+        "recipenlg:843375",
+        "recipenlg:699679"
       ],
       "ok": true,
       "same_ids": true,
@@ -141,23 +141,23 @@
     {
       "docker_ids": [
         "recipenlg:1188249",
-        "recipenlg:1881858",
-        "recipenlg:2131264",
-        "recipenlg:704149",
-        "recipenlg:868657"
+        "recipenlg:2100434",
+        "recipenlg:1992668",
+        "recipenlg:1946867",
+        "recipenlg:1508123"
       ],
       "ingredients": [
         "rice",
         "soy sauce"
       ],
-      "max_score_diff": 0.0,
+      "max_score_diff": 1.7881393432617188e-07,
       "n_results": 5,
       "native_ids": [
         "recipenlg:1188249",
-        "recipenlg:1881858",
-        "recipenlg:2131264",
-        "recipenlg:704149",
-        "recipenlg:868657"
+        "recipenlg:2100434",
+        "recipenlg:1992668",
+        "recipenlg:1946867",
+        "recipenlg:1508123"
       ],
       "ok": true,
       "same_ids": true,

@@ -41,6 +41,8 @@ baselines:
 serving:
   # The model the API serves. Empty = TfidfReference over the processed corpus (always works);
   # otherwise a bundle folder under models/, e.g. models/bm25-main-1f1f4ce5. API_BUNDLE overrides it.
+  # The production bundle lives in configs/production.yaml; this file stays bundle-free so a
+  # fresh checkout runs the reference retriever without downloading anything.
   bundle: ""
 
 artifacts:

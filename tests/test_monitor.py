@@ -104,6 +104,21 @@ def test_load_request_logs(tmp_path: Path, sample_records):
     assert loaded[1].ingredients == ["garlic"]
 
 
+@pytest.mark.parametrize("suffix", [".db", ".sqlite3"])
+def test_monitor_reads_api_sqlite_log(tmp_path: Path, sample_records, suffix):
+    from api.request_log import RequestLogger
+
+    log_file = tmp_path / f"requests{suffix}"
+    logger = RequestLogger(log_file)
+    for record in sample_records:
+        logger.log(record)
+
+    assert load_request_logs(log_file) == sample_records
+    report = tmp_path / "monitoring.md"
+    assert main(["--log-path", str(log_file), "--out", str(report)]) == 0
+    assert "**Total Requests:** 3" in report.read_text(encoding="utf-8")
+
+
 def test_format_monitoring_report(sample_records):
     metrics = compute_monitoring_metrics(sample_records)
     report = format_monitoring_report(metrics)
