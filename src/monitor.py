@@ -4,7 +4,12 @@
                           --requests logs/requests.jsonl \
                           --out reports/monitoring_report.html
 
-Computes:
+Or using SQLite production logs:
+
+    python -m src.monitor --log-path logs/requests.db --out reports/monitoring_report.md
+
+Reads the `RequestLogRecord` rows of the API's request log (SQLite by default, the format
+`api/request_log.py` writes; a JSONL file is accepted too) and computes:
   - Request volume & throughput
   - Success and error rates
   - Latency distribution (mean, p50, p90, p95, p99)
@@ -17,6 +22,8 @@ Computes:
 from __future__ import annotations
 
 import argparse
+import json
+import sqlite3
 import statistics
 import sys
 from collections import Counter
@@ -29,7 +36,7 @@ from scipy.stats import ks_2samp
 from src.contracts import RequestLogRecord
 from src.utils import REPO_ROOT, read_jsonl
 
-DEFAULT_LOG_PATH = REPO_ROOT / "logs" / "requests.jsonl"
+DEFAULT_LOG_PATH = REPO_ROOT / "logs" / "requests.db"
 DEFAULT_REPORT_PATH = REPO_ROOT / "reports" / "monitoring_report.html"
 DEFAULT_MIN_SAMPLE_SIZE = 10
 OOV_DRIFT_THRESHOLD = 0.05  # 5% of tokens unseen in train/reference vocab
@@ -37,55 +44,78 @@ ERROR_DRIFT_THRESHOLD = 0.05  # 5% error rate
 KS_ALPHA_THRESHOLD = 0.05  # significance level alpha for KS test
 
 
+def _split(value: Any) -> list[str]:
+    """The log stores list fields as comma-separated strings or JSON arrays."""
+    if isinstance(value, list):
+        return [str(item) for item in value]
+    if value is None or value == "":
+        return []
+    val_str = str(value).strip()
+    if val_str.startswith("[") and val_str.endswith("]"):
+        try:
+            parsed = json.loads(val_str)
+            if isinstance(parsed, list):
+                return [str(p) for p in parsed]
+        except Exception:
+            pass
+    return [part.strip() for part in val_str.split(",") if part.strip()]
+
+
+def _load_request_logs_sqlite(path: Path) -> list[RequestLogRecord]:
+    """Read the rows of the API's SQLite request log."""
+    from api.request_log import COLUMNS, TABLE
+
+    records: list[RequestLogRecord] = []
+    try:
+        with sqlite3.connect(path, timeout=30.0) as connection:
+            connection.row_factory = sqlite3.Row
+            rows = connection.execute(f"SELECT {', '.join(COLUMNS)} FROM {TABLE}").fetchall()
+    except sqlite3.Error:
+        return []
+
+    for row in rows:
+        record = dict(row)
+        record["ingredients"] = _split(record.get("ingredients"))
+        record["result_ids"] = _split(record.get("result_ids"))
+        raw_scores = _split(record.get("scores"))
+        scores: list[float] = []
+        for s in raw_scores:
+            try:
+                scores.append(float(s))
+            except ValueError:
+                continue
+        record["scores"] = scores
+        try:
+            records.append(RequestLogRecord.model_validate(record))
+        except Exception:
+            continue
+    return records
+
+
 def load_request_logs(path: Path | str) -> list[RequestLogRecord]:
-    """Load and validate RequestLogRecords from a JSONL or SQLite file."""
+    """Load and validate RequestLogRecords from the request log.
+
+    The API writes SQLite (`API_REQUEST_LOG`, see `api/request_log.py`); a JSONL file is
+    also accepted, because both hold the same `RequestLogRecord` schema.
+    """
     p = Path(path)
     if not p.exists():
+        # Fallback to .jsonl if .db was requested but not found
+        if p.suffix in {".db", ".sqlite", ".sqlite3"}:
+            alt_jsonl = p.with_suffix(".jsonl")
+            if alt_jsonl.exists():
+                return load_request_logs(alt_jsonl)
         return []
-    records: list[RequestLogRecord] = []
-    if p.suffix.lower() in (".db", ".sqlite"):
-        import json
-        import sqlite3
 
+    if p.suffix.lower() in {".db", ".sqlite", ".sqlite3"}:
+        return _load_request_logs_sqlite(p)
+
+    records: list[RequestLogRecord] = []
+    for line in read_jsonl(p):
         try:
-            with sqlite3.connect(p) as conn:
-                conn.row_factory = sqlite3.Row
-                cursor = conn.execute("SELECT * FROM request_log")
-                for row in cursor.fetchall():
-                    d = dict(row)
-                    for k in ("ingredients", "result_ids", "scores"):
-                        val = d.get(k)
-                        if isinstance(val, str):
-                            val_str = val.strip()
-                            if not val_str:
-                                d[k] = []
-                            elif val_str.startswith('[') and val_str.endswith(']'):
-                                try:
-                                    d[k] = json.loads(val_str)
-                                except Exception:
-                                    d[k] = []
-                            else:
-                                parts = [p_item.strip() for p_item in val_str.split(',') if p_item.strip()]
-                                if k == 'scores':
-                                    try:
-                                        d[k] = [float(p_item) for p_item in parts]
-                                    except ValueError:
-                                        d[k] = []
-                                else:
-                                    d[k] = parts
-                    try:
-                        records.append(RequestLogRecord.model_validate(d))
-                    except Exception:
-                        continue
-        except Exception as e:
-            print(f"warning: Error reading SQLite logs from {p}: {e}", file=sys.stderr)
-            return []
-    else:
-        for line in read_jsonl(p):
-            try:
-                records.append(RequestLogRecord.model_validate(line))
-            except Exception:
-                continue
+            records.append(RequestLogRecord.model_validate(line))
+        except Exception:
+            continue
     return records
 
 
@@ -777,7 +807,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reference", help="Path to reference queries (queries.jsonl or reference requests)")
     parser.add_argument("--requests", dest="requests", help="Path to request logs (requests.jsonl)")
-    parser.add_argument("--log-path", dest="legacy_log_path", help="Legacy alias for --requests")
+    parser.add_argument("--log-path", dest="legacy_log_path", help="Path to request log (SQLite DB or JSONL)")
     parser.add_argument(
         "--out",
         default=str(DEFAULT_REPORT_PATH),
