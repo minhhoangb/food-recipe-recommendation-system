@@ -104,3 +104,4 @@ Thông tin manifest đã được lưu trữ vĩnh viễn tại `reports/model_m
 - **SHA-256 Weights:** `ecac4fdf79dce1a1e16fd1ace100d794103e4a1f15f9fe14da4f909f36a4cdd3`
 - **Corpus SHA-256:** `1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46`
 - **Trạng thái:** `LOCKED` & sẵn sàng phục vụ cho production serving.
+

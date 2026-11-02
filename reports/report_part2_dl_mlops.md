@@ -221,3 +221,4 @@ Nhật ký thử nghiệm rollback thực tế được ghi nhận tại `report
 - Vai trò: Fine-Tuning + MLflow + Monitoring  
 - Nhãn nộp bài: `FINAL` | `AI-labeled`  
 - Toàn bộ cam kết DoD về Bảng phân tích FT, Báo cáo Giám sát Log thật, Bằng chứng MLflow UI và Báo cáo DL/MLOps tối thiểu 5 trang đã được đáp ứng hoàn chỉnh.
+
