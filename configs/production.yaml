@@ -7,5 +7,5 @@ data:
   profile: main
 
 serving:
-  # Pretrained MiniLM over the main corpus (E04), the dense backend of the demo.
-  bundle: models/minilm_pretrained-E04-main-1f1f4ce5
+  # E03 selected on validation before E10 (user confirmation, 2026-11-03).
+  bundle: models/bm25-main-1f1f4ce5
