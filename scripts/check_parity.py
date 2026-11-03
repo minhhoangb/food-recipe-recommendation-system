@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -66,13 +67,16 @@ def model_info(base_url: str) -> dict:
     """What the server says it is serving."""
     import httpx
 
-    return httpx.get(f"{base_url.rstrip('/')}/model-info", timeout=120.0).json()
+    response = httpx.get(f"{base_url.rstrip('/')}/model-info", timeout=120.0)
+    response.raise_for_status()
+    return response.json()
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("--native", default="http://127.0.0.1:8010")
-    parser.add_argument("--docker", default="http://127.0.0.1:8020")
+    parser.add_argument("--docker", default="http://127.0.0.1:8080")
+    parser.add_argument("--expected-model", help="Fail when either endpoint serves a different model")
     parser.add_argument("--top-k", type=int, default=5)
     parser.add_argument("--tolerance", type=float, default=DEFAULT_TOLERANCE)
     parser.add_argument("--out", default="reports/parity.json")
@@ -80,6 +84,11 @@ def main(argv: list[str] | None = None) -> int:
 
     native_info = model_info(args.native)
     docker_info = model_info(args.docker)
+    same_model = all(native_info.get(key) == docker_info.get(key)
+                     for key in ("model", "bundle", "corpus_sha256"))
+    expected_model = not args.expected_model or all(
+        info.get("model") == args.expected_model for info in (native_info, docker_info)
+    )
 
     rows = []
     for ingredients in DEFAULT_QUERIES:
@@ -99,12 +108,18 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     payload = {
+        "verified_utc": datetime.now(timezone.utc).isoformat(),
+        "expected_model": args.expected_model,
+        "same_model_identity": same_model,
+        "expected_model_served": expected_model,
         "native": {"url": args.native, "model_info": native_info},
         "docker": {"url": args.docker, "model_info": docker_info},
         "top_k": args.top_k,
         "tolerance": args.tolerance,
         "queries": rows,
-        "all_ok": all(row["ok"] for row in rows),
+        "all_ok": same_model and expected_model and all(
+            row["ok"] and row["n_results"] == args.top_k for row in rows
+        ),
     }
     out = Path(args.out) if Path(args.out).is_absolute() else REPO_ROOT / args.out
     write_json(out, payload)
