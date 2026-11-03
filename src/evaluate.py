@@ -143,7 +143,8 @@ def load_system(bundle: Path, encoder: str | Path | None = None):
     from src.retrieval import DenseRetriever
 
     payload = read_json(bundle / "manifest.json")
-    if payload["model_name"] == "minilm_finetuned" and encoder is None:
+    if (payload["model_name"] == "minilm_finetuned" and encoder is None
+            and not (bundle / "encoder" / "modules.json").is_file()):
         raise ValueError(f"{bundle} was encoded by a fine-tuned model: pass its checkpoint as encoder")
     model = load_model(model_name_or_path=str(encoder)) if encoder else None
     retriever = DenseRetriever.from_bundle(bundle, model=model)
