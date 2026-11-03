@@ -18,6 +18,8 @@ models/*
 dist/
 mlruns/
 *.db
+# Shared MLflow tracking snapshot; other runtime databases remain ignored.
+!/mlflow.db
 logs/
 reports/regularization_ablation*/checkpoint-*/
 

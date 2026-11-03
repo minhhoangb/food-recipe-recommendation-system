@@ -78,6 +78,11 @@ Step 2 writes `models/bm25-main-1f1f4ce5/`, which is selected by
 against `artifacts.sha256` before extraction. `verify_data.py` then checks both
 profiles, file hashes and split/group isolation.
 
+The complete archived `models/` directory is also available as an optional
+[GitHub Release download](docs/shared_model_artifacts.md), with a SHA-256 and
+per-file inventory. The repository includes a versioned `mlflow.db` snapshot for
+viewing run history; `mlruns/` artifacts are separate.
+
 > **Windows note:** if pip fails with *"An Application Control policy has blocked this
 > file"*, the wheels were downloaded with the Mark-of-the-Web flag. Run
 > `Get-ChildItem .venv -Recurse -Include *.pyd,*.dll | Unblock-File` once after the install.
