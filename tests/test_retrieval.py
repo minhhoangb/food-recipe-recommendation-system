@@ -37,6 +37,48 @@ class FakeEncoder:
         return vectors
 
 
+def test_ft_bundle_requires_its_checkpoint(bundle):
+    from src.utils import read_json, write_json
+
+    directory, _, _ = bundle
+    manifest = read_json(directory / "manifest.json")
+    manifest["model_name"] = "minilm_finetuned"
+    write_json(directory / "manifest.json", manifest)
+    with pytest.raises(BundleError, match="no encoder"):
+        DenseRetriever.from_bundle(directory)
+
+
+def test_ft_checkpoint_is_portable_and_hash_checked(bundle, tmp_path, monkeypatch):
+    import shutil
+
+    from src.embeddings import package_encoder
+    from src.utils import read_json, write_json
+
+    directory, _, _ = bundle
+    checkpoint = tmp_path / "checkpoint"
+    checkpoint.mkdir()
+    for name in ("modules.json", "model.safetensors", "config.json"):
+        (checkpoint / name).write_text("fixture checkpoint")
+    manifest = read_json(directory / "manifest.json")
+    manifest["model_name"] = "minilm_finetuned"
+    write_json(directory / "manifest.json", manifest)
+    package_encoder(directory, checkpoint)
+    relocated = tmp_path / "relocated" / directory.name
+    shutil.copytree(directory, relocated)
+    calls = []
+
+    def load(**kwargs):
+        calls.append(kwargs["model_name_or_path"])
+        return FakeEncoder()
+
+    monkeypatch.setattr("src.retrieval.load_model", load)
+    assert DenseRetriever.from_bundle(relocated).name == "minilm_finetuned"
+    assert calls == [str((relocated / "encoder").resolve())]
+    (relocated / "encoder" / "model.safetensors").write_text("tampered")
+    with pytest.raises(BundleError, match="sha256"):
+        DenseRetriever.from_bundle(relocated)
+
+
 @pytest.fixture
 def bundle(tmp_path: Path):
     """A 6-recipe bundle with distinct, normalised vectors."""

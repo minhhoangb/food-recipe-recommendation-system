@@ -1,0 +1,166 @@
+{
+  "status": "frozen",
+  "frozen_utc": "2026-11-03T06:07:24.603257+00:00",
+  "decision_source": "User confirmed seven systems and BM25 deployment before any E10 score",
+  "git_head": "2c8e4604768ff941b39a35014e286b36b94cf8a8",
+  "config": "configs/default.yaml",
+  "config_sha256": "d23e5a7246b538e93a239dc2a544bc06b052850586a39f1810294d170013e1eb",
+  "profile": "main",
+  "data_dir": "D:\\MDS301\\food-recipe-recommendation-system\\data\\processed\\main",
+  "data_files": {
+    "corpus.jsonl": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+    "splits.json": "35abfe794e8cd840d103657dfb613b31034870960fb513cf85032c810524de0a",
+    "queries.jsonl": "76c827a330ea5802d74b4ce3b59ad9c7be6084b814f343fff18354b37ad6f8c9",
+    "qrels.jsonl": "cebd0d58c3eca55831b3bf84afb1b4f0b2556444bde53d150967a07bddac3b7d",
+    "dataset_manifest.json": "cfa2e0aeca4fdd74704d86a9480599c5bf66ce2ef8c0a2d3d5a32e68359f9245"
+  },
+  "code_files": {
+    "src/final_evaluation.py": "be1c83cde6cb84923c3f0a30a412c6bdd02190153c9b6b0bc2f22c66e9080a6a",
+    "src/evaluate.py": "cbbffca6c9d7d55a5c1a37223aab3b105bfa531dbd4baf2bd0d1da98a395d911",
+    "src/retrieval.py": "fd16d97de65303c067905e91de95ac92d98a7cdc0707839f44fb6b8c0ecb5504",
+    "src/embeddings.py": "e9eec2bf11b53521e564222030e7d44ef930de1429e8c993e3ba3cdffd9cbf30",
+    "src/baseline.py": "f4c4e6db449cfbbf8db69993f91af7c7553cca3ac4d221d51ff8667f89b6105b",
+    "src/normalize.py": "49ac19460b04a76512afdc1b1d6175b41f6970aa775d7bf38f124ecde17d8b4e",
+    "src/config.py": "8330b4827c8f288ae9fc4fa409934b2f3cb277f697150130e5a40287412d9402",
+    "src/contracts.py": "e62fed8131d5087ed58a6ec5d73383f5fbec33b5d4d4f880ed3d854605f24614",
+    "src/pipeline.py": "fbf9395722cc0fe45658eb1b631b290dc663eedc7a209f88f464cdb4335cccc9",
+    "configs/production.yaml": "d339170498cbdb3c58324370c666a7094f8aad7f7a02bf4b7d06e4e32530724e"
+  },
+  "systems": [
+    {
+      "label": "E01",
+      "bundle": "models/tfidf-main-1f1f4ce5",
+      "model_name": "tfidf",
+      "files": {
+        "manifest.json": "0a87c246c23d5a38a59cf8f7aca74883f8ee89f87a5185bb3198abcff95ef248",
+        "metrics.json": "6738407329ac9e49b3b8852ff72450272fe74fda59cf68feb9d1f2a7a70e54a7",
+        "model.joblib": "bb3f26921c091410c29e20cfeb22260488f3a8f51556c33271f44884cce665e4"
+      },
+      "encoder": null,
+      "encoder_files": {}
+    },
+    {
+      "label": "E02",
+      "bundle": "models/tfidf_tuned-main-1f1f4ce5",
+      "model_name": "tfidf",
+      "files": {
+        "manifest.json": "f476fd4007fdc88ea734a4ff0b797cc1c76f475a348c2e2fc5cfd29f4e052f2c",
+        "metrics.json": "f879b89abc6691b22edf49ceaf3900f5cfdc252220722963efb51aa914ba7204",
+        "model.joblib": "bb3f26921c091410c29e20cfeb22260488f3a8f51556c33271f44884cce665e4"
+      },
+      "encoder": null,
+      "encoder_files": {}
+    },
+    {
+      "label": "E03",
+      "bundle": "models/bm25-main-1f1f4ce5",
+      "model_name": "bm25",
+      "files": {
+        "manifest.json": "e20ceee15607ac71b42effc1e19d52d46a203cbfc88a4a54fcd18cd6437a1e07",
+        "metrics.json": "a93d1ac776dff9b3836b2105d822269795de62c855d524034a27868fccfefceb",
+        "model.joblib": "46fd18e1bcb4e3b69fa7031d0c46557cefdb8c3d22966bf32e19a6a9ff6d13ef"
+      },
+      "encoder": null,
+      "encoder_files": {}
+    },
+    {
+      "label": "LSA",
+      "bundle": "models/lsa-main-1f1f4ce5",
+      "model_name": "lsa",
+      "files": {
+        "manifest.json": "199f0bb9458b31554f4ba090446b98bfb939518523f694cc87c5960f98ffd1c2",
+        "metrics.json": "0ebd65e5b26d26f968bf9ea57345b8f2d0aa976eecfdcefbd120d31d63dce968",
+        "model.joblib": "997c97addf6a818b478d3bc1fb4c124a8973074ed117f5337a67c00a531a5c06"
+      },
+      "encoder": null,
+      "encoder_files": {}
+    },
+    {
+      "label": "E04",
+      "bundle": "models/minilm_pretrained-E04-main-1f1f4ce5",
+      "model_name": "minilm_pretrained",
+      "files": {
+        "embeddings.npy": "86032108d982f718176f522c621f73ab683e826f596f853a3c207162aa0989c3",
+        "manifest.json": "56a165fba6a10e290a54670460324804d96aeb36f008d245517910dce7c37475",
+        "recipe_ids.json": "0aac8cd8af70a2e8879f4703d8603d6913463007a469c885ee07e6f38c040241"
+      },
+      "encoder": "C:\\Users\\buimi\\.cache\\huggingface\\hub\\models--sentence-transformers--all-MiniLM-L6-v2\\snapshots\\1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+      "encoder_files": {
+        "1_Pooling/config.json": "4be450dde3b0273bb9787637cfbd28fe04a7ba6ab9d36ac48e92b11e350ffc23",
+        "config.json": "953f9c0d463486b10a6871cc2fd59f223b2c70184f49815e7efbcab5d8908b41",
+        "config_sentence_transformers.json": "061ca9d39661d6c6d6de5ba27f79a1cd5770ea247f8d46412a68a498dc5ac9f3",
+        "model.safetensors": "53aa51172d142c89d9012cce15ae4d6cc0ca6895895114379cacb4fab128d9db",
+        "modules.json": "84e40c8e006c9b1d6c122e02cba9b02458120b5fb0c87b746c41e0207cf642cf",
+        "README.md": "dcd602d2fd35c203a247304a06fec6654a12f7941b739f9221a064fe8dc3b7f0",
+        "sentence_bert_config.json": "fc1993fde0a95c24ec6c022539d41cf6e2f7c9721e5415d6fb6897472a9cd4b7",
+        "special_tokens_map.json": "303df45a03609e4ead04bc3dc1536d0ab19b5358db685b6f3da123d05ec200e3",
+        "tokenizer.json": "be50c3628f2bf5bb5e3a7f17b1f74611b2561a3a27eeab05e5aa30f411572037",
+        "tokenizer_config.json": "acb92769e8195aabd29b7b2137a9e6d6e25c476a4f15aa4355c233426c61576b",
+        "vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+      }
+    },
+    {
+      "label": "E05",
+      "bundle": "models/minilm_pretrained-E05-main-1f1f4ce5",
+      "model_name": "minilm_pretrained",
+      "files": {
+        "embeddings.npy": "0d1b785f2da85c13f98bcb39a4ab410a7dacf6f16f1e320bf4e5d3f00ffe6af5",
+        "manifest.json": "ccb7fbfeee3eb0bb816d8beff9e3024a31f6a5accf812c7d1b10f94348e0545b",
+        "recipe_ids.json": "0aac8cd8af70a2e8879f4703d8603d6913463007a469c885ee07e6f38c040241"
+      },
+      "encoder": "C:\\Users\\buimi\\.cache\\huggingface\\hub\\models--sentence-transformers--all-MiniLM-L6-v2\\snapshots\\1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+      "encoder_files": {
+        "1_Pooling/config.json": "4be450dde3b0273bb9787637cfbd28fe04a7ba6ab9d36ac48e92b11e350ffc23",
+        "config.json": "953f9c0d463486b10a6871cc2fd59f223b2c70184f49815e7efbcab5d8908b41",
+        "config_sentence_transformers.json": "061ca9d39661d6c6d6de5ba27f79a1cd5770ea247f8d46412a68a498dc5ac9f3",
+        "model.safetensors": "53aa51172d142c89d9012cce15ae4d6cc0ca6895895114379cacb4fab128d9db",
+        "modules.json": "84e40c8e006c9b1d6c122e02cba9b02458120b5fb0c87b746c41e0207cf642cf",
+        "README.md": "dcd602d2fd35c203a247304a06fec6654a12f7941b739f9221a064fe8dc3b7f0",
+        "sentence_bert_config.json": "fc1993fde0a95c24ec6c022539d41cf6e2f7c9721e5415d6fb6897472a9cd4b7",
+        "special_tokens_map.json": "303df45a03609e4ead04bc3dc1536d0ab19b5358db685b6f3da123d05ec200e3",
+        "tokenizer.json": "be50c3628f2bf5bb5e3a7f17b1f74611b2561a3a27eeab05e5aa30f411572037",
+        "tokenizer_config.json": "acb92769e8195aabd29b7b2137a9e6d6e25c476a4f15aa4355c233426c61576b",
+        "vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+      }
+    },
+    {
+      "label": "FT",
+      "bundle": "models/minilm_finetuned-E04-main-1f1f4ce5",
+      "model_name": "minilm_finetuned",
+      "files": {
+        "embeddings.npy": "45b006344037cd0adc357d316771431c9b0605e2e66183ed1cdc1e2c12354f83",
+        "encoder/1_Pooling/config.json": "b4105bf48c5257a542a7e1968cef220b3ecd49ae24943143279650c4ac6e30a0",
+        "encoder/config.json": "038a9fbf343363a7b9f8296a0a8402375e8e4e24f612ee4d7f1ec6fa67548508",
+        "encoder/config_sentence_transformers.json": "11e91cd46ff21e48bad612fa772168cbdf6dc45d99287100b8bf19cf47a8ebc7",
+        "encoder/model.safetensors": "ecac4fdf79dce1a1e16fd1ace100d794103e4a1f15f9fe14da4f909f36a4cdd3",
+        "encoder/modules.json": "e7989e94b5b809d895a9521b708312c1ccd333e183effebaf3838908da2acd53",
+        "encoder/README.md": "59fda0d13ff750c0939be63a1782394973c3d6ec7bfd1a0680bf648ba1a60636",
+        "encoder/sentence_bert_config.json": "5a78a8637a4c986a89b5e9b3ce4af84b94b1dfeb9f1dfb09c448182a9d7ca9ab",
+        "encoder/special_tokens_map.json": "5aa43c2f985a25296d5a5ce621c2f77376ca8091a47993c492fd5460b895b140",
+        "encoder/tokenizer.json": "851ca67100d372ca3ae031a6abd168f53489eebfd7d89523f35c5c9b4d372c3c",
+        "encoder/tokenizer_config.json": "d4f505dfdb84b5a987fc5f520e0c2bac59e4ac6e43a1d00cab1e96647971dad8",
+        "encoder/vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3",
+        "manifest.json": "ca21c2af8bf79ccc363a6544eb786ea6812fe5b000a4cf351fc41c603071fab2",
+        "recipe_ids.json": "0aac8cd8af70a2e8879f4703d8603d6913463007a469c885ee07e6f38c040241"
+      },
+      "encoder": null,
+      "encoder_files": {}
+    }
+  ],
+  "selected_deployment": "E03",
+  "selection_basis": "Highest historical validation MRR@10; test scores cannot change this choice",
+  "top_k": 10,
+  "rerank": "none",
+  "test_queries_expected": 1000,
+  "pool_depth": 5,
+  "double_label_share": 0.2,
+  "seed": 42,
+  "significance": {
+    "library": "ranx.compare",
+    "test": "student",
+    "max_p": 0.01,
+    "correction": null,
+    "limitation": "Pairwise tests, no multiplicity correction"
+  },
+  "python": "3.14.7"
+}

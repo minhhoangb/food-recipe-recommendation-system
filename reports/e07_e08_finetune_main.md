@@ -1,8 +1,9 @@
 # Fine-tuned MiniLM: main corpus CPU one-epoch evaluation
 
 Measured on 2026-10-29. This report replaces the earlier E07/E08 table: its FT
-values and registry claims were not tied to this checkpoint. No E08 (fine-tuned
-title + ingredients) bundle was evaluated in this run.
+values and registry claims were not tied to this checkpoint. Following the team contract
+(E07 = pilot fine-tuning, E08 = main fine-tuning), this checkpoint is **E08**. No fine-tuned
+title + ingredients bundle was evaluated in this run.
 
 ## Setup and provenance
 
@@ -33,7 +34,7 @@ title + ingredients) bundle was evaluated in this run.
 | LSA | 0.4560 | 0.5360 | 0.3629 |
 | E04 pretrained ingredients | 0.5120 | 0.5760 | 0.4342 |
 | E05 pretrained title + ingredients | 0.2140 | 0.2620 | 0.1519 |
-| FT CPU one epoch (E07) | 0.7340 | 0.7980 | 0.6209 |
+| FT CPU one epoch (E08) | 0.7340 | 0.7980 | 0.6209 |
 
 FT improves MRR@10 over E04 by **+0.1867 (+43.0%)** and Recall@10 by
 **+0.2220**. It improves reciprocal rank on

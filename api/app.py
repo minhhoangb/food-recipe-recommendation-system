@@ -162,6 +162,7 @@ def _log(payload: PredictRequest, response: PredictResponse, status_code: int, e
             top_k=payload.top_k,
             result_ids=[result.recipe_id for result in response.results],
             scores=[result.score for result in response.results],
+            missing_ingredient_counts=[len(result.missing_ingredients) for result in response.results],
             latency_ms=response.latency_ms,
             status_code=status_code,
         )

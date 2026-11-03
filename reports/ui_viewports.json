@@ -1,0 +1,19 @@
+{
+  "checked_utc": "2026-11-03T05:44:14.196Z",
+  "tool": "Playwright with explicit CSS viewport",
+  "model": "minilm_finetuned",
+  "checks": [
+    {
+      "viewport": 390,
+      "scrollWidth": 390,
+      "topKRight": 106.59375,
+      "results": 3
+    },
+    {
+      "viewport": 1440,
+      "scrollWidth": 1440,
+      "topKRight": 1044,
+      "results": 3
+    }
+  ]
+}

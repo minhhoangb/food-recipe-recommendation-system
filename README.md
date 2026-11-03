@@ -194,10 +194,10 @@ Measured on `main` validation (500 queries over 50,000 recipes) using synthetic 
 | Exp ID | Pipeline Description | Recall@5 | Recall@10 | MRR@10 | Delta vs Baseline |
 |---|---|---|---|---|---|
 | **E04** | Pretrained MiniLM, ingredients | 0.5120 | 0.5760 | 0.4342 | Baseline |
-| **FT (E07)** | Fine-tuned MiniLM, ingredients, CPU one epoch | **0.7340** | **0.7980** | **0.6209** | **+43.0% MRR@10 (+0.1867)** |
+| **FT (E08)** | Fine-tuned MiniLM on main, ingredients, CPU one epoch | **0.7340** | **0.7980** | **0.6209** | **+43.0% MRR@10 (+0.1867)** |
 | **E05** | Pretrained MiniLM, title + ingredients | 0.2140 | 0.2620 | 0.1519 | Different representation |
 
-No E08 or hybrid pipeline was evaluated in this run. BM25 remains above FT on this proxy (MRR@10 0.7583). See [the full comparison](reports/comparison.csv), [error analysis](reports/error_analysis.md) and [dev judging assignments](reports/manual_eval/README.md).
+Experiment ids follow the team contract (E07 = pilot fine-tuning, E08 = main fine-tuning). No fine-tuned title + ingredients bundle and no hybrid pipeline were evaluated in this run. BM25 remains above FT on this proxy (MRR@10 0.7583). See [the full comparison](reports/comparison.csv), [error analysis](reports/error_analysis.md) and [dev judging assignments](reports/manual_eval/README.md).
 
 #### MLflow Tracking & Model Registry
 
@@ -219,21 +219,57 @@ Pass the exported fine-tuned checkpoint bundle via `--model-path`:
 # 1. Build training pairs on main (30,000 pairs, seed 42)
 python -m src.build_pairs --config configs/default.yaml --split train --mode ingredients --max-pairs 30000 --seed 42
 
-# 2. Build index bundle using the CPU one-epoch checkpoint (FT / E07)
+# 2. Build index bundle using the CPU one-epoch checkpoint (FT / E08)
 python -m src.embeddings --config configs/default.yaml --model-path models/minilm_finetuned-main-cpu1ep
 ```
 
 ### Production API & Model Monitoring (Person 3)
 
-`src/monitor.py` parses `RequestLogRecord` entries from `logs/requests.jsonl` to compute request throughput, error rates, p90/p95/p99 latency, zero-hit rate, and vocabulary drift:
+`src/monitor.py` calculates statistical drift via SciPy Kolmogorov-Smirnov (KS 2-sample test, $\alpha=0.05$) and operational metrics over `RequestLogRecord` entries from API request logs:
+- **Query Length & Token Drift:** KS test comparing query length distributions against reference queries.
+- **OOV (Out-Of-Vocabulary) Ingredients:** Percentage of requested ingredients not in training vocabulary (drift threshold > 5%).
+- **Missing Ingredients & Latency:** p50/p95/p99 latency (ms), zero-hit rate, and system error rate (threshold > 5%).
+- **Sample Sufficiency:** Returns `INSUFFICIENT_DATA` if sample size < `min_samples` (default: 10) instead of false positives.
+- **HTML & Markdown Reporting:** Generates a standalone, dark-themed HTML report with simulation disclaimers:
 
 ```bash
-python -m src.monitor --log-path logs/requests.jsonl --out reports/monitoring_report.md --mlflow
+# Monitor drift against reference queries and export HTML report
+python -m src.monitor --reference data/processed/pilot/queries.jsonl --requests logs/simulated_requests_drift.jsonl --out reports/monitoring_report.html
+
+# Run simulated drift scenarios (no-drift vs drifted)
+python scripts/simulate_drift.py
 ```
+
+*See simulation reports and analysis in [reports/drift_simulation.md](reports/drift_simulation.md), [reports/monitoring_nodrift_simulation.html](reports/monitoring_nodrift_simulation.html), and [reports/monitoring_drift_simulation.html](reports/monitoring_drift_simulation.html).*
+
+#### MLflow Model Registry & Instant Rollback
+
+The model registry uses aliases to manage deployments cleanly without redeploying code:
+- `@production`: Active model serving live user traffic (Version 2).
+- `@staging`: Candidate model undergoing validation/QA (Version 1).
+- **Offline Serving Decoupling:** Serving bundles (`models/<bundle_name>`) hold static `embeddings.npy` and `manifest.json`. The API (`src.serving` / `api.app`) runs independently without requiring an active MLflow tracking server.
+- **Single-command Rollback:**
+  ```bash
+  # Rollback @production alias to Version 1
+  python -m src.train --rollback 1 --alias production
+  ```
+*Detailed trial execution and SOP documented in [reports/mlflow_rollback_trial.md](reports/mlflow_rollback_trial.md).*
 
 ## Experiment results (Master Comparison Table)
 
-**TODO(Person 1)**: filled from the MLflow runs after the frozen final evaluation.
+| Model | Train MRR@10 | Test MRR@10 | CV MRR@10 | Training/index s | Tuned? | Notes |
+|---|---:|---:|---|---:|---|---|
+| E01 tfidf | 0.6998 | 0.6649 | 0.6896 ± 0.0063 | 28.024 | no |  |
+| E02 tfidf | 0.6998 | 0.6649 | 0.6896 ± 0.0063 | 33.988 | yes (GroupKFold CV5) |  |
+| E03* bm25 | 0.7687 | 0.7766 | N/A | 25.658 | no | Selected before test; N/A: rank-bm25 indexes every candidate (transductive IDF), nothing is fitted on train |
+| LSA lsa | 0.3402 | 0.3424 | 0.3560 ± 0.0095 | 51.638 | no |  |
+| E04 minilm_pretrained | 0.4575 | 0.4752 | N/A | 0.000 | no | N/A: pretrained encoder, nothing is fitted on our data |
+| E05 minilm_pretrained | 0.1808 | 0.1989 | N/A | 0.000 | no | N/A: pretrained encoder, nothing is fitted on our data |
+| FT minilm_finetuned | 0.6450 | 0.6368 | N/A | 871.336 | fine-tuned (MNRL) | N/A: one fixed one-epoch checkpoint, not cross-validated |
+
+* = selected for deployment using validation before E10. Train and test are origin-recipe retrieval proxies, not human relevance. Train/Validation/Test, training-time and CV run IDs are in `master_comparison.csv`. Training/index/encoding times have different meanings and hardware; do not rank their speed.
+
+Frozen protocol and one-run ledger: [reports/final](reports/final). Final human labels and agreement remain pending; see [the judging instructions](docs/final_annotation_workflow.md).
 
 ## API usage
 
@@ -631,8 +667,35 @@ docker-compose.yml  api + the bundles volume + the optional MLflow UI
 
 ## Reproducibility
 
+Khung 3 verification (2026-11-03):
+
+- Fine-tuned bundles include an `encoder/` directory. Every checkpoint file is hashed in
+  `manifest.json`; the API, benchmark and evaluator load that encoder instead of pretrained
+  weights. Build a portable FT bundle with
+  `python -m src.embeddings --config configs/default.yaml --model-path models/minilm_finetuned-main-cpu1ep`.
+  Legacy FT bundles without a packaged encoder fail clearly; explicit evaluation encoders still work.
+- `src.train` verifies cached inputs and output hashes. Data/config mismatches in processed
+  artifacts stop the pipeline for verification; they do not silently overwrite shared data.
+  Checkpoint caches include pairs, hyperparameters and device. `train_summary.json` records actual
+  training measurements; missing legacy measurements are omitted from MLflow.
+- API logs include one missing-ingredient count per returned recipe. Existing SQLite logs are
+  migrated; missing fields in old records remain unknown. Monitoring excludes test/final
+  reference queries and does not invent reference latencies.
+- `python -m scripts.record_rollback_trial --bootstrap` creates trial registry revisions only when
+  the local registry is empty, checks a rollback, restores the original production alias and sends
+  real HTTP requests to a fresh API with an unavailable tracking endpoint. Both initial trial
+  revisions use the same locked FT checkpoint; this tests registry operations, not quality changes.
+  Evidence: `reports/mlflow_rollback_trial.json` and `reports/offline_api_verification.json`.
+- `reports/benchmark.json` includes FT with 20 warmup and 100 measured validation queries per bundle.
+  `reports/ui_viewports.json` records actual 390px/1440px CSS viewports, overflow and keyboard checks.
+
 - Seed 42 everywhere; `configs/default.yaml` holds every data parameter and is hashed into each manifest.
 - `python -m src.data_collection` reproduces the processed files exactly (hashes are in the manifest; `tests/test_data_collection.py::test_build_is_reproducible` checks it on a fixture).
 - `python -m pytest` runs offline in seconds. Tests that read the real processed data skip themselves if it is absent.
-- Training from scratch: run `python -m src.train --config configs/pilot.yaml`. Runs on CPU by default; automatically leverages CUDA when available (e.g. on Colab GPU).
+- Training from scratch: run `python src/train.py --config configs/pilot.yaml`. Supports multi-stage orchestration (`raw`, `processed`, `baseline`, `embeddings`, `pairs`, `finetune`, `evaluate`) with hash-based caching to avoid redundant computation.
+  - `--stage <name>`: Execute a single stage (e.g., `--stage pairs`).
+  - `--from-stage <name>`: Run sequentially starting from a specific stage.
+  - `--force`: Bypass hash caching and force re-computation.
+  - `--device cpu`: Guaranteed CPU pathway for environments without GPU.
+  - Missing raw dataset: Exits cleanly with clear data acquisition instructions (never performs silent background downloads).
 - Collaboration rules and file ownership: [CONTRIBUTING.md](CONTRIBUTING.md).

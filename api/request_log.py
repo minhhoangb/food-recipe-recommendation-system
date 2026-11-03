@@ -8,7 +8,9 @@ interleaving half a line.
 
 from __future__ import annotations
 
+import json
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 from src.contracts import RequestLogRecord
@@ -26,6 +28,7 @@ COLUMNS = (
     "scores",
     "latency_ms",
     "status_code",
+    "missing_ingredient_counts",
 )
 
 
@@ -36,10 +39,12 @@ class RequestLogger:
         self.path = Path(path) if path else None
         if self.path is not None:
             self.path.parent.mkdir(parents=True, exist_ok=True)
-            with self._connect() as connection:
-                connection.execute(
-                    f"CREATE TABLE IF NOT EXISTS {TABLE} ({', '.join(COLUMNS)})"
-                )
+            with closing(self._connect()) as connection, connection:
+                connection.execute("BEGIN IMMEDIATE")
+                connection.execute(f"CREATE TABLE IF NOT EXISTS {TABLE} ({', '.join(COLUMNS)})")
+                columns = {row[1] for row in connection.execute(f"PRAGMA table_info({TABLE})")}
+                if "missing_ingredient_counts" not in columns:
+                    connection.execute(f"ALTER TABLE {TABLE} ADD COLUMN missing_ingredient_counts")
 
     def _connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(self.path, timeout=30.0)
@@ -53,10 +58,9 @@ class RequestLogger:
             return
         row = record.model_dump()
         try:
-            with self._connect() as connection:
+            with closing(self._connect()) as connection, connection:
                 connection.execute(
-                    f"INSERT INTO {TABLE} ({', '.join(COLUMNS)}) "
-                    f"VALUES ({', '.join('?' for _ in COLUMNS)})",
+                    f"INSERT INTO {TABLE} ({', '.join(COLUMNS)}) VALUES ({', '.join('?' for _ in COLUMNS)})",
                     (
                         row["request_id"],
                         row["timestamp_utc"],
@@ -69,6 +73,9 @@ class RequestLogger:
                         ",".join(str(score) for score in row["scores"]),
                         row["latency_ms"],
                         row["status_code"],
+                        json.dumps(row["missing_ingredient_counts"])
+                        if row["missing_ingredient_counts"] is not None
+                        else None,
                     ),
                 )
         except sqlite3.Error:

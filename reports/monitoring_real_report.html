@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo Giám Sát API & Data Drift</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --border: #334155;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --primary: #38bdf8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 24px;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        h1 {
+            margin: 0 0 6px 0;
+            font-size: 24px;
+            color: #ffffff;
+        }
+        .timestamp {
+            color: var(--muted);
+            font-size: 13px;
+        }
+        .simulation-banner {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid var(--warning);
+            color: #fde68a;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        .badge-sim {
+            background: var(--warning);
+            color: #000000;
+            font-weight: bold;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .kpi-title {
+            font-size: 12px;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .kpi-value {
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .status-card {
+            border-left: 4px solid #ef4444;
+        }
+        .section-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        h2 {
+            margin: 0 0 16px 0;
+            font-size: 18px;
+            color: #e2e8f0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            color: var(--muted);
+            font-weight: 600;
+            background: #182234;
+        }
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        code {
+            background: #0b1120;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--primary);
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        }
+        .pill {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+        .pill-success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .pill-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .pill-warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Hệ Thống Giám Sát API & Phát Hiện Data Drift</h1>
+                <div class="timestamp">
+                    Sinh lúc UTC: 2026-11-01 03:38:09Z
+                    | Vai trò: Hiếu (Person 3)
+                </div>
+            </div>
+            <div>
+                <span class="pill"
+                      style="background: #ef4444; color: #000000; font-size: 13px; padding: 6px 14px;">
+                    CẢNH BÁO DỊCH CHUYỂN (DRIFT DETECTED)
+                </span>
+            </div>
+        </header>
+
+        
+
+        <div class="kpi-grid">
+            <div class="kpi-card status-card">
+                <div class="kpi-title">Trạng Thái Phân Phối</div>
+                <div class="kpi-value" style="color: #ef4444; font-size: 18px;">CẢNH BÁO DỊCH CHUYỂN (DRIFT DETECTED)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Tổng Lượt Request</div>
+                <div class="kpi-value">50</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Tỉ Lệ Lỗi (Error Rate)</div>
+                <div class="kpi-value">6.00%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Tỉ Lệ Nguyên Liệu Lạ (OOV)</div>
+                <div class="kpi-value">50.00%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Độ Trễ p95</div>
+                <div class="kpi-value">3.07 ms</div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>Kiểm Định Thống Kê & Phát Hiện Dịch Chuyển (Drift Tests)</h2>
+            <p style="color: var(--muted); font-size: 13px; margin-top: -8px; margin-bottom: 16px;">
+                Mẫu tối thiểu: 10 quan sát. Ngưỡng ý nghĩa: α = 0.05.<br>
+                Kết luận: Phát hiện dịch chuyển phân phối (Data Drift Detected)
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Đặc Trưng (Feature)</th>
+                        <th>Phương Pháp Kiểm Định</th>
+                        <th>Reference Mean</th>
+                        <th>Quan Sát Mean</th>
+                        <th>Thống Kê (D/Rate)</th>
+                        <th>p-value</th>
+                        <th>Ngưỡng Cảnh Báo</th>
+                        <th>Trạng Thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+        <tr>
+            <td><strong>Độ dài Query (Query Length)</strong></td>
+            <td>Kolmogorov-Smirnov (KS-2)</td>
+            <td>5.27</td>
+            <td>3.60</td>
+            <td><code>0.6733</code></td>
+            <td><code>0.0000</code></td>
+            <td>p < 0.05</td>
+            <td><span class="pill pill-danger">CẢNH BÁO DRIFT</span></td>
+        </tr>
+        
+        <tr>
+            <td><strong>Nguyên liệu ngoài Vocab (OOV Rate)</strong></td>
+            <td>Tỉ lệ thành phần (Proportion)</td>
+            <td>0.00</td>
+            <td>0.50</td>
+            <td><code>0.5000</code></td>
+            <td><code>—</code></td>
+            <td>> 0.05</td>
+            <td><span class="pill pill-danger">CẢNH BÁO DRIFT</span></td>
+        </tr>
+        
+        <tr>
+            <td><strong>Độ trễ phản hồi (Latency)</strong></td>
+            <td>Kolmogorov-Smirnov (KS-2)</td>
+            <td>24.50</td>
+            <td>2.17</td>
+            <td><code>0.9800</code></td>
+            <td><code>0.0000</code></td>
+            <td>p < 0.05</td>
+            <td><span class="pill pill-success">ĐẠT (PASS)</span></td>
+        </tr>
+        
+        <tr>
+            <td><strong>Tỉ lệ lỗi API (Error Rate)</strong></td>
+            <td>Ngưỡng tần suất lỗi</td>
+            <td>0.00</td>
+            <td>0.06</td>
+            <td><code>0.0600</code></td>
+            <td><code>—</code></td>
+            <td>> 0.05</td>
+            <td><span class="pill pill-danger">CẢNH BÁO DRIFT</span></td>
+        </tr>
+        
+        <tr>
+            <td><strong>Tỉ lệ truy vấn không kết quả (Zero-Hit)</strong></td>
+            <td>Ngưỡng tần suất</td>
+            <td>0.00</td>
+            <td>0.30</td>
+            <td><code>0.3000</code></td>
+            <td><code>—</code></td>
+            <td>> 0.10</td>
+            <td><span class="pill pill-danger">CẢNH BÁO DRIFT</span></td>
+        </tr>
+        
+                </tbody>
+            </table>
+        </div>
+
+        <div class="grid-2">
+            <div class="section-card">
+                <h2>Phân Phối Độ Trễ API (Latency Percentiles)</h2>
+                <table>
+                    <thead>
+                        <tr><th>Thước Đo</th><th>Thời Gian Phản Hồi</th></tr>
+                    </thead>
+                    <tbody>
+                        
+    <tr><td>Trung bình (Mean)</td><td>11.56 ms</td></tr>
+    <tr><td>Trung vị (p50)</td><td>2.17 ms</td></tr>
+    <tr><td>Phân vị 90 (p90)</td><td>2.92 ms</td></tr>
+    <tr><td>Phân vị 95 (p95)</td><td><strong>3.07 ms</strong></td></tr>
+    <tr><td>Phân vị 99 (p99)</td><td>4.14 ms</td></tr>
+    <tr><td>Tối thiểu / Tối đa</td><td>0.0 ms / 480.94 ms</td></tr>
+    
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section-card">
+                <h2>Top Nguyên Liệu Mới Lạ (OOV Ingredients)</h2>
+                <p style="color: var(--muted); font-size: 13px;">
+                    Các từ khóa xuất hiện trong request nhưng chưa có trong dữ liệu huấn luyện:
+                </p>
+                <ul style="padding-left: 20px; font-size: 14px; line-height: 1.8;">
+                    <li><code>chicken</code>: 2 lần</li><li><code>beef</code>: 2 lần</li><li><code>pasta</code>: 2 lần</li><li><code>pepper</code>: 2 lần</li><li><code>chocolate</code>: 2 lần</li><li><code>cheese</code>: 2 lần</li><li><code>salt</code>: 2 lần</li><li><code>lemon</code>: 2 lần</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

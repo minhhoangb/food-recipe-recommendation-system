@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "manifest_version": "1.0.0",
+  "locked_utc": "2026-11-01T03:40:00Z",
+  "author": "Hiếu (Person 3) - Fine-tune + MLflow + Monitoring",
+  "ai_attribution": "Co-authored with Antigravity AI (Gemini 2.5 Flash / DeepMind)",
+  "checkpoint": {
+    "name": "minilm_finetuned-main-cpu1ep",
+    "path": "models/minilm_finetuned-main-cpu1ep",
+    "architecture": "sentence-transformers/all-MiniLM-L6-v2",
+    "embedding_dimension": 384,
+    "max_seq_length": 128,
+    "weights_sha256": "ecac4fdf79dce1a1e16fd1ace100d794103e4a1f15f9fe14da4f909f36a4cdd3",
+    "model_card_format": "huggingface/sentence-transformers"
+  },
+  "serving_bundle": {
+    "bundle_path": "models/minilm_finetuned-E04-main-1f1f4ce5",
+    "corpus_format": "ingredients",
+    "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+    "embeddings_sha256": "models/minilm_finetuned-E04-main-1f1f4ce5/embeddings.npy",
+    "recipe_count": 50000,
+    "dimension": 384,
+    "normalized": true
+  },
+  "training_provenance": {
+    "mlflow_run_id": "0437841237734100a7c1a9b26725d908",
+    "mlflow_experiment": "recipe-retrieval",
+    "device": "cpu",
+    "epochs": 1,
+    "batch_size": 32,
+    "learning_rate": 2e-05,
+    "weight_decay": 0.01,
+    "warmup_steps": 50,
+    "total_train_pairs": 30000,
+    "pair_seed": 42,
+    "train_duration_seconds": 871.336,
+    "train_steps_per_second": 1.08,
+    "peak_rss_mb": 2787.1,
+    "final_train_loss": 0.07921305292450798,
+    "loss_function": "MultipleNegativesRankingLoss",
+    "source_log": "reports/finetune_main.log"
+  },
+  "validation_metrics": {
+    "evaluation_split": "validation (500 queries)",
+    "mrr_at_10": 0.620852,
+    "recall_at_10": 0.798,
+    "recall_at_5": 0.734,
+    "mrr_improvement_over_pretrained_e04": 0.1867,
+    "relative_mrr_gain_percent": 43.0,
+    "improved_queries_count": 196,
+    "tied_queries_count": 274,
+    "regressed_queries_count": 30,
+    "train_proxy_mrr_at_10": 0.644959,
+    "train_val_generalization_gap": 0.024107
+  },
+  "registry": {
+    "model_name": "minilm_finetuned",
+    "production_version": 2,
+    "staging_version": 1,
+    "production_alias_target": 2,
+    "offline_decoupled": true
+  }
+}
