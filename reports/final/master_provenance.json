@@ -1,0 +1,8 @@
+{
+  "e10_parent_run": "16e4dfb977434b2a87a06418c8f2e5a1",
+  "freeze_sha256": "2dd262758c788485a2725e64fc7e28eecc6b5a6aaf7526653c821f9fa12eacd9",
+  "ft_training_run": "0437841237734100a7c1a9b26725d908",
+  "historical_comparison_sha256": "117b2b38819ba6cd8a16462bbdb55676087d6e13a0c1b505fd534400bdcd26fb",
+  "selection_changed_after_test": false,
+  "test_metrics_verified_against_mlflow": true
+}

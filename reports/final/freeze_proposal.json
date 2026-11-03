@@ -1,0 +1,69 @@
+{
+  "config": "configs/default.yaml",
+  "config_sha256": "d23e5a7246b538e93a239dc2a544bc06b052850586a39f1810294d170013e1eb",
+  "created_utc": "2026-11-03T05:59:12.994502+00:00",
+  "decision": "User confirmed all seven systems and BM25 deployment before E10",
+  "double_label_share": 0.2,
+  "existing_ft_lock": "reports/model_manifest_locked.json",
+  "existing_production": "E04 pretrained MiniLM",
+  "frozen_manifest": "frozen_config.json",
+  "pool_depth": 5,
+  "prior_test_runs_found_locally": false,
+  "recommended_deployment": "E03",
+  "rerank": "none",
+  "selection_basis": "Highest recorded validation MRR@10: BM25=0.7583134921; selection occurs before test scores.",
+  "status": "confirmed_then_frozen",
+  "systems": [
+    {
+      "bundle": "models/tfidf-main-1f1f4ce5",
+      "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+      "label": "E01",
+      "manifest_sha256": "0a87c246c23d5a38a59cf8f7aca74883f8ee89f87a5185bb3198abcff95ef248",
+      "model_name": "tfidf"
+    },
+    {
+      "bundle": "models/tfidf_tuned-main-1f1f4ce5",
+      "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+      "label": "E02",
+      "manifest_sha256": "f476fd4007fdc88ea734a4ff0b797cc1c76f475a348c2e2fc5cfd29f4e052f2c",
+      "model_name": "tfidf"
+    },
+    {
+      "bundle": "models/bm25-main-1f1f4ce5",
+      "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+      "label": "E03",
+      "manifest_sha256": "e20ceee15607ac71b42effc1e19d52d46a203cbfc88a4a54fcd18cd6437a1e07",
+      "model_name": "bm25"
+    },
+    {
+      "bundle": "models/lsa-main-1f1f4ce5",
+      "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+      "label": "LSA",
+      "manifest_sha256": "199f0bb9458b31554f4ba090446b98bfb939518523f694cc87c5960f98ffd1c2",
+      "model_name": "lsa"
+    },
+    {
+      "bundle": "models/minilm_pretrained-E04-main-1f1f4ce5",
+      "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+      "label": "E04",
+      "manifest_sha256": "56a165fba6a10e290a54670460324804d96aeb36f008d245517910dce7c37475",
+      "model_name": "minilm_pretrained"
+    },
+    {
+      "bundle": "models/minilm_pretrained-E05-main-1f1f4ce5",
+      "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+      "label": "E05",
+      "manifest_sha256": "ccb7fbfeee3eb0bb816d8beff9e3024a31f6a5accf812c7d1b10f94348e0545b",
+      "model_name": "minilm_pretrained"
+    },
+    {
+      "bundle": "models/minilm_finetuned-E04-main-1f1f4ce5",
+      "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+      "label": "FT",
+      "manifest_sha256": "ca21c2af8bf79ccc363a6544eb786ea6812fe5b000a4cf351fc41c603071fab2",
+      "model_name": "minilm_finetuned"
+    }
+  ],
+  "test_query_count_expected": 1000,
+  "top_k": 10
+}
