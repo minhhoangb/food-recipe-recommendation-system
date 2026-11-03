@@ -1,0 +1,389 @@
+﻿item_id,query_id,recipe_id,systems
+m21-01,m21,recipenlg:1804036,E05@1
+m21-02,m21,recipenlg:1857896,E01@4 E02@4 E03@1 LSA@1 E04@1 FT@1
+m21-03,m21,recipenlg:1622850,E01@3 E02@3 E03@2 LSA@2 E04@5 FT@3
+m21-04,m21,recipenlg:1746819,E03@3 LSA@3
+m21-05,m21,recipenlg:604783,E01@2 E02@2
+m21-06,m21,recipenlg:2179810,E04@3
+m21-07,m21,recipenlg:2138240,E05@3
+m21-08,m21,recipenlg:1840920,E01@1 E02@1 E03@4 LSA@5 E05@2
+m21-09,m21,recipenlg:1828626,E03@5 LSA@4
+m21-10,m21,recipenlg:1125589,E04@4
+m21-11,m21,recipenlg:1133094,E05@5
+m21-12,m21,recipenlg:1951386,FT@4
+m21-13,m21,recipenlg:70800,E04@2
+m21-14,m21,recipenlg:1356652,FT@2
+m21-15,m21,recipenlg:1884112,E05@4
+m21-16,m21,recipenlg:1090961,FT@5
+m21-17,m21,recipenlg:1165773,E01@5 E02@5
+m22-01,m22,recipenlg:2126735,LSA@4
+m22-02,m22,recipenlg:2224382,E01@1 E02@1 E03@5
+m22-03,m22,recipenlg:2052363,E05@2
+m22-04,m22,recipenlg:1881858,LSA@1
+m22-05,m22,recipenlg:337866,E01@3 E02@3 E03@2 E04@5
+m22-06,m22,recipenlg:1085514,E03@3
+m22-07,m22,recipenlg:2131264,LSA@3
+m22-08,m22,recipenlg:1461700,E05@5
+m22-09,m22,recipenlg:990732,E05@4
+m22-10,m22,recipenlg:1188249,LSA@2
+m22-11,m22,recipenlg:943719,E04@3 E05@1 FT@1
+m22-12,m22,recipenlg:1212598,E01@2 E02@2 E03@1 E04@1 FT@4
+m22-13,m22,recipenlg:2021494,E01@5 E02@5 E04@4
+m22-14,m22,recipenlg:997590,FT@5
+m22-15,m22,recipenlg:1201387,E01@4 E02@4 E03@4
+m22-16,m22,recipenlg:2195861,FT@2
+m22-17,m22,recipenlg:1723684,LSA@5
+m22-18,m22,recipenlg:1067501,E05@3
+m22-19,m22,recipenlg:735926,FT@3
+m22-20,m22,recipenlg:1833257,E04@2
+m23-01,m23,recipenlg:5552,E04@5
+m23-02,m23,recipenlg:520350,LSA@1
+m23-03,m23,recipenlg:816009,E05@1 FT@2
+m23-04,m23,recipenlg:178772,LSA@3
+m23-05,m23,recipenlg:426637,E05@3
+m23-06,m23,recipenlg:1593441,E04@1 FT@1
+m23-07,m23,recipenlg:1675681,E03@2 LSA@4 FT@4
+m23-08,m23,recipenlg:2153372,E01@3 E02@3
+m23-09,m23,recipenlg:181470,E01@4 E02@4
+m23-10,m23,recipenlg:14293,E03@4
+m23-11,m23,recipenlg:567210,E04@3 FT@5
+m23-12,m23,recipenlg:2021129,E04@2 E05@5
+m23-13,m23,recipenlg:616546,E04@4
+m23-14,m23,recipenlg:1352881,E03@1
+m23-15,m23,recipenlg:93122,E01@2 E02@2 LSA@5
+m23-16,m23,recipenlg:206081,E05@2
+m23-17,m23,recipenlg:750287,E05@4
+m23-18,m23,recipenlg:458909,E01@1 E02@1 LSA@2 FT@3
+m23-19,m23,recipenlg:160238,E03@5
+m23-20,m23,recipenlg:471752,E01@5 E02@5 E03@3
+m24-01,m24,recipenlg:1142683,E05@3
+m24-02,m24,recipenlg:592462,E04@3
+m24-03,m24,recipenlg:2030566,E05@4
+m24-04,m24,recipenlg:333602,E03@2 LSA@3
+m24-05,m24,recipenlg:241806,E01@1 E02@1 E03@5 LSA@5 E05@2 FT@3
+m24-06,m24,recipenlg:409265,E01@5 E02@5
+m24-07,m24,recipenlg:956872,E03@4
+m24-08,m24,recipenlg:2202479,LSA@2
+m24-09,m24,recipenlg:725214,E04@2
+m24-10,m24,recipenlg:67682,E05@1
+m24-11,m24,recipenlg:923043,E01@3 E02@3 FT@5
+m24-12,m24,recipenlg:201717,E01@4 E02@4 E04@4
+m24-13,m24,recipenlg:673995,FT@4
+m24-14,m24,recipenlg:1968135,FT@2
+m24-15,m24,recipenlg:436044,E03@3 LSA@4 E04@5
+m24-16,m24,recipenlg:1708622,E05@5
+m24-17,m24,recipenlg:1737213,E01@2 E02@2 E03@1 LSA@1 E04@1 FT@1
+m25-01,m25,recipenlg:2123980,E04@1
+m25-02,m25,recipenlg:2114751,E01@1 E02@1 E03@2
+m25-03,m25,recipenlg:250229,LSA@3
+m25-04,m25,recipenlg:1838098,E04@3 FT@2
+m25-05,m25,recipenlg:638119,E03@3
+m25-06,m25,recipenlg:276034,E05@3
+m25-07,m25,recipenlg:1120835,E05@1
+m25-08,m25,recipenlg:1097306,FT@5
+m25-09,m25,recipenlg:316566,E03@4
+m25-10,m25,recipenlg:1297157,E03@5
+m25-11,m25,recipenlg:652035,LSA@5
+m25-12,m25,recipenlg:1945467,E01@4 E02@4 E04@5 FT@3
+m25-13,m25,recipenlg:1329274,E01@2 E02@2 LSA@4
+m25-14,m25,recipenlg:823453,E04@4
+m25-15,m25,recipenlg:418590,E05@5
+m25-16,m25,recipenlg:625777,FT@1
+m25-17,m25,recipenlg:1676544,E05@4
+m25-18,m25,recipenlg:1438740,E01@5 E02@5 E03@1 LSA@2 E05@2
+m25-19,m25,recipenlg:1157934,FT@4
+m25-20,m25,recipenlg:1739201,E01@3 E02@3
+m25-21,m25,recipenlg:1655779,LSA@1 E04@2
+m26-01,m26,recipenlg:1277033,E01@2 E02@2 E03@2 LSA@2 E04@3 FT@3
+m26-02,m26,recipenlg:1038578,E05@2
+m26-03,m26,recipenlg:1002830,E01@1 E02@1 E03@1 LSA@1 E04@1 E05@4 FT@1
+m26-04,m26,recipenlg:1855437,E01@5 E02@5 E03@5
+m26-05,m26,recipenlg:44118,E04@4 E05@3
+m26-06,m26,recipenlg:478361,E01@3 E02@3 E03@3 LSA@3 E04@2 E05@1 FT@2
+m26-07,m26,recipenlg:659849,FT@5
+m26-08,m26,recipenlg:841905,LSA@5
+m26-09,m26,recipenlg:368663,E05@5
+m26-10,m26,recipenlg:1545990,E01@4 E02@4 E03@4 LSA@4 E04@5 FT@4
+m27-01,m27,recipenlg:984948,E04@1
+m27-02,m27,recipenlg:1869039,E04@3
+m27-03,m27,recipenlg:41604,E04@5
+m27-04,m27,recipenlg:554139,LSA@2
+m27-05,m27,recipenlg:1572447,E05@1
+m27-06,m27,recipenlg:389436,E05@4
+m27-07,m27,recipenlg:1822178,E05@2
+m27-08,m27,recipenlg:1769274,E05@5
+m27-09,m27,recipenlg:1038841,E01@1 E02@1 E03@1 LSA@1 FT@1
+m27-10,m27,recipenlg:1068796,FT@5
+m27-11,m27,recipenlg:942693,E04@4
+m27-12,m27,recipenlg:743883,E05@3
+m27-13,m27,recipenlg:1160107,E01@4 E02@4 E03@4 FT@3
+m27-14,m27,recipenlg:1289457,FT@2
+m27-15,m27,recipenlg:1380781,FT@4
+m27-16,m27,recipenlg:2066720,E03@5 LSA@3
+m27-17,m27,recipenlg:333406,E01@2 E02@2 E03@2
+m27-18,m27,recipenlg:1607360,E01@3 E02@3
+m27-19,m27,recipenlg:941080,E01@5 E02@5 E03@3
+m27-20,m27,recipenlg:593632,LSA@5
+m27-21,m27,recipenlg:1585496,E04@2
+m27-22,m27,recipenlg:1309861,LSA@4
+m28-01,m28,recipenlg:1642209,E01@3 E02@3 E03@2 FT@2
+m28-02,m28,recipenlg:2225819,E05@2
+m28-03,m28,recipenlg:50433,E01@4 E02@4
+m28-04,m28,recipenlg:786558,FT@4
+m28-05,m28,recipenlg:1378246,E03@1 LSA@3
+m28-06,m28,recipenlg:1887672,E04@3
+m28-07,m28,recipenlg:1898680,LSA@5
+m28-08,m28,recipenlg:808349,E05@4
+m28-09,m28,recipenlg:984012,E05@1
+m28-10,m28,recipenlg:1297157,E03@4 LSA@2 FT@5
+m28-11,m28,recipenlg:702652,E04@1
+m28-12,m28,recipenlg:1134729,E01@5 E02@5
+m28-13,m28,recipenlg:844742,E01@1 E02@1 E03@3 LSA@4
+m28-14,m28,recipenlg:1645255,E04@5 E05@5
+m28-15,m28,recipenlg:2226017,E01@2 E02@2 E04@2 FT@1
+m28-16,m28,recipenlg:822122,LSA@1
+m28-17,m28,recipenlg:994985,E03@5 E05@3 FT@3
+m28-18,m28,recipenlg:79081,E04@4
+m29-01,m29,recipenlg:1752717,E04@4
+m29-02,m29,recipenlg:2039711,E04@2 FT@4
+m29-03,m29,recipenlg:1566433,E05@5 FT@5
+m29-04,m29,recipenlg:364250,E05@1
+m29-05,m29,recipenlg:1805682,E01@5 E02@5 E03@2
+m29-06,m29,recipenlg:2014758,FT@3
+m29-07,m29,recipenlg:1672653,E01@3 E02@3
+m29-08,m29,recipenlg:1128928,E05@4
+m29-09,m29,recipenlg:136444,E05@3
+m29-10,m29,recipenlg:993830,LSA@1
+m29-11,m29,recipenlg:1849641,E05@2
+m29-12,m29,recipenlg:1386080,E01@4 E02@4 E03@5 LSA@4
+m29-13,m29,recipenlg:1780429,E01@1 E02@1 E03@1
+m29-14,m29,recipenlg:1031966,E04@5
+m29-15,m29,recipenlg:2109403,LSA@5 FT@1
+m29-16,m29,recipenlg:997590,E01@2 E02@2 E03@4
+m29-17,m29,recipenlg:1688897,LSA@2
+m29-18,m29,recipenlg:1016811,LSA@3
+m29-19,m29,recipenlg:2036240,E03@3 E04@1 FT@2
+m29-20,m29,recipenlg:1477687,E04@3
+m30-01,m30,recipenlg:1763380,LSA@3
+m30-02,m30,recipenlg:2187051,E05@1
+m30-03,m30,recipenlg:1265389,LSA@1
+m30-04,m30,recipenlg:1681153,E04@5
+m30-05,m30,recipenlg:1961232,FT@2
+m30-06,m30,recipenlg:258537,LSA@5
+m30-07,m30,recipenlg:1961722,LSA@2
+m30-08,m30,recipenlg:1223001,E05@3
+m30-09,m30,recipenlg:2154147,E01@5 E02@5 E03@2 E04@1 E05@2 FT@1
+m30-10,m30,recipenlg:870382,E01@1 E02@1 E03@3
+m30-11,m30,recipenlg:960343,E05@5
+m30-12,m30,recipenlg:1294689,E04@2 FT@5
+m30-13,m30,recipenlg:2194538,E04@3
+m30-14,m30,recipenlg:1300967,E01@3 E02@3 E03@1 FT@4
+m30-15,m30,recipenlg:430663,E01@4 E02@4 E03@5
+m30-16,m30,recipenlg:1281851,LSA@4 E04@4 FT@3
+m30-17,m30,recipenlg:1211436,E01@2 E02@2 E03@4
+m30-18,m30,recipenlg:567197,E05@4
+m31-01,m31,recipenlg:1038578,E05@5
+m31-02,m31,recipenlg:226052,FT@5
+m31-03,m31,recipenlg:1832511,E01@1 E02@1 E03@1 LSA@1 E04@3 FT@1
+m31-04,m31,recipenlg:2004819,E01@3 E02@3 E03@3 LSA@3 FT@3
+m31-05,m31,recipenlg:1296757,LSA@4
+m31-06,m31,recipenlg:1605064,E03@4
+m31-07,m31,recipenlg:307606,E04@4
+m31-08,m31,recipenlg:1565175,E05@4
+m31-09,m31,recipenlg:1610880,E01@2 E02@2 E03@2 LSA@2 E04@1 E05@1 FT@2
+m31-10,m31,recipenlg:2063135,E04@2
+m31-11,m31,recipenlg:708080,E05@3
+m31-12,m31,recipenlg:1335642,E04@5
+m31-13,m31,recipenlg:1824351,E01@5 E02@5
+m31-14,m31,recipenlg:1688752,E03@5 LSA@5 FT@4
+m31-15,m31,recipenlg:1912644,E05@2
+m31-16,m31,recipenlg:1572446,E01@4 E02@4
+m32-01,m32,recipenlg:2104622,E01@5 E02@5
+m32-02,m32,recipenlg:1859709,LSA@1
+m32-03,m32,recipenlg:1336912,E01@1 E02@1 E03@1 LSA@4 E05@4 FT@2
+m32-04,m32,recipenlg:1627968,E01@4 E02@4 E03@5
+m32-05,m32,recipenlg:2012799,E04@4 FT@3
+m32-06,m32,recipenlg:2176385,E01@3 E02@3 E03@2 E04@1
+m32-07,m32,recipenlg:1433431,E01@2 E02@2 E03@3
+m32-08,m32,recipenlg:335748,FT@5
+m32-09,m32,recipenlg:1907556,E03@4 LSA@3 E04@3
+m32-10,m32,recipenlg:1113991,E04@5
+m32-11,m32,recipenlg:1451801,E05@1
+m32-12,m32,recipenlg:660609,LSA@5
+m32-13,m32,recipenlg:432557,E05@3
+m32-14,m32,recipenlg:1399851,LSA@2
+m32-15,m32,recipenlg:1194573,E04@2 FT@1
+m32-16,m32,recipenlg:669465,E05@5
+m32-17,m32,recipenlg:517003,E05@2 FT@4
+m33-01,m33,recipenlg:1676158,LSA@2
+m33-02,m33,recipenlg:2130991,FT@5
+m33-03,m33,recipenlg:1004672,LSA@4
+m33-04,m33,recipenlg:1425735,E05@1
+m33-05,m33,recipenlg:1340950,E04@4 FT@2
+m33-06,m33,recipenlg:1797880,E04@5
+m33-07,m33,recipenlg:1298124,FT@4
+m33-08,m33,recipenlg:2088393,E04@2
+m33-09,m33,recipenlg:1817345,E05@4
+m33-10,m33,recipenlg:1803325,E01@3 E02@3 E03@5
+m33-11,m33,recipenlg:958075,LSA@3
+m33-12,m33,recipenlg:2102196,E03@2
+m33-13,m33,recipenlg:1116956,E01@1 E02@1 E03@1 LSA@1 FT@1
+m33-14,m33,recipenlg:1075757,E05@2
+m33-15,m33,recipenlg:1380231,E01@5 E02@5 E03@4 E04@3
+m33-16,m33,recipenlg:896168,E01@2 E02@2 E03@3 LSA@5
+m33-17,m33,recipenlg:1674773,E05@3
+m33-18,m33,recipenlg:1026001,E05@5
+m33-19,m33,recipenlg:1051435,E04@1 FT@3
+m33-20,m33,recipenlg:1368406,E01@4 E02@4
+m34-01,m34,recipenlg:110274,E05@5
+m34-02,m34,recipenlg:1377791,FT@5
+m34-03,m34,recipenlg:1892583,E01@2 E02@2 E03@2
+m34-04,m34,recipenlg:660335,E01@3 E02@3 LSA@1
+m34-05,m34,recipenlg:1621756,E01@4 E02@4
+m34-06,m34,recipenlg:1753230,E04@1
+m34-07,m34,recipenlg:1445109,FT@4
+m34-08,m34,recipenlg:527972,E03@4
+m34-09,m34,recipenlg:1384238,E03@5
+m34-10,m34,recipenlg:929785,E01@1 E02@1
+m34-11,m34,recipenlg:1026940,E04@4 FT@1
+m34-12,m34,recipenlg:2183119,E05@3
+m34-13,m34,recipenlg:382012,LSA@3
+m34-14,m34,recipenlg:2229977,E05@2
+m34-15,m34,recipenlg:1817850,E04@3 E05@1
+m34-16,m34,recipenlg:1034410,LSA@4
+m34-17,m34,recipenlg:2030127,E05@4
+m34-18,m34,recipenlg:390322,LSA@5
+m34-19,m34,recipenlg:546589,FT@2
+m34-20,m34,recipenlg:1887249,E04@5
+m34-21,m34,recipenlg:936150,E01@5 E02@5 E03@1
+m34-22,m34,recipenlg:725020,LSA@2
+m34-23,m34,recipenlg:1338954,FT@3
+m34-24,m34,recipenlg:1428572,E04@2
+m34-25,m34,recipenlg:1960600,E03@3
+m35-01,m35,recipenlg:425180,E03@3 LSA@1
+m35-02,m35,recipenlg:1679650,E05@4
+m35-03,m35,recipenlg:232982,E04@3
+m35-04,m35,recipenlg:799910,E05@3
+m35-05,m35,recipenlg:937007,E04@4
+m35-06,m35,recipenlg:62018,E05@1
+m35-07,m35,recipenlg:792436,E04@1
+m35-08,m35,recipenlg:642356,E01@3 E02@3
+m35-09,m35,recipenlg:1168821,E01@1 E02@1 LSA@3
+m35-10,m35,recipenlg:793615,E01@4 E02@4
+m35-11,m35,recipenlg:868345,FT@1
+m35-12,m35,recipenlg:806829,E03@5 LSA@2 E04@5 FT@3
+m35-13,m35,recipenlg:139450,E05@5
+m35-14,m35,recipenlg:1888832,E01@2 E02@2 E03@1 LSA@4 E04@2 E05@2 FT@5
+m35-15,m35,recipenlg:51024,FT@2
+m35-16,m35,recipenlg:521920,E03@4 LSA@5
+m35-17,m35,recipenlg:292512,E01@5 E02@5 E03@2 FT@4
+m36-01,m36,recipenlg:1204997,LSA@2
+m36-02,m36,recipenlg:1881871,E04@1
+m36-03,m36,recipenlg:2125441,E05@2 FT@4
+m36-04,m36,recipenlg:2179411,E04@4
+m36-05,m36,recipenlg:119963,FT@3
+m36-06,m36,recipenlg:1729236,E01@2 E02@2 E03@2
+m36-07,m36,recipenlg:825703,E04@5
+m36-08,m36,recipenlg:1894509,E01@1 E02@1 FT@2
+m36-09,m36,recipenlg:2054480,E05@3
+m36-10,m36,recipenlg:970784,E03@1
+m36-11,m36,recipenlg:1408099,E03@3 LSA@1
+m36-12,m36,recipenlg:145600,E03@4
+m36-13,m36,recipenlg:1960247,E04@2
+m36-14,m36,recipenlg:2081229,E05@5
+m36-15,m36,recipenlg:1990446,E03@5 E05@4
+m36-16,m36,recipenlg:1457442,E01@3 E02@3 FT@1
+m36-17,m36,recipenlg:2179257,E05@1 FT@5
+m36-18,m36,recipenlg:1040767,LSA@4
+m36-19,m36,recipenlg:902650,E04@3
+m36-20,m36,recipenlg:1439483,E01@4 E02@4
+m36-21,m36,recipenlg:1083725,E01@5 E02@5
+m36-22,m36,recipenlg:1927727,LSA@3
+m36-23,m36,recipenlg:1454518,LSA@5
+m37-01,m37,recipenlg:1593983,E05@4
+m37-02,m37,recipenlg:1428781,LSA@4
+m37-03,m37,recipenlg:1397685,LSA@5
+m37-04,m37,recipenlg:1821897,LSA@1
+m37-05,m37,recipenlg:1455500,FT@5
+m37-06,m37,recipenlg:1403395,E01@3 E02@3 E03@2 E04@4
+m37-07,m37,recipenlg:990506,E01@2 E02@2 E05@2
+m37-08,m37,recipenlg:1919600,E01@4 E02@4 E03@1 E04@1 FT@4
+m37-09,m37,recipenlg:617268,E05@5
+m37-10,m37,recipenlg:2029298,E01@1 E02@1 E03@3
+m37-11,m37,recipenlg:1033824,E03@5 E04@5
+m37-12,m37,recipenlg:1232438,FT@2
+m37-13,m37,recipenlg:2081487,E05@1
+m37-14,m37,recipenlg:2078763,E01@5 E02@5 E03@4 E04@2
+m37-15,m37,recipenlg:1679931,FT@1
+m37-16,m37,recipenlg:2186943,LSA@3
+m37-17,m37,recipenlg:741204,E04@3
+m37-18,m37,recipenlg:1051462,E05@3 FT@3
+m37-19,m37,recipenlg:1883181,LSA@2
+m38-01,m38,recipenlg:1077899,E01@3 E02@3 E03@1
+m38-02,m38,recipenlg:456713,E04@3 FT@3
+m38-03,m38,recipenlg:832009,LSA@2
+m38-04,m38,recipenlg:1672158,LSA@1
+m38-05,m38,recipenlg:229535,E04@4
+m38-06,m38,recipenlg:567981,LSA@3
+m38-07,m38,recipenlg:576857,E04@1 E05@5 FT@1
+m38-08,m38,recipenlg:506654,E01@1 E02@1
+m38-09,m38,recipenlg:1410618,LSA@4
+m38-10,m38,recipenlg:1528592,E03@3
+m38-11,m38,recipenlg:1542594,E01@5 E02@5 E03@4
+m38-12,m38,recipenlg:1903347,LSA@5
+m38-13,m38,recipenlg:516610,E04@5 FT@5
+m38-14,m38,recipenlg:215939,E04@2 E05@1 FT@2
+m38-15,m38,recipenlg:2196867,E05@2
+m38-16,m38,recipenlg:490940,E01@4 E02@4
+m38-17,m38,recipenlg:1302016,E05@4
+m38-18,m38,recipenlg:1133837,E03@5
+m38-19,m38,recipenlg:1880852,E01@2 E02@2 E03@2 FT@4
+m38-20,m38,recipenlg:740202,E05@3
+m39-01,m39,recipenlg:2183027,FT@4
+m39-02,m39,recipenlg:784303,E03@4 LSA@1 E05@1
+m39-03,m39,recipenlg:1991167,FT@5
+m39-04,m39,recipenlg:1431897,FT@1
+m39-05,m39,recipenlg:1980943,E01@2 E02@2 E03@1
+m39-06,m39,recipenlg:1746762,LSA@4
+m39-07,m39,recipenlg:1635583,E04@5
+m39-08,m39,recipenlg:2177501,E04@1 E05@2 FT@3
+m39-09,m39,recipenlg:1398105,E03@5
+m39-10,m39,recipenlg:31022,E05@4
+m39-11,m39,recipenlg:1359053,E01@5 E02@5
+m39-12,m39,recipenlg:2012434,E01@4 E02@4 LSA@5
+m39-13,m39,recipenlg:2108045,LSA@3
+m39-14,m39,recipenlg:1642687,E04@3
+m39-15,m39,recipenlg:1043678,E01@1 E02@1 E03@2
+m39-16,m39,recipenlg:1261258,E05@3
+m39-17,m39,recipenlg:941508,FT@2
+m39-18,m39,recipenlg:1021027,E04@4
+m39-19,m39,recipenlg:1258386,E04@2
+m39-20,m39,recipenlg:1904857,E05@5
+m39-21,m39,recipenlg:2077449,E01@3 E02@3 E03@3 LSA@2
+m40-01,m40,recipenlg:2168252,FT@1
+m40-02,m40,recipenlg:1666671,E05@4
+m40-03,m40,recipenlg:1466078,LSA@2
+m40-04,m40,recipenlg:1275576,E05@2
+m40-05,m40,recipenlg:1683572,FT@5
+m40-06,m40,recipenlg:1659233,E03@1 E05@3
+m40-07,m40,recipenlg:1199027,E03@5
+m40-08,m40,recipenlg:1865644,E04@5
+m40-09,m40,recipenlg:846949,E01@1 E02@1
+m40-10,m40,recipenlg:570303,LSA@3
+m40-11,m40,recipenlg:110274,E05@1
+m40-12,m40,recipenlg:374903,LSA@1
+m40-13,m40,recipenlg:1666155,LSA@4
+m40-14,m40,recipenlg:1080966,E03@2
+m40-15,m40,recipenlg:1782897,E04@1
+m40-16,m40,recipenlg:1960600,E01@4 E02@4 E03@4
+m40-17,m40,recipenlg:1503218,E04@2
+m40-18,m40,recipenlg:1179735,E04@4
+m40-19,m40,recipenlg:1115019,FT@3
+m40-20,m40,recipenlg:1640922,E05@5
+m40-21,m40,recipenlg:1933800,E04@3
+m40-22,m40,recipenlg:2137227,FT@2
+m40-23,m40,recipenlg:1034410,E01@5 E02@5
+m40-24,m40,recipenlg:1892583,E01@2 E02@2 E03@3
+m40-25,m40,recipenlg:2107008,FT@4
+m40-26,m40,recipenlg:660335,E01@3 E02@3
+m40-27,m40,recipenlg:200025,LSA@5

@@ -1,0 +1,10 @@
+{
+  "metrics_published": false,
+  "missing_labels": {
+    "hieu": 136,
+    "hoang": 160,
+    "hung": 177
+  },
+  "n_items": 388,
+  "status": "awaiting_independent_labels"
+}

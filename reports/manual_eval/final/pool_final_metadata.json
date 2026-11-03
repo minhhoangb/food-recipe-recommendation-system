@@ -1,0 +1,15 @@
+{
+  "assignments": {
+    "hieu": 136,
+    "hoang": 160,
+    "hung": 177
+  },
+  "depth": 5,
+  "freeze_sha256": "2dd262758c788485a2725e64fc7e28eecc6b5a6aaf7526653c821f9fa12eacd9",
+  "label_status": "awaiting independent human labels",
+  "n_assignments": 473,
+  "n_double_label_items": 85,
+  "n_items": 388,
+  "n_labels": 0,
+  "n_queries": 20
+}
