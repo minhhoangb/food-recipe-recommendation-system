@@ -20,6 +20,7 @@ import argparse
 import statistics
 import sys
 from collections import Counter
+from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -48,11 +49,13 @@ def load_request_logs(path: Path | str) -> list[RequestLogRecord]:
         import sqlite3
 
         try:
-            with sqlite3.connect(p) as conn:
+            with closing(sqlite3.connect(p)) as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.execute("SELECT * FROM request_log")
                 for row in cursor.fetchall():
                     d = dict(row)
+                    if isinstance(d.get("missing_ingredient_counts"), str):
+                        d["missing_ingredient_counts"] = json.loads(d["missing_ingredient_counts"])
                     for k in ("ingredients", "result_ids", "scores"):
                         val = d.get(k)
                         if isinstance(val, str):
@@ -105,16 +108,14 @@ def load_reference_data(path: Path | str) -> dict[str, Any]:
     latencies: list[float] = []
 
     for item in read_jsonl(p):
+        if item.get("split") in ("test", "final"):
+            continue
         ings = item.get("ingredients") or item.get("ingredients_normalized") or []
         if isinstance(ings, list) and ings:
             vocab.update(ings)
             query_lengths.append(len(ings))
         if "latency_ms" in item and isinstance(item["latency_ms"], (int, float)):
             latencies.append(float(item["latency_ms"]))
-
-    # Default baseline latency proxy (e.g. 20ms +/- 5ms) if reference has no latency records
-    if not latencies and query_lengths:
-        latencies = [20.0 + (i % 7) * 1.5 for i in range(len(query_lengths))]
 
     return {
         "vocab": vocab,
@@ -174,6 +175,13 @@ def compute_monitoring_metrics(
     predict_records = [r for r in records if "predict" in r.endpoint]
     zero_hits = sum(1 for r in predict_records if not r.result_ids)
     zero_hit_rate = round(zero_hits / len(predict_records), 4) if predict_records else 0.0
+    missing_counts = [count for r in predict_records for count in (r.missing_ingredient_counts or [])]
+    missing_stats = {
+        "observed_results": len(missing_counts),
+        "mean": round(statistics.mean(missing_counts), 2) if missing_counts else None,
+        "max": max(missing_counts) if missing_counts else None,
+        "requests_with_counts": sum(r.missing_ingredient_counts is not None for r in predict_records),
+    }
 
     endpoints = Counter(r.endpoint for r in records)
     models = Counter(r.model for r in records)
@@ -202,6 +210,7 @@ def compute_monitoring_metrics(
             "predict_requests": len(predict_records),
             "zero_hit_count": zero_hits,
             "zero_hit_rate": zero_hit_rate,
+            "missing_ingredients": missing_stats,
             "mean_query_length": mean_req_length,
             "insufficient_data": True,
             "status": "INSUFFICIENT_DATA",
@@ -307,7 +316,7 @@ def compute_monitoring_metrics(
         "drift": zero_hit_drift,
     }
 
-    drift_detected = bool(query_len_drift or oov_drift or latency_drift or error_drift)
+    drift_detected = bool(query_len_drift or oov_drift or latency_drift or error_drift or zero_hit_drift)
     status = "DRIFT_DETECTED" if drift_detected else "NO_DRIFT"
     msg = (
         "Phát hiện dịch chuyển phân phối (Data Drift Detected)"
@@ -325,6 +334,7 @@ def compute_monitoring_metrics(
         "predict_requests": len(predict_records),
         "zero_hit_count": zero_hits,
         "zero_hit_rate": zero_hit_rate,
+        "missing_ingredients": missing_stats,
         "mean_query_length": mean_req_length,
         "total_ingredient_tokens": total_tokens,
         "oov_tokens_count": len(oov_tokens),
@@ -415,6 +425,8 @@ def format_html_report(metrics: dict[str, Any]) -> str:
 
     msg_text = metrics.get("message", "")
     min_req_count = metrics.get("min_samples_required", DEFAULT_MIN_SAMPLE_SIZE)
+    missing = metrics.get("missing_ingredients", {})
+    missing_text = f"{missing['mean']:.2f}" if missing.get("mean") is not None else "Không có dữ liệu"
 
     html = f"""<!DOCTYPE html>
 <html lang="vi">
@@ -586,6 +598,9 @@ def format_html_report(metrics: dict[str, Any]) -> str:
 
         {sim_banner}
 
+        <p>Nguyên liệu còn thiếu trung bình / kết quả: {missing_text}
+        (đã ghi {missing.get('observed_results', 0)} kết quả).
+        Log cũ không có trường này không được tính là 0.</p>
         <div class="kpi-grid">
             <div class="kpi-card status-card">
                 <div class="kpi-title">Trạng Thái Phân Phối</div>
@@ -682,6 +697,7 @@ def format_monitoring_report(metrics: dict[str, Any]) -> str:
         f"- **Error Rate:** {metrics['error_rate'] * 100:.2f}% ({errors_cnt} errors)",
         f"- **Zero-Hit Rate:** {metrics['zero_hit_rate'] * 100:.2f}% ({zero_hits_cnt} queries)",
         f"- **OOV Rate:** {metrics.get('oov_rate', 0.0) * 100:.2f}%",
+        f"- **Missing ingredients per result:** {metrics.get('missing_ingredients', {})}",
         f"- **Message:** {metrics.get('message', '')}",
         "",
         "## Latency Distribution (ms)",

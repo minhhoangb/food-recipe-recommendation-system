@@ -104,6 +104,39 @@ def test_load_request_logs(tmp_path: Path, sample_records):
     assert loaded[1].ingredients == ["garlic"]
 
 
+def test_missing_ingredients_roundtrip_migrates_legacy_sqlite(tmp_path, sample_records):
+    import sqlite3
+    from contextlib import closing
+
+    from api.request_log import COLUMNS, RequestLogger
+
+    path = tmp_path / "old.db"
+    with closing(sqlite3.connect(path)) as connection, connection:
+        connection.execute(f"CREATE TABLE request_log ({', '.join(COLUMNS[:-1])})")
+    record = sample_records[0].model_copy(update={"missing_ingredient_counts": [0, 4]})
+    logger = RequestLogger(path)
+    logger.log(record)
+    logger.log(sample_records[1])  # a legacy record is unknown, not zero missing ingredients
+    loaded = load_request_logs(path)
+    assert loaded == [record, sample_records[1]]
+    metrics = compute_monitoring_metrics(loaded)
+    assert metrics["missing_ingredients"] == {
+        "mean": 2.0, "max": 4, "observed_results": 2, "requests_with_counts": 1,
+    }
+    assert "2.0" in format_html_report(metrics)
+
+
+def test_query_reference_does_not_invent_latency(tmp_path):
+    from src.monitor import load_reference_data
+
+    path = tmp_path / "queries.jsonl"
+    write_jsonl(path, [{"ingredients": ["chicken", "rice"], "split": "train"},
+                      {"ingredients": ["test-only-ingredient"], "split": "test"}])
+    reference = load_reference_data(path)
+    assert reference["latencies_ms"] == []
+    assert reference["vocab"] == {"chicken", "rice"}
+
+
 @pytest.mark.parametrize("suffix", [".db", ".sqlite3"])
 def test_monitor_reads_api_sqlite_log(tmp_path: Path, sample_records, suffix):
     from api.request_log import RequestLogger

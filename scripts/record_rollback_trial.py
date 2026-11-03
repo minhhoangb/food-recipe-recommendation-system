@@ -9,20 +9,44 @@ DoD:
 
 from __future__ import annotations
 
+import argparse
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
+from time import perf_counter
 
 from mlflow.tracking import MlflowClient
 
+from scripts.verify_offline_api import verify_offline_api
 from src.train import rollback_model_registry
-from src.utils import REPO_ROOT
+from src.utils import REPO_ROOT, write_json
 
 TRACKING_URI = "sqlite:///mlflow.db"
 
 
-def run_trial() -> Path:
+def run_trial(bootstrap: bool = False) -> Path:
     client = MlflowClient(TRACKING_URI)
     model_name = "minilm_finetuned"
+    bundle = REPO_ROOT / "models" / "minilm_finetuned-E04-main-1f1f4ce5"
+    if bootstrap and not client.search_model_versions(f"name='{model_name}'"):
+        from src.utils import sha256_file
+
+        snapshot = REPO_ROOT / "models" / "rollback-trial-snapshot"
+        shutil.copytree(bundle, snapshot, dirs_exist_ok=True)
+        client.create_registered_model(model_name)
+        for revision in (1, 2):
+            version = client.create_model_version(
+                model_name,
+                source=snapshot.as_uri(),
+                tags={
+                    "trial_revision": str(revision),
+                    "same_locked_checkpoint": "true",
+                    "manifest_sha256": sha256_file(snapshot / "manifest.json"),
+                },
+            )
+            client.set_registered_model_alias(
+                model_name, "staging" if revision == 1 else "production", version.version
+            )
 
     # Verify registered model exists
     rm = client.get_registered_model(model_name)
@@ -36,46 +60,50 @@ def run_trial() -> Path:
 
     # Initial state
     initial_aliases = dict(rm.aliases)
-    v_prod_initial = str(initial_aliases.get("production", "2"))
-    v_staging_initial = str(initial_aliases.get("staging", "1"))
+    v_prod_initial = str(initial_aliases["production"])
+    v_staging_initial = str(initial_aliases.get("staging", "unset"))
+    alternatives = [v.version for v in versions if str(v.version) != v_prod_initial]
+    if not alternatives:
+        raise ValueError("Rollback trial needs a registered version different from production")
+    target_version = alternatives[0]
 
     # Execute Rollback Trial: Roll production from v2 to v1
     rollback_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    rollback_res = rollback_model_registry(
-        model_name=model_name,
-        target_version=1,
-        alias="production",
-        tracking_uri=TRACKING_URI,
-    )
-
-    # Verify post-rollback state
-    rm_after = client.get_registered_model(model_name)
-    prod_rolled = str(rm_after.aliases.get("production"))
-
-    # Verify API offline serving (without any running MLflow server)
-    serving_test_success = False
-    serving_details = ""
+    started = perf_counter()
     try:
-        from src.serving import load_retriever
-        models_dir = REPO_ROOT / "models"
-        # Find any available dense or lexical bundle
-        bundles = [p for p in models_dir.iterdir() if p.is_dir() and (p / "manifest.json").exists()]
-        if bundles:
-            target_bundle = bundles[0]
-            retriever = load_retriever(target_bundle)
-            hits = retriever.search(["tomato", "pasta"], top_k=3)
-            serving_test_success = len(hits) > 0
-            serving_details = f"Loaded bundle '{target_bundle.name}' and retrieved {len(hits)} hits without MLflow server."
-        else:
-            serving_test_success = True
-            serving_details = "Verified standalone bundle architecture (bundle manifest & embeddings decoupling)."
-    except Exception as e:
-        serving_details = f"Serving check warning: {e}"
-
-    # Restore production back to v2 (or keep as needed with verified trial)
-    client.set_registered_model_alias(model_name, "production", "2")
-    client.set_registered_model_alias(model_name, "staging", "1")
+        rollback_res = rollback_model_registry(
+            model_name=model_name,
+            target_version=target_version,
+            alias="production",
+            tracking_uri=TRACKING_URI,
+        )
+        prod_rolled = str(client.get_registered_model(model_name).aliases["production"])
+        if prod_rolled != str(target_version):
+            raise RuntimeError("Registry did not switch production to the requested version")
+        elapsed = perf_counter() - started
+    finally:
+        client.set_registered_model_alias(model_name, "production", v_prod_initial)
     final_rm = client.get_registered_model(model_name)
+    offline = verify_offline_api(bundle)
+    write_json(REPO_ROOT / "reports" / "offline_api_verification.json", offline)
+    write_json(
+        REPO_ROOT / "reports" / "mlflow_rollback_trial.json",
+        {
+            "rollback": rollback_res,
+            "rollback_seconds": elapsed,
+            "original_aliases": initial_aliases,
+            "restored_aliases": dict(final_rm.aliases),
+            "offline_api": offline,
+            "same_locked_checkpoint": all(v.tags.get("same_locked_checkpoint") == "true" for v in versions),
+        },
+    )
+    serving_test_success = offline["success"]
+    serving_details = (
+        f"Fresh uvicorn HTTP /health, /predict, /model-info: 200; "
+        f"{len(offline['prediction']['results'])} results; tracking URI {offline['tracking_uri']} unavailable. "
+        f"Bundle {offline['bundle']}; encoder SHA-256 {offline['encoder_weights_sha256']}. "
+        "Evidence: reports/offline_api_verification.json."
+    )
 
     # Generate Report
     report_path = REPO_ROOT / "reports" / "mlflow_rollback_trial.md"
@@ -87,14 +115,18 @@ def run_trial() -> Path:
 **Thời gian thử nghiệm:** {rollback_time}  
 **Môi trường:** Dev (`feature/person3-monitoring-train-mlflow`)
 
+**Phạm vi trial:** Hai revision registry của cùng checkpoint FT đã khóa được dùng
+để kiểm tra cơ chế alias và phục vụ offline. Trial không chứng minh rollback giữa
+hai model có chất lượng khác nhau. Các revision tham chiếu snapshot bundle cố định.
+
 ---
 
 ## 1. Định nghĩa Alias trong Model Registry
 
 | Alias | Ý nghĩa nghiệp vụ | Trạng thái triển khai |
 | :--- | :--- | :--- |
-| `@production` | Model đã qua đánh giá toàn diện, phục vụ API chính thức của hệ thống. | Active (Hiện tại: Version 2) |
-| `@staging` | Model ứng viên (candidate) đang trong giai đoạn QA / kiểm thử tích hợp. | Staging (Hiện tại: Version 1) |
+| `@production` | Model đã qua đánh giá toàn diện, phục vụ API chính thức của hệ thống. | Active (Version {v_prod_initial}) |
+| `@staging` | Model ứng viên (candidate) đang trong giai đoạn QA / kiểm thử tích hợp. | Staging (Version {v_staging_initial}) |
 
 > **Quy ước nhãn (Tags) nộp bài:**
 > - `owner`: `Person 3 (Hiếu)`
@@ -113,21 +145,21 @@ Quá trình thử nghiệm đảo alias (rollback) được thực hiện trực
 
 2. **Lệnh thực hiện rollback:**
    ```bash
-   python -m src.train --rollback 1 --alias production
+   python -m src.train --rollback {target_version} --alias production
    ```
    *Kết quả thực thi:*
    - `model_name`: `{model_name}`
-   - `previous_version`: `{rollback_res['previous_version']}`
-   - `current_version`: `{rollback_res['current_version']}`
+   - `previous_version`: `{rollback_res["previous_version"]}`
+   - `current_version`: `{rollback_res["current_version"]}`
    - `alias`: `production`
 
 3. **Kiểm tra xác nhận (Verification):**
    - Truy vấn `client.get_registered_model('{model_name}').aliases['production']` trả về: `{prod_rolled}`.
-   - Thao tác chuyển đổi alias diễn ra tức thì (latency < 10ms), không cần redeploy mã nguồn.
+   - Alias được đọc lại sau rollback để xác nhận. Thời gian đo: {elapsed:.3f} giây.
 
 4. **Khôi phục trạng thái chuẩn:**
-   - `@production`: Version `{final_rm.aliases.get('production')}`
-   - `@staging`: Version `{final_rm.aliases.get('staging')}`
+   - `@production`: Version `{final_rm.aliases.get("production")}`
+   - `@staging`: Version `{final_rm.aliases.get("staging")}`
 
 ---
 
@@ -138,9 +170,11 @@ Quá trình thử nghiệm đảo alias (rollback) được thực hiện trực
   - `recipe_ids.json`: Danh sách id tài liệu tương ứng.
   - `manifest.json`: Toàn bộ thông tin cấu hình, checksum SHA-256 và metrics.
 * **Kết quả kiểm thử khi tắt MLflow Server:**
-  - Trạng thái kiểm thử: **{'THÀNH CÔNG' if serving_test_success else 'CHÚ Ý'}**
+  - Trạng thái kiểm thử: **{"THÀNH CÔNG" if serving_test_success else "CHÚ Ý"}**
   - Chi tiết: {serving_details}
-  - API khởi động và phục vụ truy vấn tìm kiếm độc lập hoàn toàn với việc MLflow server đang bật hay tắt.
+  - API khởi động và phục vụ request HTTP thật khi tracking endpoint không truy cập được.
+  - Đổi alias chỉ đổi registry. Để đổi API đang chạy, export bundle của version đó,
+    cập nhật serving.bundle và khởi động lại API.
 
 ---
 
@@ -165,10 +199,17 @@ Khi phát hiện mô hình trên production bị suy giảm chất lượng ho�
    - Vào tab **Models** > Chọn `minilm_finetuned`.
    - Tại cột **Aliases**, click vào icon edit của `@production` và nhập số version cần rollback (ví dụ: `1`).
 """
-    report_path.write_text(content, encoding="utf-8")
+    report_path.write_text("\n".join(line.rstrip() for line in content.splitlines()) + "\n", encoding="utf-8")
     print(f"Rollback trial recorded to: {report_path}")
     return report_path
 
 
 if __name__ == "__main__":
-    run_trial()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--bootstrap",
+        action="store_true",
+        help="Create two trial revisions of the locked checkpoint in an empty registry",
+    )
+    args = parser.parse_args()
+    print(run_trial(bootstrap=args.bootstrap))

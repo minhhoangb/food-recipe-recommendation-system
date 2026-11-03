@@ -1,10 +1,14 @@
 # MLflow Model Registry: Aliases, Rollback Trial & Offline Serving
 
-**Thực hiện:** Hiếu (Person 3) - Fine-tune, MLflow & Monitoring  
-**Mô hình:** `minilm_finetuned`  
-**Backend Store:** `sqlite:///mlflow.db`  
-**Thời gian thử nghiệm:** 2026-10-31 15:43:33 UTC  
+**Thực hiện:** Hiếu (Person 3) - Fine-tune, MLflow & Monitoring
+**Mô hình:** `minilm_finetuned`
+**Backend Store:** `sqlite:///mlflow.db`
+**Thời gian thử nghiệm:** 2026-11-03 05:49:18 UTC
 **Môi trường:** Dev (`feature/person3-monitoring-train-mlflow`)
+
+**Phạm vi trial:** Hai revision registry của cùng checkpoint FT đã khóa được dùng
+để kiểm tra cơ chế alias và phục vụ offline. Trial không chứng minh rollback giữa
+hai model có chất lượng khác nhau. Các revision tham chiếu snapshot bundle cố định.
 
 ---
 
@@ -12,8 +16,8 @@
 
 | Alias | Ý nghĩa nghiệp vụ | Trạng thái triển khai |
 | :--- | :--- | :--- |
-| `@production` | Model đã qua đánh giá toàn diện, phục vụ API chính thức của hệ thống. | Active (Hiện tại: Version 2) |
-| `@staging` | Model ứng viên (candidate) đang trong giai đoạn QA / kiểm thử tích hợp. | Staging (Hiện tại: Version 1) |
+| `@production` | Model đã qua đánh giá toàn diện, phục vụ API chính thức của hệ thống. | Active (Version 2) |
+| `@staging` | Model ứng viên (candidate) đang trong giai đoạn QA / kiểm thử tích hợp. | Staging (Version 1) |
 
 > **Quy ước nhãn (Tags) nộp bài:**
 > - `owner`: `Person 3 (Hiếu)`
@@ -28,7 +32,7 @@ Quá trình thử nghiệm đảo alias (rollback) được thực hiện trực
 
 1. **Trạng thái ban đầu:**
    - `@production` trỏ tới: Version `2`
-   - `@staging` trỏ tới: Version `2`
+   - `@staging` trỏ tới: Version `1`
 
 2. **Lệnh thực hiện rollback:**
    ```bash
@@ -42,7 +46,7 @@ Quá trình thử nghiệm đảo alias (rollback) được thực hiện trực
 
 3. **Kiểm tra xác nhận (Verification):**
    - Truy vấn `client.get_registered_model('minilm_finetuned').aliases['production']` trả về: `1`.
-   - Thao tác chuyển đổi alias diễn ra tức thì (latency < 10ms), không cần redeploy mã nguồn.
+   - Alias được đọc lại sau rollback để xác nhận. Thời gian đo: 0.070 giây.
 
 4. **Khôi phục trạng thái chuẩn:**
    - `@production`: Version `2`
@@ -58,8 +62,10 @@ Quá trình thử nghiệm đảo alias (rollback) được thực hiện trực
   - `manifest.json`: Toàn bộ thông tin cấu hình, checksum SHA-256 và metrics.
 * **Kết quả kiểm thử khi tắt MLflow Server:**
   - Trạng thái kiểm thử: **THÀNH CÔNG**
-  - Chi tiết: Verified standalone bundle architecture (bundle manifest & embeddings decoupling).
-  - API khởi động và phục vụ truy vấn tìm kiếm độc lập hoàn toàn với việc MLflow server đang bật hay tắt.
+  - Chi tiết: Fresh uvicorn HTTP /health, /predict, /model-info: 200; 3 results; tracking URI http://127.0.0.1:1 unavailable. Bundle minilm_finetuned-E04-main-1f1f4ce5; encoder SHA-256 ecac4fdf79dce1a1e16fd1ace100d794103e4a1f15f9fe14da4f909f36a4cdd3. Evidence: reports/offline_api_verification.json.
+  - API khởi động và phục vụ request HTTP thật khi tracking endpoint không truy cập được.
+  - Đổi alias chỉ đổi registry. Để đổi API đang chạy, export bundle của version đó,
+    cập nhật serving.bundle và khởi động lại API.
 
 ---
 

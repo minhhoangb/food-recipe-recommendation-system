@@ -35,7 +35,8 @@ def test_stage_processed_caching(built_fixture, fixture_csv, capsys):
     assert "[CACHED]" in captured.out
 
 
-def test_stage_pairs_builds_and_caches(built_fixture, capsys):
+def test_stage_pairs_builds_and_caches(built_fixture, capsys, tmp_path, monkeypatch):
+    monkeypatch.setattr(train, "REPO_ROOT", tmp_path)
     cfg, _, _ = built_fixture
     pairs_file = train.run_stage_pairs(cfg, mode="ingredients", force=False)
     assert pairs_file.exists()

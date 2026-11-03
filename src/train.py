@@ -19,7 +19,7 @@ from __future__ import annotations
 import argparse
 import os
 
-os.environ.setdefault('MLFLOW_DISABLE_AGENT_HINT', '1')
+os.environ.setdefault("MLFLOW_DISABLE_AGENT_HINT", "1")
 import sys
 import time
 from datetime import datetime, timezone
@@ -31,11 +31,11 @@ from mlflow.tracking import MlflowClient
 from omegaconf import DictConfig
 
 from src.build_pairs import build_pairs, load_pairs, save_pairs_and_manifest
-from src.config import load_config, processed_dir
+from src.config import fingerprint, load_config, processed_dir
 from src.contracts import BundleManifest, RecipeRecord
 from src.finetune import finetune_model
 from src.memory import peak_rss_mb
-from src.utils import REPO_ROOT, read_json, read_jsonl, sha256_file
+from src.utils import REPO_ROOT, read_json, read_jsonl, sha256_file, sha256_obj, write_json
 
 DEFAULT_MODELS_DIR = REPO_ROOT / "models"
 DEFAULT_TRACKING_URI = "sqlite:///mlflow.db"
@@ -46,6 +46,43 @@ EmbeddingMode = Literal["ingredients", "title_ingredients"]
 MODES = ("ingredients", "title_ingredients")
 
 STAGES = ["raw", "processed", "baseline", "embeddings", "pairs", "finetune", "evaluate"]
+
+
+def _stage_inputs(cfg: DictConfig, **parameters: Any) -> dict[str, Any]:
+    directory = processed_dir(cfg)
+    return {
+        "config_sha256": fingerprint(cfg),
+        "corpus_sha256": sha256_file(directory / "corpus.jsonl"),
+        "splits_sha256": sha256_file(directory / "splits.json"),
+        **parameters,
+    }
+
+
+def _cache_matches(path: Path, inputs: dict[str, Any]) -> bool:
+    if not path.is_file():
+        return False
+    try:
+        cache = read_json(path)
+        return (
+            cache["inputs_sha256"] == sha256_obj(inputs)
+            and bool(cache["files"])
+            and all(
+                (path.parent / name).is_file() and sha256_file(path.parent / name) == digest
+                for name, digest in cache["files"].items()
+            )
+        )
+    except (OSError, ValueError, KeyError):
+        return False
+
+
+def _record_cache(path: Path, inputs: dict[str, Any], files: list[Path]) -> None:
+    write_json(
+        path,
+        {
+            "inputs_sha256": sha256_obj(inputs),
+            "files": {p.relative_to(path.parent).as_posix(): sha256_file(p) for p in files},
+        },
+    )
 
 
 def check_raw_dataset(raw_path: Path) -> Path:
@@ -85,6 +122,17 @@ def run_stage_processed(cfg: DictConfig, raw_path: Path | None = None, force: bo
     manifest_file = directory / "dataset_manifest.json"
 
     if corpus_file.exists() and manifest_file.exists() and not force:
+        manifest = read_json(manifest_file)
+        if manifest["config_sha256"] != fingerprint(cfg) or not all(
+            (directory / name).is_file() and sha256_file(directory / name) == digest
+            for name, digest in manifest["files"].items()
+        ):
+            raise ValueError("Processed data/config hash mismatch; verify shared artifacts before --force")
+        raw_source = raw_path or Path(cfg.paths.raw_csv)
+        if not raw_source.is_absolute():
+            raw_source = REPO_ROOT / raw_source
+        if raw_source.is_file() and sha256_file(raw_source) != manifest["raw"]["sha256"]:
+            raise ValueError("Raw dataset hash differs from the processed manifest")
         print(f"[STAGE: processed] [CACHED] Processed data exists at {directory}. Skipping.")
         return directory
 
@@ -114,7 +162,9 @@ def run_stage_baseline(
     run_id = f"bm25-{profile}-{corpus_sha[:8]}"
     bundle_path = out_models_dir / run_id
 
-    if bundle_path.exists() and (bundle_path / "manifest.json").exists() and not force:
+    inputs = _stage_inputs(cfg, model="bm25")
+    cache = bundle_path / "stage_cache.json"
+    if not force and _cache_matches(cache, inputs):
         print(f"[STAGE: baseline] [CACHED] Baseline bundle {run_id} is up-to-date. Skipping.")
         return bundle_path
 
@@ -126,6 +176,7 @@ def run_stage_baseline(
     records = list(read_jsonl(corpus_file))
     retriever, info = fit_retriever("bm25", records, train_ids)
     bundle = save_bundle(retriever, info, cfg, out_dir=out_models_dir)
+    _record_cache(cache, inputs, [bundle / n for n in ("manifest.json", "model.joblib", "metrics.json")])
     print(f"[STAGE: baseline] Baseline bundle saved to {bundle}")
     return bundle
 
@@ -145,10 +196,14 @@ def run_stage_embeddings(
 
     corpus_sha = sha256_file(corpus_file)
     profile = str(cfg.data.profile)
-    run_id = f"minilm_pretrained-E04-{profile}-{corpus_sha[:8]}"
+    from src.embeddings import bundle_run_id
+
+    run_id = bundle_run_id(mode, profile, corpus_sha)
     bundle_path = out_models_dir / run_id
 
-    if bundle_path.exists() and (bundle_path / "manifest.json").exists() and not force:
+    inputs = _stage_inputs(cfg, mode=mode, device=device)
+    cache = bundle_path / "stage_cache.json"
+    if not force and _cache_matches(cache, inputs):
         print(f"[STAGE: embeddings] [CACHED] Pretrained embedding bundle {run_id} is up-to-date. Skipping.")
         return bundle_path
 
@@ -178,6 +233,7 @@ def run_stage_embeddings(
         encode_seconds=encode_sec,
         out_dir=out_models_dir,
     )
+    _record_cache(cache, inputs, [bundle / n for n in ("manifest.json", "embeddings.npy", "recipe_ids.json")])
     print(f"[STAGE: embeddings] Pretrained bundle saved to {bundle}")
     return bundle
 
@@ -198,14 +254,16 @@ def run_stage_pairs(
     pairs_file = REPO_ROOT / "data" / "pairs" / f"{profile}_train_{mode}_pairs.jsonl"
     manifest_file = REPO_ROOT / "data" / "pairs" / f"{profile}_train_{mode}_pairs_manifest.json"
 
-    if pairs_file.exists() and manifest_file.exists() and not force:
+    max_p = max_pairs if max_pairs is not None else (10000 if profile == "pilot" else 30000)
+    inputs = _stage_inputs(cfg, mode=mode, max_pairs=max_p)
+    cache = pairs_file.with_suffix(".cache.json")
+    if not force and _cache_matches(cache, inputs):
         print(f"[STAGE: pairs] [CACHED] Pairs file {pairs_file.name} is up-to-date. Skipping.")
         return pairs_file
 
     print(f"[STAGE: pairs] Building training pairs for profile '{profile}' (mode={mode})...")
     from src.build_pairs import build_pairs
 
-    max_p = max_pairs if max_pairs is not None else 10000
     pairs, stats = build_pairs(
         directory,
         split="train",
@@ -220,6 +278,7 @@ def run_stage_pairs(
         out_dir=REPO_ROOT / "data" / "pairs",
         profile=profile,
     )
+    _record_cache(cache, inputs, [saved_pairs, manifest_file])
     print(f"[STAGE: pairs] Saved {len(pairs)} pairs to {saved_pairs}")
     return saved_pairs
 
@@ -237,17 +296,22 @@ def run_stage_finetune(
     """Stage 6: Fine-tune MiniLM on generated pairs with hash cache."""
     profile = str(cfg.data.profile)
     checkpoint_dir = out_models_dir / f"checkpoint_{profile}_{mode}"
-
-    if checkpoint_dir.exists() and (checkpoint_dir / "config.json").exists() and not force:
+    pairs_file = run_stage_pairs(cfg, mode=mode, force=force)
+    inputs = _stage_inputs(
+        cfg,
+        mode=mode,
+        pairs_sha256=sha256_file(pairs_file),
+        epochs=epochs,
+        batch_size=batch_size,
+        learning_rate=learning_rate,
+        device=device,
+    )
+    cache = checkpoint_dir / "stage_cache.json"
+    if not force and _cache_matches(cache, inputs):
         print(
-            f"[STAGE: finetune] [CACHED] Fine-tuned checkpoint {checkpoint_dir.name} "
-            f"is up-to-date. Skipping."
+            f"[STAGE: finetune] [CACHED] Fine-tuned checkpoint {checkpoint_dir.name} is up-to-date. Skipping."
         )
         return checkpoint_dir
-
-    pairs_file = REPO_ROOT / "data" / "pairs" / f"{profile}_train_{mode}_pairs.jsonl"
-    if not pairs_file.exists() or force:
-        pairs_file = run_stage_pairs(cfg, mode=mode, force=force)
 
     from src.finetune import finetune_model
 
@@ -263,7 +327,10 @@ def run_stage_finetune(
         epochs=epochs,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        device=device,
     )
+    write_json(checkpoint_dir / "train_summary.json", summary)
+    _record_cache(cache, inputs, [p for p in checkpoint_dir.rglob("*") if p.is_file() and p != cache])
     print(f"[STAGE: finetune] Model fine-tuned successfully. Checkpoint: {checkpoint_dir}")
     return checkpoint_dir
 
@@ -278,21 +345,35 @@ def run_stage_evaluate(
     tracking_uri: str = DEFAULT_TRACKING_URI,
     experiment: str = DEFAULT_EXPERIMENT,
     model_registry_name: str = "minilm_finetuned",
+    force: bool = False,
 ) -> dict[str, Any]:
     """Stage 7: Evaluate fine-tuned model against validation split with ranx and log to MLflow."""
     directory = processed_dir(cfg)
     profile = str(cfg.data.profile)
 
-    from src.embeddings import encode_corpus, save_bundle
+    from src.embeddings import bundle_run_id, encode_corpus, save_bundle
     from src.evaluation import evaluate_retriever, load_split
     from src.retrieval import DenseRetriever
 
     if bundle_dir is None:
         # Check if fine-tuned serving bundle already exists
         corpus_sha = sha256_file(directory / "corpus.jsonl")
-        expected_run_id = f"minilm_finetuned-{profile}-{corpus_sha[:8]}"
+        expected_run_id = bundle_run_id(mode, profile, corpus_sha, model_name="minilm_finetuned")
         candidate_bundle = out_models_dir / expected_run_id
-        if candidate_bundle.exists() and (candidate_bundle / "manifest.json").exists():
+        checkpoint_dir = out_models_dir / f"checkpoint_{profile}_{mode}"
+        if not checkpoint_dir.exists():
+            checkpoint_dir = run_stage_finetune(cfg, out_models_dir=out_models_dir, mode=mode)
+        inputs = _stage_inputs(
+            cfg,
+            mode=mode,
+            checkpoint_files={
+                p.relative_to(checkpoint_dir).as_posix(): sha256_file(p)
+                for p in checkpoint_dir.rglob("*")
+                if p.is_file()
+            },
+        )
+        cache = candidate_bundle / "stage_cache.json"
+        if not force and _cache_matches(cache, inputs):
             bundle_dir = candidate_bundle
         else:
             # Build serving bundle from finetuned checkpoint
@@ -304,6 +385,7 @@ def run_stage_evaluate(
             ft_model = SentenceTransformer(str(checkpoint_dir), device="cpu")
             corpus_path = directory / "corpus.jsonl"
             records = [RecipeRecord(**row) for row in read_jsonl(corpus_path)]
+            started = time.perf_counter()
             vectors, recipe_ids, truncated = encode_corpus(
                 ft_model, records, mode=mode, batch_size=DEFAULT_BATCH_SIZE
             )
@@ -315,9 +397,15 @@ def run_stage_evaluate(
                 cfg=cfg,
                 corpus_sha256=corpus_sha,
                 truncated=truncated,
+                encode_seconds=time.perf_counter() - started,
                 model_name="minilm_finetuned",
                 out_dir=out_models_dir,
+                encoder_path=checkpoint_dir,
             )
+            summary_path = checkpoint_dir / "train_summary.json"
+            if summary_path.is_file():
+                write_json(bundle_dir / "train_summary.json", read_json(summary_path))
+            _record_cache(cache, inputs, [p for p in bundle_dir.rglob("*") if p.is_file() and p != cache])
 
     retriever = DenseRetriever.from_bundle(bundle_dir)
     queries, qrels = load_split(directory, "validation")
@@ -336,21 +424,13 @@ def run_stage_evaluate(
         "peak_rss_mb": peak_rss_mb(),
     }
 
+    summary_path = bundle_dir / "train_summary.json"
+    result["train_summary"] = read_json(summary_path) if summary_path.is_file() else {}
+    result["encode_seconds"] = read_json(bundle_dir / "manifest.json").get("encode_seconds")
     if log_to_mlflow:
         try:
             run_id = _log_and_register_mlflow(
-                result={
-                    **result,
-                    "train_summary": {
-                        "base_model": MODEL_NAME,
-                        "epochs": 1,
-                        "batch_size": 16,
-                        "learning_rate": 2e-5,
-                        "n_examples": 100,
-                        "train_seconds": 1.0,
-                    },
-                    "encode_seconds": 1.0,
-                },
+                result=result,
                 cfg=cfg,
                 bundle_dir=bundle_dir,
                 tracking_uri=tracking_uri,
@@ -480,7 +560,9 @@ def run_training_pipeline(
         encode_seconds=encode_seconds,
         model_name="minilm_finetuned",
         out_dir=out_models_dir,
+        encoder_path=finetuned_checkpoint,
     )
+    write_json(bundle_dir / "train_summary.json", train_summary)
     validate_bundle(bundle_dir)
 
     # 4. Evaluate on validation split
@@ -528,23 +610,21 @@ def _log_and_register_mlflow(
     mlflow.set_tracking_uri(tracking_uri)
     mlflow.set_experiment(experiment)
 
-    manifest = BundleManifest.model_validate_json(
-        (bundle_dir / "manifest.json").read_text(encoding="utf-8")
-    )
+    manifest = BundleManifest.model_validate_json((bundle_dir / "manifest.json").read_text(encoding="utf-8"))
 
     with mlflow.start_run(run_name=result["run_id"]) as run:
         mlflow.log_params(
             {
                 "model_name": manifest.model_name,
-                "base_model": result["train_summary"]["base_model"],
                 "embedding_mode": result["mode"],
                 "corpus_sha256": manifest.corpus_sha256,
                 "config_sha256": manifest.config_sha256,
                 "profile": str(cfg.data.profile),
-                "epochs": result["train_summary"]["epochs"],
-                "batch_size": result["train_summary"]["batch_size"],
-                "learning_rate": result["train_summary"]["learning_rate"],
-                "n_train_examples": result["train_summary"]["n_examples"],
+                **{
+                    ("n_train_examples" if key == "n_examples" else key): value
+                    for key, value in result.get("train_summary", {}).items()
+                    if key in ("base_model", "epochs", "batch_size", "learning_rate", "n_examples", "device")
+                },
                 "embedding_dim": manifest.embedding_dim,
                 "experiment": "E07_finetuned" if cfg.data.profile == "pilot" else "E08_finetuned",
                 "owner": "Person 3 (Hiếu)",
@@ -554,8 +634,16 @@ def _log_and_register_mlflow(
         mlflow.log_metrics(
             {
                 **{name.replace("@", "_at_"): value for name, value in result["metrics"].items()},
-                "train_seconds": result["train_summary"]["train_seconds"],
-                "encode_seconds": result["encode_seconds"],
+                **(
+                    {"train_seconds": result["train_summary"]["train_seconds"]}
+                    if "train_seconds" in result.get("train_summary", {})
+                    else {}
+                ),
+                **(
+                    {"encode_seconds": result["encode_seconds"]}
+                    if result.get("encode_seconds") is not None
+                    else {}
+                ),
                 "peak_rss_mb": result["peak_rss_mb"],
             }
         )
@@ -655,6 +743,7 @@ def run_pipeline(
             out_models_dir=models_dir,
             log_to_mlflow=log_to_mlflow,
             promote_production=promote,
+            force=force,
         )
 
     print(f"\n{'=' * 65}")
@@ -694,11 +783,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--rollback", help="Roll back MLflow Model Registry production alias to target version"
     )
+    parser.add_argument("--alias", default="production", help="Registry alias to roll back")
     parser.add_argument("--no-mlflow", action="store_true", help="Disable MLflow tracking and logging")
     args = parser.parse_args(argv)
 
     if args.rollback:
-        rollback_model_registry(target_version=args.rollback)
+        rollback_model_registry(target_version=args.rollback, alias=args.alias)
         return 0
 
     cfg: DictConfig = load_config(args.config)

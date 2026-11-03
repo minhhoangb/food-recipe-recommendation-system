@@ -181,3 +181,4 @@ class RequestLogRecord(BaseModel):
     scores: list[float]
     latency_ms: float
     status_code: int
+    missing_ingredient_counts: list[Annotated[int, Field(ge=0)]] | None = None

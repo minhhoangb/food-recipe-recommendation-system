@@ -1,0 +1,292 @@
+{
+  "bundle": "minilm_finetuned-E04-main-1f1f4ce5",
+  "checked_utc": "2026-11-03T05:49:41.131267+00:00",
+  "encoder_weights_sha256": "ecac4fdf79dce1a1e16fd1ace100d794103e4a1f15f9fe14da4f909f36a4cdd3",
+  "health": {
+    "model": "minilm_finetuned",
+    "model_version": "1",
+    "status": "ok"
+  },
+  "manifest_sha256": "ca21c2af8bf79ccc363a6544eb786ea6812fe5b000a4cf351fc41c603071fab2",
+  "model_info": {
+    "backend": "dense",
+    "bundle": "D:\\MDS301\\food-recipe-recommendation-system\\models\\minilm_finetuned-E04-main-1f1f4ce5",
+    "config": "configs/default.yaml",
+    "corpus_recipes": 50000,
+    "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+    "metrics": null,
+    "model": "minilm_finetuned",
+    "model_version": "1"
+  },
+  "predict_status": 200,
+  "prediction": {
+    "latency_ms": 171.27729998901486,
+    "model": "minilm_finetuned",
+    "model_version": "1",
+    "note": null,
+    "results": [
+      {
+        "directions": [
+          "Boil chicken with skin on until done when it is done remove from broth and take off bone.",
+          "Cut up onion put into broth.",
+          "Add minced garlic; cook for 5 minutes.",
+          "Add rice and",
+          "cook until done. Add the chicken to the ingredients add salt to taste.",
+          "Serve with pears or bread."
+        ],
+        "link": "https://www.cookbooks.com/Recipe-Details.aspx?id=709588",
+        "matched_ingredients": [
+          "chicken",
+          "rice",
+          "garlic"
+        ],
+        "missing_ingredients": [
+          "onion",
+          "salt"
+        ],
+        "recipe_id": "recipenlg:7642",
+        "score": 0.8338920474052429,
+        "title": "Chicken And Rice"
+      },
+      {
+        "directions": [
+          "Melt butter in a large sauce pan. Saute onion and garlic (roasted and fresh) in butter over medium heat, stirring frequently, until onion is translucent. Add rice and cook, stirring frequently, until a brown fond has formed on the bottom of the pan.",
+          "Add stock and some salt, stir, and bring to a boil. Reduce to simmer (low) and cover to cook, about 15-20 minutes with regular rice, 10 minutes for the faster cooking rice.",
+          "When rice is cooked, turn off heat, add parmigiano and green onions and fluff with a fork.",
+          "Yum!"
+        ],
+        "link": "https://tastykitchen.com/recipes/sidedishes/tastier-brown-rice-pilaf/",
+        "matched_ingredients": [
+          "chicken",
+          "garlic"
+        ],
+        "missing_ingredients": [
+          "butter",
+          "onion",
+          "brown rice",
+          "salt"
+        ],
+        "recipe_id": "recipenlg:1553265",
+        "score": 0.665107011795044,
+        "title": "Tastier Brown Rice Pilaf"
+      },
+      {
+        "directions": [
+          "Mix all together, then pour it into a casserole dish.",
+          "Bake at 350° for 45 minutes, or until brown on top."
+        ],
+        "link": "https://www.cookbooks.com/Recipe-Details.aspx?id=1012699",
+        "matched_ingredients": [
+          "chicken",
+          "rice"
+        ],
+        "missing_ingredients": [
+          "broccoli",
+          "chicken mushroom",
+          "onion"
+        ],
+        "recipe_id": "recipenlg:121838",
+        "score": 0.6206110715866089,
+        "title": "Broccoli Casserole"
+      }
+    ]
+  },
+  "prediction_requests": [
+    {
+      "ingredients": [
+        "chicken",
+        "rice",
+        "garlic"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "anise oil",
+        "cinnamon",
+        "vinegar",
+        "flour"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "dough",
+        "garlic",
+        "green pepper",
+        "mozzarella cheese",
+        "cooking spray"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "sultana raisin",
+        "ground ginger"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "sugar",
+        "ground cardamom",
+        "vanilla ice cream"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "lean ground beef",
+        "sage",
+        "egg",
+        "garlic",
+        "tomato",
+        "green onion"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "onion",
+        "okra",
+        "garlic"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "chicken breast",
+        "canola oil"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "yellow squash",
+        "mixed mushroom",
+        "garlic",
+        "basil",
+        "thyme"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "chicken breast",
+        "canola oil",
+        "lemon juice",
+        "soy sauce",
+        "red wine vinegar",
+        "ground pepper"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "butter",
+        "salt",
+        "chocolate chip",
+        "nut"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "celery",
+        "carrot",
+        "basil",
+        "honey mustard",
+        "mayonnaise",
+        "salt"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "white wine vinegar",
+        "garlic",
+        "salt",
+        "mushroom"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "raisin",
+        "butternut squash",
+        "ground ginger"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "ground beef",
+        "salt",
+        "italian seasoning"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "olive oil",
+        "ground rainbow peppercorn"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "black rice",
+        "coconut cream"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "cranberry sauce",
+        "chicken breast"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "garlic",
+        "oregano",
+        "worcestershire sauce",
+        "tomato",
+        "couscous",
+        "chicken"
+      ],
+      "n_results": 3,
+      "status": 200
+    },
+    {
+      "ingredients": [
+        "black bean",
+        "cumin"
+      ],
+      "n_results": 3,
+      "status": 200
+    }
+  ],
+  "success": true,
+  "tracking_uri": "http://127.0.0.1:1",
+  "transport": "HTTP to a fresh uvicorn subprocess"
+}
