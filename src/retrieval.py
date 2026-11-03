@@ -68,12 +68,31 @@ class DenseRetriever:
         manifest, vectors, recipe_ids = validate_bundle(bundle)
         if manifest.embedding_dim is not None and vectors.shape[1] != manifest.embedding_dim:
             raise BundleError(
-                f"embedding dimension {vectors.shape[1]} differs from the manifest "
-                f"({manifest.embedding_dim})"
+                f"embedding dimension {vectors.shape[1]} differs from the manifest ({manifest.embedding_dim})"
             )
         if manifest.normalized_vectors is False:
             raise BundleError("bundle vectors are not normalised; rebuild the bundle")
-        encoder = model if model is not None else load_model()
+        if model is not None:
+            encoder = model
+        elif manifest.model_name == "minilm_finetuned":
+            from src.utils import read_json
+
+            payload = read_json(Path(bundle) / "manifest.json")
+            encoder_path = (Path(bundle) / payload.get("encoder_path", "encoder")).resolve()
+            if not encoder_path.is_relative_to(Path(bundle).resolve()):
+                raise BundleError("FT encoder must be packaged inside its bundle")
+            if not (encoder_path / "modules.json").is_file():
+                raise BundleError(
+                    "FT bundle has no encoder; rebuild with embeddings --model-path <checkpoint>"
+                )
+            encoder_files = [p for p in encoder_path.rglob("*") if p.is_file()]
+            if not encoder_files or any(
+                p.relative_to(Path(bundle).resolve()).as_posix() not in manifest.files for p in encoder_files
+            ):
+                raise BundleError("FT encoder files must have hashes in manifest.json")
+            encoder = load_model(model_name_or_path=str(encoder_path))
+        else:
+            encoder = load_model()
         retriever = cls(encoder, vectors, recipe_ids, embedding_dim=int(vectors.shape[1]))
         retriever.name = manifest.model_name
         return retriever

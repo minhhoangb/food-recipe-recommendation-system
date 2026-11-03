@@ -1,0 +1,129 @@
+{
+  "drift_detected": false,
+  "endpoint_counts": {
+    "/predict": 21
+  },
+  "error_count": 0,
+  "error_rate": 0.0,
+  "first_request_utc": "2026-11-03T05:47:31Z",
+  "insufficient_data": false,
+  "is_simulation": false,
+  "last_request_utc": "2026-11-03T05:49:41Z",
+  "latency_ms": {
+    "max": 171.28,
+    "mean": 40.04,
+    "median": 26.06,
+    "min": 19.89,
+    "p90": 38.09,
+    "p95": 158.45,
+    "p99": 158.45
+  },
+  "limitations": "Scripted API smoke workload, not user traffic; no relevance labels or relevance-decay claim. Reference has no latency observations; latency drift is not tested.",
+  "mean_query_length": 3.62,
+  "message": "Phân phối ổn định, không phát hiện dịch chuyển đáng kể (No Significant Drift)",
+  "min_samples_required": 10,
+  "missing_ingredients": {
+    "max": 18,
+    "mean": 4.54,
+    "observed_results": 63,
+    "requests_with_counts": 21
+  },
+  "model_counts": {
+    "minilm_finetuned": 21
+  },
+  "oov_rate": 0.0,
+  "oov_tokens_count": 0,
+  "predict_requests": 21,
+  "source": "logs/offline_api.db (real HTTP requests to uvicorn; MLflow endpoint unavailable)",
+  "status": "NO_DRIFT",
+  "success_rate": 1.0,
+  "tests": {
+    "error_rate": {
+      "drift": false,
+      "metric": "Tỉ lệ lỗi API (Error Rate)",
+      "p_value": null,
+      "ref_mean": 0.0,
+      "req_mean": 0.0,
+      "statistic": 0.0,
+      "test": "Ngưỡng tần suất lỗi",
+      "threshold": "> 0.05"
+    },
+    "oov_rate": {
+      "drift": false,
+      "metric": "Nguyên liệu ngoài Vocab (OOV Rate)",
+      "p_value": null,
+      "ref_mean": 0.0,
+      "req_mean": 0.0,
+      "statistic": 0.0,
+      "test": "Tỉ lệ thành phần (Proportion)",
+      "threshold": "> 0.05"
+    },
+    "query_length": {
+      "drift": false,
+      "metric": "Độ dài Query (Query Length)",
+      "p_value": 0.9948,
+      "ref_mean": 3.7,
+      "req_mean": 3.62,
+      "statistic": 0.0851,
+      "test": "Kolmogorov-Smirnov (KS-2)",
+      "threshold": "p < 0.05"
+    },
+    "zero_hit_rate": {
+      "drift": false,
+      "metric": "Tỉ lệ truy vấn không kết quả (Zero-Hit)",
+      "p_value": null,
+      "ref_mean": 0.0,
+      "req_mean": 0.0,
+      "statistic": 0.0,
+      "test": "Ngưỡng tần suất",
+      "threshold": "> 0.10"
+    }
+  },
+  "top_ingredients": [
+    [
+      "garlic",
+      8
+    ],
+    [
+      "salt",
+      4
+    ],
+    [
+      "chicken",
+      3
+    ],
+    [
+      "chicken breast",
+      3
+    ],
+    [
+      "rice",
+      2
+    ],
+    [
+      "ground ginger",
+      2
+    ],
+    [
+      "tomato",
+      2
+    ],
+    [
+      "canola oil",
+      2
+    ],
+    [
+      "basil",
+      2
+    ],
+    [
+      "anise oil",
+      1
+    ]
+  ],
+  "top_oov_ingredients": [],
+  "total_ingredient_tokens": 76,
+  "total_requests": 21,
+  "zero_hit_count": 0,
+  "zero_hit_rate": 0.0
+}

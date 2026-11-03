@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 import time
 from datetime import datetime, timezone
@@ -31,7 +32,7 @@ from omegaconf import DictConfig
 from src.config import fingerprint, load_config, processed_dir
 from src.contracts import BundleManifest, ModelName, RecipeRecord
 from src.normalize import NORMALIZATION_FINGERPRINT
-from src.utils import REPO_ROOT, read_jsonl, sha256_file, sha256_obj, write_json
+from src.utils import REPO_ROOT, read_json, read_jsonl, sha256_file, sha256_obj, write_json
 
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 EMBEDDING_DIM = 384
@@ -89,10 +90,7 @@ def count_truncated(texts: list[str], tokenizer: Any, max_seq_length: int = MAX_
     """
     if not texts:
         return 0
-    lengths = [
-        len(ids)
-        for ids in tokenizer(texts, add_special_tokens=True, truncation=False)["input_ids"]
-    ]
+    lengths = [len(ids) for ids in tokenizer(texts, add_special_tokens=True, truncation=False)["input_ids"]]
     return sum(1 for length in lengths if length > max_seq_length)
 
 
@@ -199,6 +197,7 @@ def save_bundle(
     encode_seconds: float,
     model_name: ModelName = "minilm_pretrained",
     out_dir: Path = DEFAULT_MODELS_DIR,
+    encoder_path: str | Path | None = None,
 ) -> Path:
     """Write embeddings.npy, recipe_ids.json and manifest.json; return the bundle folder."""
     run_id = bundle_run_id(mode, profile, corpus_sha256, model_name=model_name)
@@ -236,7 +235,31 @@ def save_bundle(
     payload["n_truncated"] = int(truncated)
     payload["encode_seconds"] = round(float(encode_seconds), 3)
     write_json(bundle / "manifest.json", payload)
+    if encoder_path is not None:
+        package_encoder(bundle, encoder_path)
     return bundle
+
+
+def package_encoder(bundle: str | Path, checkpoint: str | Path) -> None:
+    """Include the exact local FT checkpoint and its hashes in a portable serving bundle."""
+    bundle, checkpoint = Path(bundle), Path(checkpoint)
+    if not (checkpoint / "modules.json").is_file() or not (checkpoint / "model.safetensors").is_file():
+        raise BundleError(f"{checkpoint} is not a complete SentenceTransformer checkpoint")
+    target = bundle / "encoder"
+    if checkpoint.resolve() != target.resolve():
+        shutil.copytree(checkpoint, target, dirs_exist_ok=True)
+    payload = read_json(bundle / "manifest.json")
+    payload["encoder_path"] = "encoder"
+    payload["encoder_model"] = "encoder"
+    payload["revision"] = sha256_file(target / "model.safetensors")
+    payload["files"].update(
+        {
+            path.relative_to(bundle).as_posix(): sha256_file(path)
+            for path in target.rglob("*")
+            if path.is_file()
+        }
+    )
+    write_json(bundle / "manifest.json", payload)
 
 
 def validate_bundle(bundle: str | Path) -> tuple[BundleManifest, np.ndarray, list[str]]:
@@ -332,6 +355,7 @@ def build(
         encode_seconds=encode_seconds,
         model_name=model_name,
         out_dir=out_dir,
+        encoder_path=model_path,
     )
     return {
         "bundle": bundle,
@@ -345,9 +369,7 @@ def build(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawTextHelpFormatter
-    )
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("--config", default="configs/pilot.yaml")
     parser.add_argument("--mode", default="ingredients", choices=list(MODES))
     parser.add_argument("--out", default=str(DEFAULT_MODELS_DIR))

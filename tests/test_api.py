@@ -186,6 +186,19 @@ def test_the_requests_are_logged(api_client, tmp_path_factory):
     assert status_code == 200
 
 
+def test_missing_counts_in_the_log_match_prediction(api_client):
+    import json
+    import sqlite3
+    from contextlib import closing
+
+    response = api_client.post("/predict", json={"ingredients": ["chicken"], "top_k": 2})
+    with closing(sqlite3.connect(os.environ["API_REQUEST_LOG"])) as connection:
+        counts = connection.execute(
+            "SELECT missing_ingredient_counts FROM request_log ORDER BY rowid DESC LIMIT 1"
+        ).fetchone()[0]
+    assert json.loads(counts) == [len(r["missing_ingredients"]) for r in response.json()["results"]]
+
+
 def test_a_rejected_request_is_logged_with_its_status(api_client):
     api_client.post("/predict", json={"ingredients": ["rice"], "top_k": 99})
     log_path = Path(os.environ["API_REQUEST_LOG"])

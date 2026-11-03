@@ -655,6 +655,28 @@ docker-compose.yml  api + the bundles volume + the optional MLflow UI
 
 ## Reproducibility
 
+Khung 3 verification (2026-11-03):
+
+- Fine-tuned bundles include an `encoder/` directory. Every checkpoint file is hashed in
+  `manifest.json`; the API, benchmark and evaluator load that encoder instead of pretrained
+  weights. Build a portable FT bundle with
+  `python -m src.embeddings --config configs/default.yaml --model-path models/minilm_finetuned-main-cpu1ep`.
+  Legacy FT bundles without a packaged encoder fail clearly; explicit evaluation encoders still work.
+- `src.train` verifies cached inputs and output hashes. Data/config mismatches in processed
+  artifacts stop the pipeline for verification; they do not silently overwrite shared data.
+  Checkpoint caches include pairs, hyperparameters and device. `train_summary.json` records actual
+  training measurements; missing legacy measurements are omitted from MLflow.
+- API logs include one missing-ingredient count per returned recipe. Existing SQLite logs are
+  migrated; missing fields in old records remain unknown. Monitoring excludes test/final
+  reference queries and does not invent reference latencies.
+- `python -m scripts.record_rollback_trial --bootstrap` creates trial registry revisions only when
+  the local registry is empty, checks a rollback, restores the original production alias and sends
+  real HTTP requests to a fresh API with an unavailable tracking endpoint. Both initial trial
+  revisions use the same locked FT checkpoint; this tests registry operations, not quality changes.
+  Evidence: `reports/mlflow_rollback_trial.json` and `reports/offline_api_verification.json`.
+- `reports/benchmark.json` includes FT with 20 warmup and 100 measured validation queries per bundle.
+  `reports/ui_viewports.json` records actual 390px/1440px CSS viewports, overflow and keyboard checks.
+
 - Seed 42 everywhere; `configs/default.yaml` holds every data parameter and is hashed into each manifest.
 - `python -m src.data_collection` reproduces the processed files exactly (hashes are in the manifest; `tests/test_data_collection.py::test_build_is_reproducible` checks it on a fixture).
 - `python -m pytest` runs offline in seconds. Tests that read the real processed data skip themselves if it is absent.
