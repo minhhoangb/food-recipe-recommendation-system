@@ -19,6 +19,7 @@ dist/
 mlruns/
 *.db
 logs/
+reports/regularization_ablation*/checkpoint-*/
 
 # OS / IDE
 .DS_Store

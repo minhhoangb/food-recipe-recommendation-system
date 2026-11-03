@@ -78,7 +78,8 @@ def finetune_model(
         train_objectives=[(train_dataloader, train_loss)],
         epochs=epochs,
         warmup_steps=warmup_steps,
-        optimizer_params={"lr": learning_rate, "weight_decay": weight_decay},
+        optimizer_params={"lr": learning_rate},
+        weight_decay=weight_decay,
         show_progress_bar=False,
     )
 
@@ -96,6 +97,7 @@ def finetune_model(
         "batch_size": batch_size,
         "learning_rate": learning_rate,
         "warmup_steps": warmup_steps,
+        "weight_decay": weight_decay,
         "device": device,
         "train_seconds": train_seconds,
         "peak_rss_mb": round(final_rss, 1),

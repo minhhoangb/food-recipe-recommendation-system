@@ -1,0 +1,133 @@
+{
+  "arms": [
+    {
+      "history": [
+        {
+          "step": 0,
+          "train_loss": 0.38463595807552337,
+          "val_loss": 0.2986302475134532
+        },
+        {
+          "step": 32,
+          "train_loss": 0.057600483453522124,
+          "val_loss": 0.03797984678919117
+        },
+        {
+          "step": 64,
+          "train_loss": 0.03493179387102525,
+          "val_loss": 0.032864335319027306
+        },
+        {
+          "step": 96,
+          "train_loss": 0.022986807782823842,
+          "val_loss": 0.03088306707019607
+        },
+        {
+          "step": 128,
+          "train_loss": 0.019934766568864386,
+          "val_loss": 0.0326834656453381
+        },
+        {
+          "step": 160,
+          "train_loss": 0.01866307211263726,
+          "val_loss": 0.03235455313697457
+        },
+        {
+          "step": 190,
+          "train_loss": 0.013650696724653244,
+          "val_loss": 0.02637192510689298
+        }
+      ],
+      "initial_weights_sha256": "c13c0900ac73c2de46340ec049fd09d33205a6a07265308320e79e283ece248d",
+      "run_id": "d6288a44961f46cc84e3053324855d4f",
+      "train_seconds": 23.418841155999985,
+      "weight_decay": 0.0
+    },
+    {
+      "history": [
+        {
+          "step": 0,
+          "train_loss": 0.38463595807552337,
+          "val_loss": 0.2986302475134532
+        },
+        {
+          "step": 32,
+          "train_loss": 0.05760100126887361,
+          "val_loss": 0.037979700199017925
+        },
+        {
+          "step": 64,
+          "train_loss": 0.03493265990788738,
+          "val_loss": 0.03286400983730952
+        },
+        {
+          "step": 96,
+          "train_loss": 0.022987537458539008,
+          "val_loss": 0.03088262751698494
+        },
+        {
+          "step": 128,
+          "train_loss": 0.019935182854533197,
+          "val_loss": 0.0326827229000628
+        },
+        {
+          "step": 160,
+          "train_loss": 0.018663763984416923,
+          "val_loss": 0.03235294485154251
+        },
+        {
+          "step": 190,
+          "train_loss": 0.0136520094005391,
+          "val_loss": 0.02637089372922977
+        }
+      ],
+      "initial_weights_sha256": "c13c0900ac73c2de46340ec049fd09d33205a6a07265308320e79e283ece248d",
+      "run_id": "dd5a0f6c678546eaa4d76d18c4676ec0",
+      "train_seconds": 22.26836477800009,
+      "weight_decay": 0.01
+    }
+  ],
+  "controls": {
+    "base_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "batch_schedule_sha256": "e79e454e4e54aa0718b899f6ad6a055c1218a9fe0ae5358b6ac42d4d8989329e",
+    "batch_size": 16,
+    "config": "configs/default.yaml",
+    "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+    "device": "cuda",
+    "epochs": 3,
+    "eval_every": 32,
+    "loss": "MultipleNegativesRankingLoss",
+    "lr": 2e-05,
+    "max_seq_length": 128,
+    "optimizer": "AdamW",
+    "probe_batches": 15,
+    "seed": 42,
+    "splits_sha256": "35abfe794e8cd840d103657dfb613b31034870960fb513cf85032c810524de0a",
+    "threads": 2,
+    "train_pairs": 1024,
+    "train_pairs_sha256": "8e16b1148af719459230e5b57a484f140c59f360e9701b6117dc8a9378f7dcb8",
+    "train_probe_sha256": "d79981ad76925b46b64320dcb81953e639eeb4dc7fdea45d36d521bdaf6f3858",
+    "val_pairs": 256,
+    "validation_pairs_sha256": "2032d51f144c9d4f8f133f1182e6636a1af8393fc7efa3fdc343a91dd17a9ddb",
+    "validation_probe_sha256": "9d9b260e7e6b1c43f8b355dcac58a5645a4adabb80fa8b17393971c1c7955569"
+  },
+  "hardware": {
+    "colab": true,
+    "device": "cuda",
+    "gpu": "Tesla T4",
+    "libraries": {
+      "mlflow": "3.17.2",
+      "sentence-transformers": "5.1.2",
+      "torch": "2.11.0+cu130"
+    },
+    "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+    "python": "3.13.16"
+  },
+  "local_run_mapping": {
+    "727a5f2969154b0591842fefc161ca18": "963482a764cb419da092bf5703bc03f3",
+    "d6288a44961f46cc84e3053324855d4f": "6b4b0facbbfb4082be15b94f3977c805",
+    "dd5a0f6c678546eaa4d76d18c4676ec0": "6178d21f4c064d019dc8fab00efd384a"
+  },
+  "parent_run_id": "727a5f2969154b0591842fefc161ca18",
+  "scope": "Single-seed controlled loss experiment; no test-set evaluation."
+}
