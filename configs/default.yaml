@@ -46,6 +46,6 @@ serving:
   bundle: ""
 
 artifacts:
-  # Filled in by the data owner after uploading dist/processed-<id>.zip (see scripts/).
-  url: ""
-  sha256: ""
+  # Public GitHub Release; verify the archive before extracting either profile.
+  url: "https://github.com/minhhoangb/food-recipe-recommendation-system/releases/download/processed-1f1f4ce505/processed-1f1f4ce505.zip"
+  sha256: "477f4da946d96e1fbd1bd98e27ad9c04883529c6b56773a16e55eb08139b6d5b"

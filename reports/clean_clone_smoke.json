@@ -1,0 +1,33 @@
+{
+  "all_ok": true,
+  "verified_utc": "2026-11-03T11:01:15.638729+00:00",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "url": "http://127.0.0.1:8010",
+  "health": {
+    "status": "ok",
+    "model": "bm25",
+    "model_version": "1"
+  },
+  "model_info": {
+    "model": "bm25",
+    "model_version": "1",
+    "backend": "lexical",
+    "config": "configs/production.yaml",
+    "corpus_recipes": 50000,
+    "bundle": "models/bm25-main-1f1f4ce5",
+    "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+    "metrics": null
+  },
+  "predict_ids": [
+    "recipenlg:7642",
+    "recipenlg:1450605",
+    "recipenlg:263382",
+    "recipenlg:642207",
+    "recipenlg:1247577"
+  ],
+  "batch_sizes": [
+    5,
+    2
+  ],
+  "invalid_top_k_status": 422
+}

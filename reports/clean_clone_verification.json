@@ -1,0 +1,34 @@
+{
+  "verified_utc": "2026-11-03T11:04:25.369817+00:00",
+  "all_ok": true,
+  "source": "fresh local git clone --no-hardlinks, with current tracked working-tree patch applied; no pre-existing data/models/venv copied",
+  "source_commit": "dc6ca4267177f2c31c83f59d00ddca15f169f180",
+  "changes_pushed": false,
+  "clone_directory": "D:\\MDS301\\clean-clone-regularization-20261103",
+  "fresh_venv": true,
+  "installation": "python -m venv .venv; pip install -r requirements.txt",
+  "artifact_url": "https://github.com/minhhoangb/food-recipe-recommendation-system/releases/download/processed-1f1f4ce505/processed-1f1f4ce505.zip",
+  "artifact_sha256": "477f4da946d96e1fbd1bd98e27ad9c04883529c6b56773a16e55eb08139b6d5b",
+  "checks": {
+    "download_and_archive_hash": true,
+    "pilot_and_main_manifests_and_splits": true,
+    "build_bm25": true,
+    "fresh_api_health_predict_batch_invalid_request": true,
+    "full_test_suite": true
+  },
+  "api_evidence": "reports/clean_clone_smoke.json",
+  "install_log": "logs/clean-clone-install.stdout.log",
+  "fetch_log": "logs/clean-clone-fetch.log",
+  "test_results": {
+    "passed": 288,
+    "warnings": 8,
+    "seconds": 155.3,
+    "log": "logs/clean-clone-tests.log"
+  },
+  "workspace_test_results": {
+    "passed": 288,
+    "warnings": 7,
+    "seconds": 73.07,
+    "log": "logs/evidence-full-tests.log"
+  }
+}

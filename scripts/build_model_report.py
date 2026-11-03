@@ -152,10 +152,11 @@ def build():
             "singular/plural variants and large origin recipes. FT improved over pretrained E04 on 196 validation "
             "queries, regressed on 30 and tied on 274. These are cases from a fixed validation comparison, not "
             "new test-derived tuning rules. No test-case inspection was used to modify the frozen systems.",
-            "Controlled regularization evidence remains missing. The older ablation image was generated from "
-            "literal loss arrays; it cannot support a causal claim about weight decay. A genuine comparison "
-            "would require otherwise matched runs and measured loss/validation histories. That task belongs to "
-            "Hiếu and is recorded in the rubric checklist; it is not filled in by this report.",
+            "A separate controlled weight-decay loss experiment was completed on Colab T4 on 2026-11-03; "
+            "reports/ablation_regularization.md links its original runs, measured histories and actual MLflow "
+            "UI captures. The matched wd=0.0/0.01 arms differ by about 0.00000103 in final validation loss, "
+            "which does not establish a meaningful regularization benefit. This experiment does not change "
+            "the locked checkpoint, frozen deployment choice or E10 evaluation.",
         ],
     )
 
@@ -217,8 +218,9 @@ def build():
             "The selection rule was highest validation MRR@10 among the fixed systems, with performance and "
             "operational limitations disclosed. BM25's validation score of 0.7583 exceeded TF-IDF's 0.6567 and "
             "FT's 0.6209. The user confirmed E03 before E10. The production configuration now identifies the "
-            "same BM25 main bundle; this is the configuration decision for Hưng to verify in the final container. "
-            "This branch does not claim a new Docker build or a clean-clone deployment test.",
+            "same BM25 main bundle. The subsequent evidence addendum verifies the fresh local clone and "
+            "a rebuilt local Docker image; reports/docker_verification.json records healthy startup, "
+            "container smoke and five native/container queries with identical IDs, order and scores.",
             "BM25's serialized joblib bundle is small and does not require loading transformer weights for "
             "inference. The serving benchmark is a separate experiment: 20 warmup queries and 100 sequential "
             "validation queries per bundle, with startup, latency, RAM and artifact size recorded. These values "
@@ -307,16 +309,19 @@ def build():
             "LSA CV run: d46efe09f7dd4835841f66b860d4d433. The CV JSONs give means, standard deviations, "
             "fold counts and corpus hashes. The master CSV links timing and CV fields to these sources.",
             "The rubric checklist maps all five phases and their subrequirements to files, runs and responsible "
-            "owners. It marks genuine regularization curves and real MLflow UI captures as missing for Hiếu, "
-            "selected-BM25 clean-clone/container checks as pending for Hưng, and final human judgments as pending "
-            "for the group. It also identifies incomplete student IDs, artifact-download configuration, "
+            "owners. The evidence addendum completes measured regularization, actual MLflow UI captures, "
+            "artifact-download configuration and the native BM25 fresh-clone check. The selected-BM25 "
+            "container rebuild, health, smoke and parity check also passed after the Windows restart. "
+            "Final human judgments remain pending "
+            "for the group. The checklist also identifies incomplete student IDs, "
             "clean-kernel notebook evidence and final presentation/rehearsal deliverables. It is an evidence "
             "map, not a guessed course grade.",
             "The retrospective review of Hiếu's PR #20 records three findings: generated UI facsimiles and "
             "constant ablation loss arrays cannot establish measured experiments; scripted recommendation "
             "function calls are not naturally collected API user traffic; and experiment/model descriptions "
             "must match main FT E08, TF-IDF settings and 256-component LSA. Those findings are reported, not "
-            "silently fixed or treated as satisfactory evidence. This branch contains Hoàng's work only.",
+            "treated as satisfactory historical evidence. The separate evidence addendum documents the "
+            "subsequent measured ablation and replacement UI captures.",
             "References and primary artifacts: RecipeNLG dataset and source links (README Dataset); "
             "scikit-learn TF-IDF/TruncatedSVD/GroupKFold; rank-bm25; sentence-transformers MiniLM and "
             "MultipleNegativesRankingLoss; ranx metrics and paired comparison; MLflow tracking. Repository "
