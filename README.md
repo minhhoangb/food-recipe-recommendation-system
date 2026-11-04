@@ -708,6 +708,18 @@ docker-compose.yml  api + the bundles volume + the optional MLflow UI
 
 ## Reproducibility
 
+GPU retraining (2026-11-04): [measured validation results and run evidence](reports/retraining_20261104/README.md).
+The [separate model release](https://github.com/minhhoangb/food-recipe-recommendation-system/releases/tag/model-artifacts-gpu-20261104)
+contains weights, embeddings, indexes and the MLflow snapshot, with SHA-256 in
+[`artifacts.json`](reports/retraining_20261104/artifacts.json). The frozen E10 and
+production selection are unchanged; another training run is not required to use these artifacts.
+
+The verified local GPU environment uses PyTorch 2.9.1 with CUDA 12.8 on an RTX 3060 Laptop.
+Install that build into the activated environment with
+`python -m pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cu128`.
+Check device availability with
+`python -c "import torch; print(torch.__version__, torch.cuda.is_available())"`.
+
 Khung 3 verification (2026-11-03):
 
 - Fine-tuned bundles include an `encoder/` directory. Every checkpoint file is hashed in
@@ -715,8 +727,12 @@ Khung 3 verification (2026-11-03):
   weights. Build a portable FT bundle with
   `python -m src.embeddings --config configs/default.yaml --model-path models/minilm_finetuned-main-cpu1ep`.
   Legacy FT bundles without a packaged encoder fail clearly; explicit evaluation encoders still work.
-- `src.train` verifies cached inputs and output hashes. Data/config mismatches in processed
-  artifacts stop the pipeline for verification; they do not silently overwrite shared data.
+- `src.train` supports both `python src/train.py` and `python -m src.train` and verifies
+  cached inputs and output hashes. Processed-data cache checks cover seed, data/query
+  settings, normalization and file hashes; download URLs, serving settings and paths do
+  not invalidate the data. New builds record `data_config_sha256`; shared legacy artifacts
+  are checked against the hash-verified original config in `configs/provenance/processed_v1.yaml`.
+  Data/config mismatches stop the pipeline instead of silently overwriting shared data.
   Checkpoint caches include pairs, hyperparameters and device. `train_summary.json` records actual
   training measurements; missing legacy measurements are omitted from MLflow.
 - API logs include one missing-ingredient count per returned recipe. Existing SQLite logs are

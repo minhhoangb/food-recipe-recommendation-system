@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-04",
+  "checks": [
+    {
+      "command": ".venv\\Scripts\\python.exe -m pytest -x -q --basetemp D:\\MDS301\\outputs\\pytest-prepush-20261104",
+      "exit_code": 0,
+      "passed": 304,
+      "notes": "Includes two artifact-publisher tests added after the 302-test post-training run. Dependency deprecation and single-label fixture warnings remain."
+    },
+    {
+      "command": ".venv\\Scripts\\python.exe -m ruff check .",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "scope": "Publication verification only; no new training or frozen E10 evaluation."
+}

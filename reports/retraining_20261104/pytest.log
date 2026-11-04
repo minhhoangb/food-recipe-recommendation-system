@@ -1,0 +1,23 @@
+........................................................................ [ 23%]
+........................................................................ [ 47%]
+........................................................................ [ 71%]
+........................................................................ [ 95%]
+..............                                                           [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  D:\MDS301\food-recipe-recommendation-system\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_compare.py::test_comparison_files_match_the_evaluator
+  D:\MDS301\food-recipe-recommendation-system\.venv\Lib\site-packages\mlflow\store\tracking\sqlalchemy_store.py:327: SADeprecationWarning: The ``noload`` loader strategy is deprecated and will be removed in a future release.  This option produces incorrect results by returning ``None`` for related items. (deprecated since: 2.1)
+    sqlalchemy.orm.configure_mappers()
+
+tests/test_final_evaluation.py::test_pooled_ndcg_reports_unjudged_coverage_and_preserves_originals
+tests/test_final_evaluation.py::test_pooled_ndcg_reports_unjudged_coverage_and_preserves_originals
+tests/test_final_evaluation.py::test_pooled_ndcg_reports_unjudged_coverage_and_preserves_originals
+tests/test_final_evaluation.py::test_disagreements_require_adjudication_without_changing_originals
+tests/test_final_evaluation.py::test_disagreements_require_adjudication_without_changing_originals
+  D:\MDS301\food-recipe-recommendation-system\.venv\Lib\site-packages\sklearn\utils\_param_validation.py:218: UndefinedMetricWarning: `y1`, `y2` and `labels` have only one label in common. `cohen_kappa_score` is undefined and set to the value defined by the the `replace_undefined_by` param, which is set to nan.
+    return func(*args, **kwargs)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

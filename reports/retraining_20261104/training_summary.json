@@ -1,0 +1,17 @@
+{
+  "base_model": "C:\\Users\\buimi\\.cache\\huggingface\\hub\\models--sentence-transformers--all-MiniLM-L6-v2\\snapshots\\1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+  "batch_size": 32,
+  "checkpoint_sha256": "9496b9b06fdee35c080daa7f951562c3da60268b8c156615f8bd693bc8e472c1",
+  "device": "cuda",
+  "epochs": 1,
+  "learning_rate": 2e-05,
+  "n_examples": 30000,
+  "output_path": "D:\\MDS301\\outputs\\retrain-20261104\\models\\minilm_finetuned-checkpoint",
+  "peak_cuda_allocated_mb": 1244.1298828125,
+  "peak_cuda_reserved_mb": 1500.0,
+  "peak_rss_mb": 3346.9,
+  "train_pairs_sha256": "9f465e8889eed9db418237e319b0f3066df24b93284b53843b5fb9d142db02c3",
+  "train_seconds": 126.791,
+  "warmup_steps": 50,
+  "weight_decay": 0.01
+}
