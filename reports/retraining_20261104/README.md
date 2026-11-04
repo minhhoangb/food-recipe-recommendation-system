@@ -37,6 +37,7 @@ human labels are still pending.
   hardware and completion time. Its `git_head` is the pre-commit run provenance.
 - `training_summary.json`, `training.log` and per-system validation rankings retain
   the measured training and retrieval outputs.
+  The repository log trims trailing console whitespace; the release preserves the original log.
 - `regularization_ablation/` contains the new measured loss histories and controls.
 - `requirements-gpu-freeze.txt` records the CUDA environment.
 - `pytest.log` records the 302 passing tests run immediately after retraining.

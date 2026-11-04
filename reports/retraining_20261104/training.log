@@ -25,7 +25,7 @@ D:\MDS301\food-recipe-recommendation-system\.venv\Lib\site-packages\mlflow\store
 
 Computing widget examples:   0%|          | 0/1 [00:00<?, ?example/s]
 Computing widget examples: 100%|██████████| 1/1 [00:00<00:00,  4.99example/s]
-                                                                             
+
 D:\MDS301\food-recipe-recommendation-system\.venv\Lib\site-packages\torch\utils\data\_utils\pin_memory.py:57: DeprecationWarning: The argument 'device' of Tensor.pin_memory() is deprecated. Please do not pass this argument. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\pytorch\aten\src\ATen\native\Memory.cpp:48.)
   return data.pin_memory(device)
 D:\MDS301\food-recipe-recommendation-system\.venv\Lib\site-packages\torch\utils\data\_utils\pin_memory.py:57: DeprecationWarning: The argument 'device' of Tensor.is_pinned() is deprecated. Please do not pass this argument. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\pytorch\aten\src\ATen\native\Memory.cpp:33.)
