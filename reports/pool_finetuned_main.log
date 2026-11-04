@@ -1,0 +1,9 @@
+Downloading required NLTK resource: averaged_perceptron_tagger_eng
+[nltk_data] Error loading averaged_perceptron_tagger_eng: <urlopen
+[nltk_data]     error pathsec.urlopen: no validated address for host
+[nltk_data]     'raw.githubusercontent.com'; refusing to connect by
+[nltk_data]     unvalidated hostname>
+hoang: 172 rows, queries ['m01', 'm03', 'm04', 'm06', 'm07', 'm09', 'm10', 'm12', 'm13', 'm15', 'm16', 'm18', 'm19']
+hung: 161 rows, queries ['m01', 'm02', 'm04', 'm05', 'm07', 'm08', 'm10', 'm11', 'm13', 'm14', 'm16', 'm17', 'm19', 'm20']
+hieu: 151 rows, queries ['m02', 'm03', 'm05', 'm06', 'm08', 'm09', 'm11', 'm12', 'm14', 'm15', 'm17', 'm18', 'm20']
+396 pooled items for 20 queries from ['E01', 'E02', 'E03', 'E04', 'E05', 'FT', 'LSA'] -> reports\manual_eval

@@ -1,0 +1,6 @@
+tfidf: {'fit_on': 'train recipes only', 'vocabulary_size': 11901, 'fit_seconds': 28.024, 'n_docs': 50000, 'n_train_docs': 35896}
+bundle: D:\MDS301\food-recipe-recommendation-system\models\tfidf-main-1f1f4ce5
+bm25: {'idf_corpus': 'all candidate recipes (transductive)', 'fit_seconds': 25.658, 'n_docs': 50000, 'n_train_docs': 35896}
+bundle: D:\MDS301\food-recipe-recommendation-system\models\bm25-main-1f1f4ce5
+lsa: {'fit_on': 'train recipes only', 'vocabulary_size': 11901, 'fit_seconds': 51.638, 'n_docs': 50000, 'n_train_docs': 35896}
+bundle: D:\MDS301\food-recipe-recommendation-system\models\lsa-main-1f1f4ce5

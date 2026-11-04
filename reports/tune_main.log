@@ -1,0 +1,32 @@
+2026/10/27 10:02:54 INFO mlflow.agent.hint: Load the `instrumenting-with-mlflow-tracing` skill at D:\MDS301\food-recipe-recommendation-system\.venv\Lib\site-packages\mlflow\assistant\skills\instrumenting-with-mlflow-tracing\SKILL.md before writing any tracing code; it ships with this MLflow install. Set MLFLOW_DISABLE_AGENT_HINT=1 to silence this.
+D:\MDS301\food-recipe-recommendation-system\.venv\Lib\site-packages\mlflow\store\tracking\sqlalchemy_store.py:327: SADeprecationWarning: The ``noload`` loader strategy is deprecated and will be removed in a future release.  This option produces incorrect results by returning ``None`` for related items. (deprecated since: 2.1)
+  sqlalchemy.orm.configure_mappers()
+min_df norm sublinear_tf               tokens  mean_cv_mrr@10  std_cv_mrr@10  mean_train_mrr@10  std_train_mrr@10  mean_fit_time  rank_cv_mrr@10
+     1   l2        False           ingredient        0.689578       0.006323           0.727992          0.001426       0.268665               1
+     1   l2         True           ingredient        0.689578       0.006323           0.727992          0.001426       0.191401               1
+     1 None        False           ingredient        0.676545       0.007275           0.736429          0.002991       0.200616               3
+     1 None         True           ingredient        0.676545       0.007275           0.736429          0.002991       0.208751               3
+     2   l2        False           ingredient        0.656140       0.010315           0.676166          0.002869       0.271393               5
+     2   l2         True           ingredient        0.656140       0.010315           0.676166          0.002869       0.192094               5
+     2 None        False           ingredient        0.653866       0.009314           0.682747          0.002054       0.265450               7
+     2 None         True           ingredient        0.653866       0.009314           0.682747          0.002054       0.228480               7
+     1   l2        False ingredient_and_words        0.637573       0.007623           0.645585          0.002309       0.426625               9
+     1   l2         True ingredient_and_words        0.637370       0.007455           0.645445          0.002275       0.502831              10
+     2   l2         True ingredient_and_words        0.627539       0.007293           0.635449          0.001728       0.443530              11
+     2   l2        False ingredient_and_words        0.627490       0.007689           0.635461          0.001947       0.453113              12
+     5   l2        False ingredient_and_words        0.618708       0.009660           0.622629          0.003007       0.800172              13
+     5   l2         True ingredient_and_words        0.618180       0.008665           0.622899          0.002849       0.665172              14
+     5 None         True           ingredient        0.610993       0.009699           0.626256          0.002095       0.211114              15
+     5 None        False           ingredient        0.610993       0.009699           0.626256          0.002095       0.188988              15
+     5   l2         True           ingredient        0.608820       0.011689           0.619784          0.002106       0.194638              17
+     5   l2        False           ingredient        0.608820       0.011689           0.619784          0.002106       0.208355              17
+     1 None         True ingredient_and_words        0.597616       0.009211           0.616076          0.002272       0.486958              19
+     2 None         True ingredient_and_words        0.588198       0.011418           0.601502          0.002974       0.457044              20
+     5 None         True ingredient_and_words        0.572411       0.011099           0.580671          0.003496       0.860747              21
+     1 None        False ingredient_and_words        0.546693       0.013492           0.569486          0.003215       0.498511              22
+     2 None        False ingredient_and_words        0.535081       0.015695           0.551200          0.003791       0.729357              23
+     5 None        False ingredient_and_words        0.514616       0.016255           0.523992          0.003990       0.666242              24
+E01 default: cv MRR@10 0.6896 ± 0.0063 | train proxy 0.7280 | {'tokens': 'ingredient', 'min_df': 1, 'sublinear_tf': False, 'norm': 'l2'}
+E02 best: cv MRR@10 0.6896 ± 0.0063 | train proxy 0.7280 | {'tokens': 'ingredient', 'min_df': 1, 'sublinear_tf': False, 'norm': 'l2'}
+24 candidates x 5 folds in 939 s -> D:\MDS301\food-recipe-recommendation-system\reports\tfidf_cv5.json
+mlflow run: dac82cb580e8403082cd9d0fabb40448 (sqlite:///mlflow.db)
