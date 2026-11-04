@@ -1,6 +1,12 @@
+import os
+import subprocess
+import sys
+from pathlib import Path
+
 import mlflow
 import numpy as np
 import pytest
+from omegaconf import OmegaConf
 
 from src import finetune, train
 from src.config import processed_dir
@@ -9,6 +15,26 @@ from src.utils import read_json
 
 class TrainingReached(Exception):
     pass
+
+
+def test_direct_training_script_reuses_processed_data(built_fixture, fixture_csv, tmp_path):
+    cfg, _, directory = built_fixture
+    config_path = tmp_path / "training.yaml"
+    OmegaConf.save(cfg, config_path)
+    environment = os.environ.copy()
+    environment.pop("PYTHONPATH", None)
+    result = subprocess.run(
+        [sys.executable, "src/train.py", "--config", str(config_path),
+         "--raw-path", str(fixture_csv), "--stage", "processed", "--no-mlflow"],
+        cwd=Path(__file__).resolve().parents[1],
+        env=environment,
+        capture_output=True,
+        text=True,
+        timeout=90,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "[CACHED]" in result.stdout
+    assert str(directory / "main") in result.stdout
 
 
 def stop_before_training(pairs, **kwargs):

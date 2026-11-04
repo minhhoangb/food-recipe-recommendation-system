@@ -1,0 +1,36 @@
+# Read-only provenance snapshot, not a profile to merge over default.yaml.
+# Source: ea76c3f:configs/default.yaml with data.profile=pilot, used to build both profiles.
+# Parsed config SHA-256: d5805a0b24c01603ec4a5e55a2cc2c8c67453017c8758b52ba2244c5f3f1320a.
+seed: 42
+paths:
+  raw_csv: data/raw/RecipeNLG_dataset.csv
+  processed_dir: data/processed
+  models_dir: models
+  runs_dir: reports/runs
+data:
+  profile: pilot
+  n_main: 50000
+  n_pilot: 5000
+  candidate_factor: 2.0
+  chunk_rows: 200000
+  min_ingredients: 2
+  max_ingredients: 40
+  test_fraction: 0.20
+  validation_fraction: 0.08
+queries:
+  min_recipe_ingredients: 3
+  min_query_size: 2
+  max_query_size: 6
+  common_df_threshold: 0.02
+  caps:
+    train: {main: 5000, pilot: 1000}
+    validation: {main: 500, pilot: 200}
+    test: {main: 1000, pilot: 300}
+artifacts:
+  url: ""
+  sha256: ""
+api:
+  max_ingredients: 50
+  max_ingredient_chars: 100
+  max_top_k: 20
+  max_batch: 20

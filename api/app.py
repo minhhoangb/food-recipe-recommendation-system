@@ -113,6 +113,7 @@ async def _validation_error_handler(request: Request, error: RequestValidationEr
     if logger is not None:
         body = error.body if isinstance(error.body, dict) else {}
         raw = body.get("ingredients") or []
+        raw_top_k = body.get("top_k")
         logger.log(
             RequestLogRecord(
                 request_id=uuid.uuid4().hex,
@@ -121,7 +122,7 @@ async def _validation_error_handler(request: Request, error: RequestValidationEr
                 model=getattr(app.state.retriever, "name", "unknown"),
                 model_version=getattr(app.state.retriever, "version", "unknown"),
                 ingredients=[str(item) for item in raw] if isinstance(raw, list) else [],
-                top_k=int(body.get("top_k", 0) or 0),
+                top_k=raw_top_k if type(raw_top_k) is int else 0,
                 result_ids=[],
                 scores=[],
                 latency_ms=0.0,
