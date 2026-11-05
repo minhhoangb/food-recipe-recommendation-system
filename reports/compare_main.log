@@ -1,0 +1,26 @@
+2026/10/27 10:22:30 INFO mlflow.agent.hint: Load the `instrumenting-with-mlflow-tracing` skill at D:\MDS301\food-recipe-recommendation-system\.venv\Lib\site-packages\mlflow\assistant\skills\instrumenting-with-mlflow-tracing\SKILL.md before writing any tracing code; it ships with this MLflow install. Set MLFLOW_DISABLE_AGENT_HINT=1 to silence this.
+D:\MDS301\food-recipe-recommendation-system\.venv\Lib\site-packages\mlflow\store\tracking\sqlalchemy_store.py:327: SADeprecationWarning: The ``noload`` loader strategy is deprecated and will be removed in a future release.  This option produces incorrect results by returning ``None`` for related items. (deprecated since: 2.1)
+  sqlalchemy.orm.configure_mappers()
+E01  train      recall@5 0.8007  recall@10 0.8550  mrr@10 0.6998
+E01  validation recall@5 0.7760  recall@10 0.8260  mrr@10 0.6567
+E02  train      recall@5 0.8007  recall@10 0.8550  mrr@10 0.6998
+E02  validation recall@5 0.7760  recall@10 0.8260  mrr@10 0.6567
+E03  train      recall@5 0.8552  recall@10 0.9013  mrr@10 0.7687
+E03  validation recall@5 0.8560  recall@10 0.9100  mrr@10 0.7583
+LSA  train      recall@5 0.4352  recall@10 0.5157  mrr@10 0.3402
+LSA  validation recall@5 0.4560  recall@10 0.5360  mrr@10 0.3629
+E04  train      recall@5 0.5454  recall@10 0.5917  mrr@10 0.4575
+E04  validation recall@5 0.5120  recall@10 0.5760  mrr@10 0.4342
+E05  train      recall@5 0.2419  recall@10 0.2965  mrr@10 0.1808
+E05  validation recall@5 0.2140  recall@10 0.2620  mrr@10 0.1519
+
+#    Model    Recall@5    Recall@10    MRR@10
+---  -------  ----------  -----------  ----------
+a    E01      0.776ᵈᵉᶠ    0.826ᵈᵉᶠ     0.657ᵈᵉᶠ
+b    E02      0.776ᵈᵉᶠ    0.826ᵈᵉᶠ     0.657ᵈᵉᶠ
+c    E03      0.856ᵃᵇᵈᵉᶠ  0.910ᵃᵇᵈᵉᶠ   0.758ᵃᵇᵈᵉᶠ
+d    LSA      0.456ᶠ      0.536ᶠ       0.363ᶠ
+e    E04      0.512ᶠ      0.576ᶠ       0.434ᵈᶠ
+f    E05      0.214       0.262        0.152
+
+-> D:\MDS301\food-recipe-recommendation-system\reports\comparison.csv

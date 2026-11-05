@@ -23,6 +23,7 @@ COPY api ./api
 COPY src ./src
 COPY configs ./configs
 COPY fe ./fe
+COPY scripts/smoke_api.py ./scripts/smoke_api.py
 
 # The corpus and the bundles are mounted as volumes (see docker-compose.yml); the app
 # reads them at startup and never writes to them.

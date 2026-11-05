@@ -1,0 +1,26 @@
+2026/10/29 15:06:27 INFO mlflow.agent.hint: Load the `instrumenting-with-mlflow-tracing` skill at D:\MDS301\food-recipe-recommendation-system\.venv\Lib\site-packages\mlflow\assistant\skills\instrumenting-with-mlflow-tracing\SKILL.md before writing any tracing code; it ships with this MLflow install. Set MLFLOW_DISABLE_AGENT_HINT=1 to silence this.
+Fine-tuning sentence-transformers/all-MiniLM-L6-v2 on 30000 pairs (epochs=1, batch_size=32)...
+Computing widget examples:   0%|          | 0/1 [00:00<?, ?example/s]                                                                     D:\MDS301\food-recipe-recommendation-system\.venv\Lib\site-packages\mlflow\store\tracking\sqlalchemy_store.py:327: SADeprecationWarning: The ``noload`` loader strategy is deprecated and will be removed in a future release.  This option produces incorrect results by returning ``None`` for related items. (deprecated since: 2.1)
+  sqlalchemy.orm.configure_mappers()
+D:\MDS301\food-recipe-recommendation-system\.venv\Lib\site-packages\torch\utils\data\dataloader.py:668: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  warnings.warn(warn_msg)
+{'loss': 0.0961, 'grad_norm': 0.4117957353591919, 'learning_rate': 9.87598647125141e-06, 'epoch': 0.5330490405117271}
+{'train_runtime': 868.2706, 'train_samples_per_second': 34.551, 'train_steps_per_second': 1.08, 'train_loss': 0.07921305292450798, 'epoch': 1.0}
+Fine-tuning completed successfully:
+  base_model: sentence-transformers/all-MiniLM-L6-v2
+  n_examples: 30000
+  epochs: 1
+  batch_size: 32
+  learning_rate: 2e-05
+  warmup_steps: 50
+  device: cpu
+  train_seconds: 871.336
+  peak_rss_mb: 2787.1
+  output_path: models\minilm_finetuned-main-cpu1ep
+[E04] ingredients (minilm_finetuned)
+  bundle          D:\MDS301\food-recipe-recommendation-system\models\minilm_finetuned-E04-main-1f1f4ce5
+  documents       50000
+  dimension       384
+  truncated       1 (max_seq_length=128)
+  encode seconds  97.079
+DONE 

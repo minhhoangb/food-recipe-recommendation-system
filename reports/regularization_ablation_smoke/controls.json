@@ -1,0 +1,21 @@
+{
+  "base_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "batch_schedule_sha256": "67ddbf39a57a422cc1604309ae85a82c52c6f1bc46083bcb9ad9740199a22d59",
+  "batch_size": 8,
+  "config": "configs/default.yaml",
+  "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+  "device": "cpu",
+  "epochs": 1,
+  "eval_every": 2,
+  "loss": "MultipleNegativesRankingLoss",
+  "lr": 2e-05,
+  "max_seq_length": 128,
+  "optimizer": "AdamW",
+  "seed": 42,
+  "splits_sha256": "35abfe794e8cd840d103657dfb613b31034870960fb513cf85032c810524de0a",
+  "threads": 2,
+  "train_pairs": 32,
+  "train_pairs_sha256": "eea77f1f24681b6c7e12e78526b93de78fd2e1872bd09acecadc613f04878202",
+  "val_pairs": 16,
+  "validation_pairs_sha256": "59e8ec0e16c576f8b43b9b05e7dce22f819e3b74ae0b83be3a3dba58ac076a9f"
+}

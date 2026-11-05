@@ -67,6 +67,83 @@ def test_processed_cache_rejects_changed_config(built_fixture):
         train.run_stage_processed(changed)
 
 
+def test_processed_cache_ignores_serving_download_and_profile_changes(built_fixture, fixture_csv):
+    cfg, _, directory = built_fixture
+    before = {path.relative_to(directory): path.read_bytes() for path in directory.rglob("*") if path.is_file()}
+    changed = OmegaConf.merge(
+        cfg,
+        {
+            "serving": {"bundle": "models/another-bundle"},
+            "artifacts": {"url": "https://example.com/data.zip", "sha256": "a" * 64},
+            "data": {"profile": "pilot"},
+        },
+    )
+    assert train.run_stage_processed(changed, raw_path=fixture_csv) == directory / "pilot"
+    assert {path.relative_to(directory): path.read_bytes() for path in directory.rglob("*") if path.is_file()} == before
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [{"data": {"max_ingredients": 39}}, {"queries": {"max_query_size": 5}}],
+)
+def test_processed_cache_rejects_changed_data_parameters(built_fixture, overrides):
+    cfg, _, _ = built_fixture
+    with pytest.raises(ValueError, match="hash mismatch"):
+        train.run_stage_processed(OmegaConf.merge(cfg, overrides))
+
+
+def test_legacy_processed_cache_verifies_its_original_config(built_fixture, fixture_csv, tmp_path, monkeypatch):
+    cfg, _, directory = built_fixture
+    # Copy the fixture so the session's original manifest stays untouched.
+    import shutil
+
+    copied = tmp_path / "processed"
+    shutil.copytree(directory, copied)
+    source_config = tmp_path / "source.yaml"
+    OmegaConf.save(cfg, source_config)
+    monkeypatch.setattr(train, "LEGACY_DATA_CONFIG", source_config, raising=False)
+    manifest_path = copied / "main" / "dataset_manifest.json"
+    manifest = read_json(manifest_path)
+    manifest.pop("data_config_sha256", None)
+    write_json(manifest_path, manifest)
+    changed = OmegaConf.merge(
+        cfg,
+        {"paths": {"processed_dir": str(copied)}, "artifacts": {"url": "https://example.com/new.zip"}},
+    )
+    before = manifest_path.read_bytes()
+    assert train.run_stage_processed(changed, raw_path=fixture_csv) == copied / "main"
+    assert manifest_path.read_bytes() == before
+    with pytest.raises(ValueError, match="hash mismatch"):
+        train.run_stage_processed(OmegaConf.merge(changed, {"queries": {"max_query_size": 5}}))
+    manifest["config_sha256"] = "0" * 64
+    write_json(manifest_path, manifest)
+    with pytest.raises(ValueError, match="hash mismatch"):
+        train.run_stage_processed(changed)
+
+
+@pytest.mark.parametrize("tamper", ["corpus", "normalization", "profile"])
+def test_processed_cache_still_rejects_modified_artifacts(built_fixture, tmp_path, tamper):
+    import shutil
+
+    cfg, _, directory = built_fixture
+    copied = tmp_path / "processed"
+    shutil.copytree(directory, copied)
+    if tamper == "corpus":
+        with (copied / "main" / "corpus.jsonl").open("a", encoding="utf-8") as stream:
+            stream.write("{}\n")
+    else:
+        path = copied / "main" / "dataset_manifest.json"
+        manifest = read_json(path)
+        if tamper == "normalization":
+            manifest["normalization"]["fingerprint"] = "0" * 64
+        else:
+            manifest["profile"] = "pilot"
+        write_json(path, manifest)
+    changed = OmegaConf.merge(cfg, {"paths": {"processed_dir": str(copied)}})
+    with pytest.raises(ValueError, match="hash mismatch"):
+        train.run_stage_processed(changed)
+
+
 def test_cache_verifies_inputs_and_artifact_hashes(tmp_path):
     file = tmp_path / "artifact.json"
     write_json(file, {"value": 1})

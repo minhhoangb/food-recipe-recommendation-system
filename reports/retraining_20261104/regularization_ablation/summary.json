@@ -1,0 +1,128 @@
+{
+  "arms": [
+    {
+      "history": [
+        {
+          "step": 0,
+          "train_loss": 0.3846358517805735,
+          "val_loss": 0.2986301506559054
+        },
+        {
+          "step": 32,
+          "train_loss": 0.057592207286506894,
+          "val_loss": 0.037322607294966774
+        },
+        {
+          "step": 64,
+          "train_loss": 0.033373635696868104,
+          "val_loss": 0.03299707503368457
+        },
+        {
+          "step": 96,
+          "train_loss": 0.02493835547938943,
+          "val_loss": 0.03200888334152599
+        },
+        {
+          "step": 128,
+          "train_loss": 0.019292207962522904,
+          "val_loss": 0.03120357505977154
+        },
+        {
+          "step": 160,
+          "train_loss": 0.018215667425344386,
+          "val_loss": 0.03357005460032572
+        },
+        {
+          "step": 190,
+          "train_loss": 0.013526015837366382,
+          "val_loss": 0.02615509102276216
+        }
+      ],
+      "initial_weights_sha256": "c13c0900ac73c2de46340ec049fd09d33205a6a07265308320e79e283ece248d",
+      "run_id": "293647c314384b16a02aa6b77fb8c013",
+      "train_seconds": 33.174116900001536,
+      "weight_decay": 0.0
+    },
+    {
+      "history": [
+        {
+          "step": 0,
+          "train_loss": 0.3846358517805735,
+          "val_loss": 0.2986301506559054
+        },
+        {
+          "step": 32,
+          "train_loss": 0.05759273795410991,
+          "val_loss": 0.037322430840382975
+        },
+        {
+          "step": 64,
+          "train_loss": 0.03337448127567768,
+          "val_loss": 0.03299664780497551
+        },
+        {
+          "step": 96,
+          "train_loss": 0.024939280034353337,
+          "val_loss": 0.032007965414474406
+        },
+        {
+          "step": 128,
+          "train_loss": 0.019292911413746575,
+          "val_loss": 0.031202233272294204
+        },
+        {
+          "step": 160,
+          "train_loss": 0.018216537800617515,
+          "val_loss": 0.03356910035169373
+        },
+        {
+          "step": 190,
+          "train_loss": 0.013526553055271506,
+          "val_loss": 0.02615291313268244
+        }
+      ],
+      "initial_weights_sha256": "c13c0900ac73c2de46340ec049fd09d33205a6a07265308320e79e283ece248d",
+      "run_id": "fc2840fcf83e4d508305c9fcee7440f6",
+      "train_seconds": 24.19190510000044,
+      "weight_decay": 0.01
+    }
+  ],
+  "controls": {
+    "base_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "batch_schedule_sha256": "e79e454e4e54aa0718b899f6ad6a055c1218a9fe0ae5358b6ac42d4d8989329e",
+    "batch_size": 16,
+    "config": "configs/default.yaml",
+    "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+    "device": "cuda",
+    "epochs": 3,
+    "eval_every": 32,
+    "loss": "MultipleNegativesRankingLoss",
+    "lr": 2e-05,
+    "max_seq_length": 128,
+    "optimizer": "AdamW",
+    "probe_batches": 15,
+    "seed": 42,
+    "splits_sha256": "35abfe794e8cd840d103657dfb613b31034870960fb513cf85032c810524de0a",
+    "threads": 4,
+    "train_pairs": 1024,
+    "train_pairs_sha256": "8e16b1148af719459230e5b57a484f140c59f360e9701b6117dc8a9378f7dcb8",
+    "train_probe_sha256": "d79981ad76925b46b64320dcb81953e639eeb4dc7fdea45d36d521bdaf6f3858",
+    "val_pairs": 256,
+    "validation_pairs_sha256": "2032d51f144c9d4f8f133f1182e6636a1af8393fc7efa3fdc343a91dd17a9ddb",
+    "validation_probe_sha256": "9d9b260e7e6b1c43f8b355dcac58a5645a4adabb80fa8b17393971c1c7955569"
+  },
+  "hardware": {
+    "colab": false,
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "libraries": {
+      "mlflow": "3.17.2",
+      "sentence-transformers": "5.1.2",
+      "torch": "2.9.1+cu128"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.7"
+  },
+  "parent_run_id": "d400744b4f8d4c7e89e7450de68cbdc8",
+  "scope": "Single-seed controlled loss experiment; no test-set evaluation."
+}

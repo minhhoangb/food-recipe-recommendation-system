@@ -1,0 +1,18 @@
+D:\MDS301\food-recipe-recommendation-system\.venv\Lib\site-packages\mlflow\store\tracking\sqlalchemy_store.py:327: SADeprecationWarning: The ``noload`` loader strategy is deprecated and will be removed in a future release.  This option produces incorrect results by returning ``None`` for related items. (deprecated since: 2.1)
+  sqlalchemy.orm.configure_mappers()
+2026/11/04 17:20:03 INFO mlflow.tracking.fluent: Experiment with name 'recipe-regularization-ablation' does not exist. Creating a new experiment.
+wd=0.0 {'step': 0, 'train_loss': 0.3846358517805735, 'val_loss': 0.2986301506559054}
+wd=0.0 {'step': 32, 'train_loss': 0.057592207286506894, 'val_loss': 0.037322607294966774}
+wd=0.0 {'step': 64, 'train_loss': 0.033373635696868104, 'val_loss': 0.03299707503368457}
+wd=0.0 {'step': 96, 'train_loss': 0.02493835547938943, 'val_loss': 0.03200888334152599}
+wd=0.0 {'step': 128, 'train_loss': 0.019292207962522904, 'val_loss': 0.03120357505977154}
+wd=0.0 {'step': 160, 'train_loss': 0.018215667425344386, 'val_loss': 0.03357005460032572}
+wd=0.0 {'step': 190, 'train_loss': 0.013526015837366382, 'val_loss': 0.02615509102276216}
+wd=0.01 {'step': 0, 'train_loss': 0.3846358517805735, 'val_loss': 0.2986301506559054}
+wd=0.01 {'step': 32, 'train_loss': 0.05759273795410991, 'val_loss': 0.037322430840382975}
+wd=0.01 {'step': 64, 'train_loss': 0.03337448127567768, 'val_loss': 0.03299664780497551}
+wd=0.01 {'step': 96, 'train_loss': 0.024939280034353337, 'val_loss': 0.032007965414474406}
+wd=0.01 {'step': 128, 'train_loss': 0.019292911413746575, 'val_loss': 0.031202233272294204}
+wd=0.01 {'step': 160, 'train_loss': 0.018216537800617515, 'val_loss': 0.03356910035169373}
+wd=0.01 {'step': 190, 'train_loss': 0.013526553055271506, 'val_loss': 0.02615291313268244}
+Evidence: D:\MDS301\outputs\retrain-20261104\regularization_ablation\summary.json

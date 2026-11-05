@@ -1,0 +1,14 @@
+{
+  "captured_utc": "2026-11-03T11:01:17.132569+00:00",
+  "capture_method": "Browser screenshots of actual MLflow 3.17.2 UI at http://127.0.0.1:5000; JPEG captures re-encoded as PNG without changing content.",
+  "tracking_store": "sqlite:///mlflow.db",
+  "experiment": "recipe-regularization-ablation",
+  "experiment_id": "2",
+  "images": {
+    "mlflow_runs_overview.png": "#/experiments/2/runs",
+    "mlflow_model_registry.png": "#/models/minilm_finetuned",
+    "mlflow_ablation_curves.png": "#/metric?runs=[\"6178d21f4c064d019dc8fab00efd384a\",\"6b4b0facbbfb4082be15b94f3977c805\"]&plot_metric_keys=[\"train_loss\",\"val_loss\"]"
+  },
+  "registry_scope": "Existing rollback-trial versions share the same locked FT checkpoint; this is not the production BM25 serving configuration.",
+  "source_colab_notebook": "https://colab.research.google.com/drive/178UsXUi0OhmEOM7PgDbyIY4UGHYX9L4M"
+}

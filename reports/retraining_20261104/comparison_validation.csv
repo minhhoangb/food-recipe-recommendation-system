@@ -1,0 +1,8 @@
+﻿label,bundle,recall@5,recall@10,mrr@10,n_queries,build_seconds,operation,latency_ms,mlflow_run_id
+E01,D:\MDS301\outputs\retrain-20261104\models\tfidf-main-1f1f4ce5,0.776,0.826,0.6567388888888889,500,51.22,fit train and transform corpus,26.146725999977207,e6ea2a5960704ef990382cb152b982f7
+E02,D:\MDS301\outputs\retrain-20261104\models\tfidf_tuned-main-1f1f4ce5,0.776,0.826,0.6567388888888889,500,2.034,fit train and transform corpus,27.86841599998297,149e48fb97ff45fa9ce8ed823acbd033
+E03,D:\MDS301\outputs\retrain-20261104\models\bm25-main-1f1f4ce5,0.856,0.91,0.7583134920634921,500,0.827,index all candidates,74.78365939998184,e44f27f1be434f7e966aae0423cc308f
+LSA,D:\MDS301\outputs\retrain-20261104\models\lsa-main-1f1f4ce5,0.456,0.536,0.3628523809523809,500,33.444,fit train and transform corpus,69.70992060002754,4439691d76b2401f8e9c7205bbc74e96
+E04,D:\MDS301\outputs\retrain-20261104\models\minilm_pretrained-E04-main-1f1f4ce5,0.512,0.576,0.4331531746031746,500,79.6300704000023,encode pretrained corpus without training,56.53477919998113,4b1b127ab2cc43dfbcb50b0a555fc298
+E05,D:\MDS301\outputs\retrain-20261104\models\minilm_pretrained-E05-main-1f1f4ce5,0.214,0.262,0.15188333333333331,500,91.21790670001064,encode pretrained corpus without training,57.39492200000677,318382139df44b96b855e45a3888ca5e
+FT,D:\MDS301\outputs\retrain-20261104\models\minilm_finetuned-E04-main-1f1f4ce5,0.738,0.794,0.6228761904761905,500,126.791,CUDA fine-tuning only,28.768798000004608,963ee41456d34650836c10f93ccef502

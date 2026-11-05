@@ -1,0 +1,23 @@
+{
+  "history": [
+    {
+      "step": 0,
+      "train_loss": 0.1696996334940195,
+      "val_loss": 0.20403000712394714
+    },
+    {
+      "step": 2,
+      "train_loss": 0.04534795135259628,
+      "val_loss": 0.07123363763093948
+    },
+    {
+      "step": 4,
+      "train_loss": 0.022853489965200424,
+      "val_loss": 0.03019062988460064
+    }
+  ],
+  "initial_weights_sha256": "c13c0900ac73c2de46340ec049fd09d33205a6a07265308320e79e283ece248d",
+  "run_id": "51fdfa929a0a4db9939a46a0ee7c5368",
+  "train_seconds": 6.73304960000678,
+  "weight_decay": 0.01
+}

@@ -117,6 +117,21 @@ def test_an_invalid_top_k_is_rejected_with_a_description(api_client, top_k):
     assert response.json()["detail"]
 
 
+@pytest.mark.parametrize("top_k", ["abc", "5", [1], {"value": 1}, None, 1.5])
+def test_invalid_top_k_types_return_422_and_are_logged(api_client, top_k):
+    import sqlite3
+    from contextlib import closing
+
+    response = api_client.post("/predict", json={"ingredients": ["rice"], "top_k": top_k})
+    assert response.status_code == 422
+    assert any(error["loc"] == ["body", "top_k"] for error in response.json()["detail"])
+    with closing(sqlite3.connect(os.environ["API_REQUEST_LOG"])) as connection:
+        record = connection.execute(
+            "SELECT status_code, top_k FROM request_log ORDER BY rowid DESC LIMIT 1"
+        ).fetchone()
+    assert record == (422, 0)
+
+
 def test_an_empty_ingredient_list_is_rejected(api_client):
     response = api_client.post("/predict", json={"ingredients": [], "top_k": 3})
     assert response.status_code == 422

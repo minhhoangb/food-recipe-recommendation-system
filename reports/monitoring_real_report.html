@@ -166,7 +166,14 @@
             </div>
         </header>
 
-        
+        <div class="simulation-banner">
+            <span class="badge-sim">SCRIPTED API TEST</span>
+            Workload kiểm thử có ghi log (ASGI Lifespan), không phải traffic người dùng production tự nhiên.
+            Phiên này gồm 50 requests ngày 2026-11-01, dùng <code>bm25</code> version 1,
+            bundle <code>bm25-pilot-031c1bc0</code>; không phải FT/E08.
+            Không có human relevance labels hay ground truth tại inference; các kết quả không chứng minh
+            chất lượng production hoặc relevance decay / nDCG degradation.
+        </div>
 
         <div class="kpi-grid">
             <div class="kpi-card status-card">
@@ -195,7 +202,9 @@
             <h2>Kiểm Định Thống Kê & Phát Hiện Dịch Chuyển (Drift Tests)</h2>
             <p style="color: var(--muted); font-size: 13px; margin-top: -8px; margin-bottom: 16px;">
                 Mẫu tối thiểu: 10 quan sát. Ngưỡng ý nghĩa: α = 0.05.<br>
-                Kết luận: Phát hiện dịch chuyển phân phối (Data Drift Detected)
+                Kết luận: Phát hiện dịch chuyển phân phối trong workload script (Data Drift Detected).<br>
+                Query-length p-value được làm tròn thành 0.0000; kết quả phản ánh bài kiểm thử,
+                không phải bằng chứng hành vi người dùng tự nhiên.
             </p>
             <table>
                 <thead>
@@ -292,9 +301,11 @@
             </div>
 
             <div class="section-card">
-                <h2>Top Nguyên Liệu Mới Lạ (OOV Ingredients)</h2>
+                <h2>Nguyên Liệu Ngoài Vocab Tham Chiếu (OOV Ingredients)</h2>
                 <p style="color: var(--muted); font-size: 13px;">
-                    Các từ khóa xuất hiện trong request nhưng chưa có trong dữ liệu huấn luyện:
+                    Các từ khóa trong workload không có trong từ điển tham chiếu.
+                    OOV 50.0% vượt ngưỡng 5.0%, phản ánh workload và vocab của bài kiểm thử;
+                    không chứng minh người dùng production đang tìm nguyên liệu mới lạ:
                 </p>
                 <ul style="padding-left: 20px; font-size: 14px; line-height: 1.8;">
                     <li><code>chicken</code>: 2 lần</li><li><code>beef</code>: 2 lần</li><li><code>pasta</code>: 2 lần</li><li><code>pepper</code>: 2 lần</li><li><code>chocolate</code>: 2 lần</li><li><code>cheese</code>: 2 lần</li><li><code>salt</code>: 2 lần</li><li><code>lemon</code>: 2 lần</li>

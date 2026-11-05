@@ -1,0 +1,473 @@
+{
+  "release_tag": "model-artifacts-gpu-20261104",
+  "release_url": "https://github.com/minhhoangb/food-recipe-recommendation-system/releases/tag/model-artifacts-gpu-20261104",
+  "archive": "gpu-retraining-20261104-9496b9b06fde.zip",
+  "url": "https://github.com/minhhoangb/food-recipe-recommendation-system/releases/download/model-artifacts-gpu-20261104/gpu-retraining-20261104-9496b9b06fde.zip",
+  "sha256": "11eb9c4758e5f813f58b8ad7d4c886133b9f5c65c38af949e9b85f1d96a42cfd",
+  "checksum_url": "https://github.com/minhhoangb/food-recipe-recommendation-system/releases/download/model-artifacts-gpu-20261104/gpu-retraining-20261104-9496b9b06fde.zip.sha256",
+  "compressed_bytes": 679961804,
+  "extracted_bytes": 771227791,
+  "files": [
+    {
+      "path": "gpu-retraining-20261104/ablation.log",
+      "bytes": 1863,
+      "sha256": "8910d134d77a2065cd3eafaca9da7c0e616f01ed044149fc38acb9def6453cf3"
+    },
+    {
+      "path": "gpu-retraining-20261104/comparison_validation.csv",
+      "bytes": 1512,
+      "sha256": "2c1a210ab3d09b5438a16951a853ab827ba701f7b4bb6d5e6993917a9330ddbe"
+    },
+    {
+      "path": "gpu-retraining-20261104/config_snapshot.yaml",
+      "bytes": 916,
+      "sha256": "9dcf173309b3fd2099e50e567816f0256778a74a03b96dd6f68472beae6f2362"
+    },
+    {
+      "path": "gpu-retraining-20261104/E01_validation_rankings.json",
+      "bytes": 157988,
+      "sha256": "6856b3ac565b4ebe0deabd95385475faab843fbc515a35424e34393907de7f5b"
+    },
+    {
+      "path": "gpu-retraining-20261104/E02_validation_rankings.json",
+      "bytes": 157988,
+      "sha256": "6856b3ac565b4ebe0deabd95385475faab843fbc515a35424e34393907de7f5b"
+    },
+    {
+      "path": "gpu-retraining-20261104/E03_validation_rankings.json",
+      "bytes": 158308,
+      "sha256": "b922c61844757394264e5e0cf6a286bafc5568b89d097cc54bf8b444f295ae61"
+    },
+    {
+      "path": "gpu-retraining-20261104/E04_validation_rankings.json",
+      "bytes": 157882,
+      "sha256": "732901ad7a0ff288ca7cc51b7b470931b182b84375f9899b134089f303c87b79"
+    },
+    {
+      "path": "gpu-retraining-20261104/E05_validation_rankings.json",
+      "bytes": 157675,
+      "sha256": "0db6439d816f573d13db762fc4f5f6ec9d99c117e5b6f98547778daf836efec4"
+    },
+    {
+      "path": "gpu-retraining-20261104/FT_validation_rankings.json",
+      "bytes": 158035,
+      "sha256": "d780290771e09761975cdda8c93dbe2adcd989e0bc4ee77eae4b9ce822b8f201"
+    },
+    {
+      "path": "gpu-retraining-20261104/LSA_validation_rankings.json",
+      "bytes": 158365,
+      "sha256": "ed27c329f6dc47cdf44e6a024c83fc3bdfd1bb40cdd1e339d8b032c6dd29ab48"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/bm25-main-1f1f4ce5/manifest.json",
+      "bytes": 803,
+      "sha256": "b34b4097b972fcc2fb9e4c0cba19bb4c2ae2523d800c83b53a772b4936a66dd3"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/bm25-main-1f1f4ce5/metrics.json",
+      "bytes": 127,
+      "sha256": "f203e6d484d4a949a0ef49d7848890c70e264833054bc2cd12f031e32a57a536"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/bm25-main-1f1f4ce5/model.joblib",
+      "bytes": 6230480,
+      "sha256": "46fd18e1bcb4e3b69fa7031d0c46557cefdb8c3d22966bf32e19a6a9ff6d13ef"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/lsa-main-1f1f4ce5/manifest.json",
+      "bytes": 801,
+      "sha256": "4944cba16a9bc5f8c401422080d21b9c5ae27aa292751af434bf640caa245872"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/lsa-main-1f1f4ce5/metrics.json",
+      "bytes": 134,
+      "sha256": "3218c6d2a827168da48c05f843b81bf037d3b74b5d234ae5d9f75b5554d0c95c"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/lsa-main-1f1f4ce5/model.joblib",
+      "bytes": 130516515,
+      "sha256": "997c97addf6a818b478d3bc1fb4c124a8973074ed117f5337a67c00a531a5c06"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-checkpoint/1_Pooling/config.json",
+      "bytes": 321,
+      "sha256": "b4105bf48c5257a542a7e1968cef220b3ecd49ae24943143279650c4ac6e30a0"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-checkpoint/config.json",
+      "bytes": 636,
+      "sha256": "038a9fbf343363a7b9f8296a0a8402375e8e4e24f612ee4d7f1ec6fa67548508"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-checkpoint/config_sentence_transformers.json",
+      "bytes": 296,
+      "sha256": "53965355a06e13fccd81e3095ef39d0421ff15b0d24c42e5caa7fd9f43f4fde1"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-checkpoint/model.safetensors",
+      "bytes": 90864192,
+      "sha256": "9496b9b06fdee35c080daa7f951562c3da60268b8c156615f8bd693bc8e472c1"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-checkpoint/modules.json",
+      "bytes": 368,
+      "sha256": "e7989e94b5b809d895a9521b708312c1ccd333e183effebaf3838908da2acd53"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-checkpoint/README.md",
+      "bytes": 13777,
+      "sha256": "f03fbb32a95699062d866d1ccce22448895b85869aefbff45bfa68609229ebfb"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-checkpoint/sentence_bert_config.json",
+      "bytes": 60,
+      "sha256": "5a78a8637a4c986a89b5e9b3ce4af84b94b1dfeb9f1dfb09c448182a9d7ca9ab"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-checkpoint/special_tokens_map.json",
+      "bytes": 732,
+      "sha256": "5aa43c2f985a25296d5a5ce621c2f77376ca8091a47993c492fd5460b895b140"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-checkpoint/tokenizer.json",
+      "bytes": 711649,
+      "sha256": "851ca67100d372ca3ae031a6abd168f53489eebfd7d89523f35c5c9b4d372c3c"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-checkpoint/tokenizer_config.json",
+      "bytes": 1529,
+      "sha256": "d4f505dfdb84b5a987fc5f520e0c2bac59e4ac6e43a1d00cab1e96647971dad8"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-checkpoint/vocab.txt",
+      "bytes": 231508,
+      "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-E04-main-1f1f4ce5/embeddings.npy",
+      "bytes": 76800128,
+      "sha256": "794695a0007286559dbf85c049126398b8f9bdac2948e58d2dca139c2c43677b"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-E04-main-1f1f4ce5/encoder/1_Pooling/config.json",
+      "bytes": 321,
+      "sha256": "b4105bf48c5257a542a7e1968cef220b3ecd49ae24943143279650c4ac6e30a0"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-E04-main-1f1f4ce5/encoder/config.json",
+      "bytes": 636,
+      "sha256": "038a9fbf343363a7b9f8296a0a8402375e8e4e24f612ee4d7f1ec6fa67548508"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-E04-main-1f1f4ce5/encoder/config_sentence_transformers.json",
+      "bytes": 296,
+      "sha256": "53965355a06e13fccd81e3095ef39d0421ff15b0d24c42e5caa7fd9f43f4fde1"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-E04-main-1f1f4ce5/encoder/model.safetensors",
+      "bytes": 90864192,
+      "sha256": "9496b9b06fdee35c080daa7f951562c3da60268b8c156615f8bd693bc8e472c1"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-E04-main-1f1f4ce5/encoder/modules.json",
+      "bytes": 368,
+      "sha256": "e7989e94b5b809d895a9521b708312c1ccd333e183effebaf3838908da2acd53"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-E04-main-1f1f4ce5/encoder/README.md",
+      "bytes": 13777,
+      "sha256": "f03fbb32a95699062d866d1ccce22448895b85869aefbff45bfa68609229ebfb"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-E04-main-1f1f4ce5/encoder/sentence_bert_config.json",
+      "bytes": 60,
+      "sha256": "5a78a8637a4c986a89b5e9b3ce4af84b94b1dfeb9f1dfb09c448182a9d7ca9ab"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-E04-main-1f1f4ce5/encoder/special_tokens_map.json",
+      "bytes": 732,
+      "sha256": "5aa43c2f985a25296d5a5ce621c2f77376ca8091a47993c492fd5460b895b140"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-E04-main-1f1f4ce5/encoder/tokenizer.json",
+      "bytes": 711649,
+      "sha256": "851ca67100d372ca3ae031a6abd168f53489eebfd7d89523f35c5c9b4d372c3c"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-E04-main-1f1f4ce5/encoder/tokenizer_config.json",
+      "bytes": 1529,
+      "sha256": "d4f505dfdb84b5a987fc5f520e0c2bac59e4ac6e43a1d00cab1e96647971dad8"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-E04-main-1f1f4ce5/encoder/vocab.txt",
+      "bytes": 231508,
+      "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-E04-main-1f1f4ce5/manifest.json",
+      "bytes": 2331,
+      "sha256": "f4d1999c3f5f5f55c7596c70fe0434a6f5e6d42cd9bff9e31ef8a1760e589006"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_finetuned-E04-main-1f1f4ce5/recipe_ids.json",
+      "bytes": 1124998,
+      "sha256": "0aac8cd8af70a2e8879f4703d8603d6913463007a469c885ee07e6f38c040241"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_pretrained-E04-main-1f1f4ce5/embeddings.npy",
+      "bytes": 76800128,
+      "sha256": "4311a17032fdbb3f6e40f732a6d719c1753a54796eb12479b9b0c20dfb3e4094"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_pretrained-E04-main-1f1f4ce5/manifest.json",
+      "bytes": 1153,
+      "sha256": "76b3955b010e7361dbc10241b4786d944f7d34c11e32b0074714fe193b25af6e"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_pretrained-E04-main-1f1f4ce5/recipe_ids.json",
+      "bytes": 1124998,
+      "sha256": "0aac8cd8af70a2e8879f4703d8603d6913463007a469c885ee07e6f38c040241"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_pretrained-E05-main-1f1f4ce5/embeddings.npy",
+      "bytes": 76800128,
+      "sha256": "124368af187aa25f6aa6395f35c2a32d221676de3633099a763ad112a56d615a"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_pretrained-E05-main-1f1f4ce5/manifest.json",
+      "bytes": 1160,
+      "sha256": "af17495e610407e564802bc201c231b68e00eb491a6153ebca4309d16036d57f"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/minilm_pretrained-E05-main-1f1f4ce5/recipe_ids.json",
+      "bytes": 1124998,
+      "sha256": "0aac8cd8af70a2e8879f4703d8603d6913463007a469c885ee07e6f38c040241"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/tfidf-main-1f1f4ce5/manifest.json",
+      "bytes": 805,
+      "sha256": "928224c5233e51ec2338931c8bca7035d2de0538bf15e5849b0335637e92388a"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/tfidf-main-1f1f4ce5/metrics.json",
+      "bytes": 133,
+      "sha256": "a7bc255d270063756d513b3db0649619383d59c4e3f099500150f48a23338b37"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/tfidf-main-1f1f4ce5/model.joblib",
+      "bytes": 8854158,
+      "sha256": "e732727d431bf2a98d36f0e5eda91f99802bc839abf8f1b78133283bff277a51"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/tfidf_tuned-main-1f1f4ce5/manifest.json",
+      "bytes": 811,
+      "sha256": "7cea5d0d3a51c24a188f5cf5e3c12cc1058dbc103dc6aea7fc148d729fc519eb"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/tfidf_tuned-main-1f1f4ce5/metrics.json",
+      "bytes": 247,
+      "sha256": "3b4fcab8b858fe8f707060cfbd2e0fe2699a2bc7af738ac0fd9db6bd3f178ba2"
+    },
+    {
+      "path": "gpu-retraining-20261104/models/tfidf_tuned-main-1f1f4ce5/model.joblib",
+      "bytes": 8854158,
+      "sha256": "e732727d431bf2a98d36f0e5eda91f99802bc839abf8f1b78133283bff277a51"
+    },
+    {
+      "path": "gpu-retraining-20261104/pairs/main_train_ingredients_pairs.jsonl",
+      "bytes": 8899612,
+      "sha256": "9f465e8889eed9db418237e319b0f3066df24b93284b53843b5fb9d142db02c3"
+    },
+    {
+      "path": "gpu-retraining-20261104/pairs/main_train_ingredients_pairs_manifest.json",
+      "bytes": 658,
+      "sha256": "b954392ef51d20dfb9b36a086b1578ebc10b747cdb628980639996ab271479e7"
+    },
+    {
+      "path": "gpu-retraining-20261104/pytest.log",
+      "bytes": 2178,
+      "sha256": "d4c34e80333ad7d9211af14065604bc04c013a7bee9a2407b1aa71cc3be0918f"
+    },
+    {
+      "path": "gpu-retraining-20261104/README_GPU.md",
+      "bytes": 2596,
+      "sha256": "e706a1dcace1352887d2b69733e2be61f7f40ff26668488ffbd24851b2f2613c"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.0/1_Pooling/config.json",
+      "bytes": 321,
+      "sha256": "b4105bf48c5257a542a7e1968cef220b3ecd49ae24943143279650c4ac6e30a0"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.0/config.json",
+      "bytes": 636,
+      "sha256": "038a9fbf343363a7b9f8296a0a8402375e8e4e24f612ee4d7f1ec6fa67548508"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.0/config_sentence_transformers.json",
+      "bytes": 296,
+      "sha256": "53965355a06e13fccd81e3095ef39d0421ff15b0d24c42e5caa7fd9f43f4fde1"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.0/model.safetensors",
+      "bytes": 90864192,
+      "sha256": "094df78979aea8154883ef60977915c93091339d9c3be58a4451eb9d3906271b"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.0/modules.json",
+      "bytes": 368,
+      "sha256": "e7989e94b5b809d895a9521b708312c1ccd333e183effebaf3838908da2acd53"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.0/README.md",
+      "bytes": 10676,
+      "sha256": "3fc756c24ada7da8ea723c13c19cba30b02a4fb22f358cd5b9262eba6a974a3b"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.0/sentence_bert_config.json",
+      "bytes": 60,
+      "sha256": "874954176b1baf79cb203116c9583f72249d6d28012447ecccfc248a680e0400"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.0/special_tokens_map.json",
+      "bytes": 732,
+      "sha256": "5aa43c2f985a25296d5a5ce621c2f77376ca8091a47993c492fd5460b895b140"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.0/tokenizer.json",
+      "bytes": 711649,
+      "sha256": "2fc687b11de0bc1b3d8348f92e3b49ef1089a621506c7661fbf3248fcd54947e"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.0/tokenizer_config.json",
+      "bytes": 1529,
+      "sha256": "d4f505dfdb84b5a987fc5f520e0c2bac59e4ac6e43a1d00cab1e96647971dad8"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.0/vocab.txt",
+      "bytes": 231508,
+      "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.01/1_Pooling/config.json",
+      "bytes": 321,
+      "sha256": "b4105bf48c5257a542a7e1968cef220b3ecd49ae24943143279650c4ac6e30a0"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.01/config.json",
+      "bytes": 636,
+      "sha256": "038a9fbf343363a7b9f8296a0a8402375e8e4e24f612ee4d7f1ec6fa67548508"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.01/config_sentence_transformers.json",
+      "bytes": 296,
+      "sha256": "53965355a06e13fccd81e3095ef39d0421ff15b0d24c42e5caa7fd9f43f4fde1"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.01/model.safetensors",
+      "bytes": 90864192,
+      "sha256": "13468fa48d888c3cce9eded907afff474b8d05e852ae8ca88d239e5d8e8b8e97"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.01/modules.json",
+      "bytes": 368,
+      "sha256": "e7989e94b5b809d895a9521b708312c1ccd333e183effebaf3838908da2acd53"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.01/README.md",
+      "bytes": 10676,
+      "sha256": "3fc756c24ada7da8ea723c13c19cba30b02a4fb22f358cd5b9262eba6a974a3b"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.01/sentence_bert_config.json",
+      "bytes": 60,
+      "sha256": "874954176b1baf79cb203116c9583f72249d6d28012447ecccfc248a680e0400"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.01/special_tokens_map.json",
+      "bytes": 732,
+      "sha256": "5aa43c2f985a25296d5a5ce621c2f77376ca8091a47993c492fd5460b895b140"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.01/tokenizer.json",
+      "bytes": 711649,
+      "sha256": "2fc687b11de0bc1b3d8348f92e3b49ef1089a621506c7661fbf3248fcd54947e"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.01/tokenizer_config.json",
+      "bytes": 1529,
+      "sha256": "d4f505dfdb84b5a987fc5f520e0c2bac59e4ac6e43a1d00cab1e96647971dad8"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/checkpoint-wd0.01/vocab.txt",
+      "bytes": 231508,
+      "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/controls.json",
+      "bytes": 1021,
+      "sha256": "1536eb3c55c3db90b1a46af46874567ac345289f82424db40d0c040d81f1712e"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/hardware.json",
+      "bytes": 264,
+      "sha256": "6585d5d495351a8269c368f09f0128974e0eaf0127f1c12a156bbf05da250bfc"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/summary.json",
+      "bytes": 3890,
+      "sha256": "6107b1468bf97b31d89d4a82bbb13283335e3ada49f6b7c4328b638dcdef19b9"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/train_pairs.jsonl",
+      "bytes": 304743,
+      "sha256": "8e16b1148af719459230e5b57a484f140c59f360e9701b6117dc8a9378f7dcb8"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/validation_pairs.jsonl",
+      "bytes": 76891,
+      "sha256": "2032d51f144c9d4f8f133f1182e6636a1af8393fc7efa3fdc343a91dd17a9ddb"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/wd0.0.json",
+      "bytes": 1004,
+      "sha256": "185be5d4857a6bee5a38774b3b0de09803dea4ecb5333f2997821523af892a3d"
+    },
+    {
+      "path": "gpu-retraining-20261104/regularization_ablation/wd0.01.json",
+      "bytes": 1005,
+      "sha256": "f74d25896da11121af0cd1c4b0e5e61e553fa24acfb175c0c4582c3b5ac602ea"
+    },
+    {
+      "path": "gpu-retraining-20261104/requirements-gpu-freeze.txt",
+      "bytes": 3264,
+      "sha256": "6df93e8632bd8f46d6b3acf9578dbc9770206e61b479df9437b3ae834540328e"
+    },
+    {
+      "path": "gpu-retraining-20261104/run_retraining.py",
+      "bytes": 10955,
+      "sha256": "eceecf1d471801086d5353efded65edba2d084a1c8f3b1cc448fe203e5df675c"
+    },
+    {
+      "path": "gpu-retraining-20261104/run_status.json",
+      "bytes": 8892,
+      "sha256": "ae70742b5f36f02047c47f220f5e2c3f95caf5d8f68a69ce89a61ee0e80e92a2"
+    },
+    {
+      "path": "gpu-retraining-20261104/training.log",
+      "bytes": 4152182,
+      "sha256": "de9abe7d6d6e45138db89e5a0602a5f4f53043718ee4202e0aa35b500f49989b"
+    },
+    {
+      "path": "gpu-retraining-20261104/training_summary.json",
+      "bytes": 728,
+      "sha256": "2bb60560359f8d1c0459eef8548b5e418a8f5318da6822a0f93e993753fdb3ff"
+    },
+    {
+      "path": "gpu-retraining-20261104/mlflow.db",
+      "bytes": 1114112,
+      "sha256": "4c40eb552181c8b151674c9a98f75432ee52109fe479c21a40163c53947bf634"
+    }
+  ],
+  "scope": "Fresh GPU retraining artifacts. Validation only. Frozen E10 and production bundle unchanged."
+}

@@ -1,0 +1,478 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>report part1</title><style>
+@page { size: A4; margin: 18mm 17mm; }
+body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10.5pt; line-height: 1.45; color: #111; }
+h1 { font-size: 18pt; margin: 0 0 4pt; }
+h2 { font-size: 14pt; margin-top: 16pt; border-bottom: 1px solid #999; }
+h3 { font-size: 11.5pt; margin: 12pt 0 4pt; } p, li { text-align: justify; }
+h1, h2, h3 { break-after: avoid; }
+p { orphans: 3; widows: 3; }
+table { border-collapse: collapse; width: 100%; margin: 6pt 0; font-size: 9pt; page-break-inside: avoid; }
+th, td { border: 1px solid #aaa; padding: 3pt 5pt; vertical-align: top; text-align: left; }
+th { background: #eee; }
+img { display: block; max-width: 78%; max-height: 72mm; margin: 6pt auto; page-break-inside: avoid; }
+code { font-family: Consolas, monospace; font-size: 9pt; }
+</style></head><body><h1>Food Recipe Recommendation System: Technical Report, Part 1</h1>
+<p><strong>Problem formulation, data analysis, preprocessing and feature engineering</strong></p>
+<p>MDS301 group project, draft of 29 October 2026. Team: Bui Minh Hoang, Tran Tuan Hung, Ho Minh Hieu.</p>
+<p>Every number in this part comes from <code>data/processed/main/dataset_manifest.json</code>, <code>reports/data_audit.md</code>,
+the EDA notebook <code>notebooks/01_eda.ipynb</code> (figures in <code>reports/figures/</code>) or an MLflow run in
+<code>sqlite:///mlflow.db</code> (experiment <code>recipe-retrieval</code>; run ids in <code>reports/comparison.csv</code>). Corpus:
+<code>main</code> profile, sha256 <code>1f1f4ce5…</code>, seed 42.</p>
+<h2>1. Problem formulation</h2>
+<h3>1.1 The real-world problem</h3>
+<p>People cooking at home regularly face the same question: <em>&quot;I have these ingredients, what can I make?&quot;</em>
+Recipe sites are organised by dish name, cuisine or popularity, so a user who starts from the contents of
+the fridge has to guess dish names and check each recipe by hand. The cost is time and wasted food. The
+system we build takes the list of ingredients a user has and returns the recipes that use them best. Each
+answer shows the recipe title, which of the user's ingredients it uses (<em>matched</em>), what is still needed
+(<em>missing</em>), the directions and a link to the original source.</p>
+<p>Users are home cooks (students, families, anyone trying to use up leftovers) and, through the REST API,
+recipe or grocery applications. The scope is English recipes and ingredient-list queries. The system does
+not filter for allergies, diets or nutrition and must not claim to: the data has no reliable fields for
+them (section 2.4), and a wrong allergy answer can hurt someone.</p>
+<h3>1.2 Machine-learning task</h3>
+<p>The task is <strong>content-based recommendation framed as ranked retrieval</strong>, an NLP problem:</p>
+<ul>
+<li><strong>Input:</strong> a set of ingredient names <em>q</em> (1 to 50 names, each at most 100 characters, as enforced by the
+API contract in <code>src/contracts.py</code>).</li>
+<li><strong>Candidates:</strong> a fixed corpus <em>D</em> of 50,000 recipes.</li>
+<li><strong>Output:</strong> the top-<em>k</em> recipes of <em>D</em> ordered by a relevance score <em>s(q, d)</em>, with ties broken by
+<code>recipe_id</code> so that every ranking is reproducible.</li>
+</ul>
+<p>Other formulations from the course were considered and rejected:</p>
+<table>
+<thead>
+<tr>
+<th>Formulation</th>
+<th>Why it does not fit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Collaborative filtering / matrix factorisation</td>
+<td>RecipeNLG has no users, ratings or clicks; there is no interaction matrix to factorise.</td>
+</tr>
+<tr>
+<td>Classification</td>
+<td>There is no fixed set of classes: the &quot;answer&quot; is any of 50,000 items, different for each query.</td>
+</tr>
+<tr>
+<td>Regression</td>
+<td>There is no numeric target; what matters is the order of the top results.</td>
+</tr>
+</tbody>
+</table>
+<p>Every recipe is described by text (title and ingredient list), so the item-feature side of content-based
+filtering applies directly. The course's NLP track (&quot;TF-IDF + Transformer&quot;) maps onto it: lexical models
+(TF-IDF with cosine similarity, BM25, and LSA, i.e. TruncatedSVD on TF-IDF, an unsupervised dimensionality
+reduction) form the classical baselines, and a transformer bi-encoder
+(<code>sentence-transformers/all-MiniLM-L6-v2</code>) is the deep-learning component, first pretrained and then
+fine-tuned on our training pairs with MultipleNegativesRankingLoss.</p>
+<h3>1.3 Labels</h3>
+<p>There is no ground-truth relevance for (ingredients, recipe) pairs, so we build two kinds of labels.</p>
+<p><strong>Synthetic queries (used for training and model selection).</strong> From each sampled recipe we draw 2 to 6 of
+its normalised ingredients, always hiding at least one ingredient of the recipe and always keeping at least
+one <em>non-common</em> ingredient (document frequency at most 2% of recipes); otherwise a query such as
+&quot;salt, water&quot; would point to thousands of recipes. The recipe the query came from (the <em>origin</em>) is the
+known relevant item. The <code>main</code> profile has 5,000 train, 500 validation and 1,000 test queries (6,572
+qrels; a query generated from two recipes of the same split is merged, which happened 76 times).
+Generation skipped 2,149 recipes whose ingredients were all common and 808 recipes with fewer than 3
+ingredients, and dropped 117 queries whose ingredient set also occurred in another split.</p>
+<p>Most queries have one known positive; 66 merged queries have multiple known positives. A system that returns a different but perfectly usable
+recipe is counted as wrong, so the metrics below measure an <strong>origin-recipe retrieval proxy</strong>, not true
+relevance. The error analysis (<code>reports/error_analysis.md</code>) counts how often the rank-1 recipe of a
+system contains every query ingredient without being the origin.</p>
+<p><strong>Manual graded labels (used for the final judgement).</strong> Forty natural English queries
+(<code>reports/manual_eval/queries.csv</code>; 20 development, 20 blind final; 6 easy, 7 medium and 7 hard in each
+half) are intended to be judged on a 0/1/2 scale defined in <code>reports/manual_eval/annotation_guide.md</code> before any system
+output was seen. Judges see a pool made of the top 5 of every system, merged, shuffled and with no system
+name; at least 20% of each pool is labelled independently by a second person and agreement is reported
+with Cohen's kappa.</p>
+<h3>1.4 Metrics and success criteria</h3>
+<p>On synthetic labels we report <strong>Recall@5</strong>, <strong>Recall@10</strong> (share of a query's relevant recipes in the top
+<em>k</em>) and <strong>MRR@10</strong> (mean of 1/rank of the first relevant recipe, 0 when it is not in the top 10). A query
+with no result counts as 0, not as skipped. All metrics are computed with <code>ranx</code>; the conventions are fixed
+by hand-computed tests in <code>tests/test_ranking_metrics.py</code>. On manual labels we report pooled <strong>nDCG@10</strong>
+together with the pool coverage, because recipes outside the pool are unjudged. Systems are compared with
+<code>ranx.compare</code> (paired Student t-test, p &lt; 0.01).</p>
+<p>The success criteria agreed in the proposal (<code>reports/proposal.pdf</code>) are: on the synthetic test split,
+Recall@10 ≥ 0.85 and MRR@10 ≥ 0.70 for the deployed model; pooled nDCG@10 ≥ 0.60 on the blind manual
+queries with kappa ≥ 0.60; API p95 latency ≤ 300 ms on one CPU core. The test split has not been read yet.</p>
+<h3>1.5 Evaluation protocol and leakage control</h3>
+<ul>
+<li><strong>Group split.</strong> Recipes that share a normalised ingredient set or a normalised title form a group
+(section 3.3). Groups never cross train, validation and test, so near-identical recipes cannot sit on
+both sides of the split.</li>
+<li><strong>Fit on train only.</strong> TF-IDF/LSA vectorisers and the rarity feature are fitted on train
+recipes only; fine-tuning positives also come from train. BM25 IDF and the ingredient frequencies
+used to sample fine-tuning pairs are computed over the fixed candidate corpus. Validation is for model selection and tuning; test is read once after the configuration
+is frozen (<code>src.evaluate</code> refuses <code>--split test</code> without <code>--allow-test</code>).</li>
+<li><strong>Fixed candidate corpus.</strong> Every system ranks the same 50,000 recipes; validation and test recipes are
+in the candidate set (otherwise their queries could not be answered), but only as documents to index,
+never as training data. BM25 (rank-bm25) computes its IDF over every document it indexes, so it is
+<em>transductive</em>; this is recorded in its bundle and discussed in the error analysis.</li>
+<li><strong>Cross-validation.</strong> TF-IDF hyper-parameters were chosen with <code>GridSearchCV</code> and <code>GroupKFold(5)</code> on
+the outer train split, refitting the vectoriser in every fold (section 3.6); a test proves that a fold's
+vocabulary contains no token that only occurs in its held-out recipes.</li>
+</ul>
+<h2>2. Data analysis</h2>
+<h3>2.1 Source</h3>
+<p>We use <strong>RecipeNLG</strong> (Bien et al., INLG 2020; <a href="https://recipenlg.cs.put.poznan.pl/">https://recipenlg.cs.put.poznan.pl/</a>, also mirrored on
+Kaggle): one CSV file of 2.29 GB (sha256 <code>f376ee0b…</code>) with <strong>2,231,142 recipes</strong> and 7 columns:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Content</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(index)</td>
+<td>integer row id, 0 to 2,231,141</td>
+<td><code>recipe_id = &quot;recipenlg:&lt;index&gt;&quot;</code></td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>recipe name</td>
+<td>display; E05 document text; grouping</td>
+</tr>
+<tr>
+<td><code>ingredients</code></td>
+<td>stringified list of raw ingredient lines (&quot;1 c. flour&quot;)</td>
+<td>fallback source of names; display</td>
+</tr>
+<tr>
+<td><code>directions</code></td>
+<td>stringified list of steps</td>
+<td>display only</td>
+</tr>
+<tr>
+<td><code>link</code></td>
+<td>source URL without scheme</td>
+<td>display (the pipeline adds <code>https://</code>)</td>
+</tr>
+<tr>
+<td><code>source</code></td>
+<td><code>Gathered</code> (73.6%) or <code>Recipes1M</code> (26.4%)</td>
+<td>one-hot feature; stratification check</td>
+</tr>
+<tr>
+<td><code>NER</code></td>
+<td>stringified list of ingredient names extracted by the dataset authors</td>
+<td>main source of names</td>
+</tr>
+</tbody>
+</table>
+<p>The licence of RecipeNLG has not been verified and none is assumed; the repository does not redistribute
+the raw file, which stays unmodified in <code>data/raw/</code> and is not committed.</p>
+<h3>2.2 Structure checks on the raw file</h3>
+<p>A full pass over the CSV with the pandas parser (lists parsed with <code>json.loads</code>, then <code>ast.literal_eval</code>;
+nothing is evaluated as code) found:</p>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Null values</td>
+<td>1 in <code>title</code>, 0 elsewhere</td>
+</tr>
+<tr>
+<td>Malformed list fields</td>
+<td>0 in <code>ingredients</code>, <code>directions</code>, <code>NER</code></td>
+</tr>
+<tr>
+<td>Empty lists</td>
+<td>573 <code>NER</code> lists; 0 <code>ingredients</code> / <code>directions</code></td>
+</tr>
+<tr>
+<td>Exact duplicates on (title, ingredient text)</td>
+<td>1,245 (0.06%)</td>
+</tr>
+<tr>
+<td>Links without a scheme</td>
+<td>all of them (none unusable)</td>
+</tr>
+</tbody>
+</table>
+<p>The file is <strong>sorted by source</strong>: its first rows are all <code>Gathered</code>. Taking the head of the file as a
+sample would therefore be biased.</p>
+<h3>2.3 Sample used by the project</h3>
+<p>The course limits datasets to 2,000-500,000 samples, so we draw a seeded random subset over all raw ids
+(a permutation with seed 42, not the first rows). Of 50,360 recipes examined, 180 were dropped as exact
+duplicates (same title and same normalised ingredient set) and 180 because they had fewer than 2 or more
+than 40 normalised ingredients, leaving exactly <strong>50,000 recipes</strong> (<code>main</code>). The first 5,000 of them form
+the <code>pilot</code> profile used for fast iterations. The sample keeps the raw source mix (73.7% <code>Gathered</code>,
+26.3% <code>Recipes1M</code>, against 73.6% / 26.4% in the full file).</p>
+<table>
+<thead>
+<tr>
+<th>Split (by group)</th>
+<th style="text-align:right">Recipes</th>
+<th style="text-align:right">Synthetic queries</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>train</td>
+<td style="text-align:right">35,896</td>
+<td style="text-align:right">5,000</td>
+</tr>
+<tr>
+<td>validation</td>
+<td style="text-align:right">3,970</td>
+<td style="text-align:right">500</td>
+</tr>
+<tr>
+<td>test</td>
+<td style="text-align:right">10,134</td>
+<td style="text-align:right">1,000</td>
+</tr>
+<tr>
+<td>total</td>
+<td style="text-align:right">50,000</td>
+<td style="text-align:right">6,500</td>
+</tr>
+</tbody>
+</table>
+<h3>2.4 Exploratory analysis</h3>
+<p><strong>Ingredients per recipe.</strong> Recipes are short: the mean is 8.25 and the median 8 normalised ingredients,
+95% have 15 or fewer, with a thin tail up to 37. A 2-6 ingredient query therefore covers a large share of
+a typical recipe, which is why query generation always hides at least one ingredient.</p>
+<p><img src="figures/eda_1_ingredients_per_recipe.png" alt="Ingredients per recipe" /></p>
+<p><strong>Frequent ingredients.</strong> Salt appears in 43.5% of recipes; sugar, egg, butter, onion and flour in 20-27%
+each. Only 79 names occur in more than 2% of recipes. These staples carry almost no information about which
+recipe a user wants, and their weight must be low (IDF) or the query must contain something else (query
+generation rule).</p>
+<p><img src="figures/eda_2_top_ingredients.png" alt="Most frequent ingredients" /></p>
+<p><strong>Vocabulary.</strong> The 14,450 distinct normalised names follow a Zipf-like distribution: 100 names cover 64% of
+all mentions, while 8,704 names (60%) occur in a single recipe. Rare names are exactly what pins down a
+recipe (high IDF), but many singletons are NER fragments (section 2.5), so they are a mix of signal and noise.</p>
+<p><img src="figures/eda_6_rank_frequency.png" alt="Rank-frequency of ingredient names" /></p>
+<p><strong>Directions and sources.</strong> Directions have a median of 5 steps (about 350 characters) and a long tail up to
+106 steps; they are displayed but never encoded, so the tail does not affect retrieval or encoder truncation.
+<code>Recipes1M</code> recipes have slightly more ingredients than <code>Gathered</code> ones (8.7 vs 8.1).</p>
+<p><img src="figures/eda_3_directions.png" alt="Directions length" /></p>
+<p><img src="figures/eda_4_sources.png" alt="Sources" /></p>
+<p><strong>Duplicate groups.</strong> 92.7% of the 39,869 groups hold one recipe, but a heavy tail has groups of more than
+100 near-identical recipes (the largest has 141). A random recipe-level split would put copies of the same
+recipe in train and test; the group split prevents this.</p>
+<p><img src="figures/eda_5_group_sizes.png" alt="Group sizes" /></p>
+<h3>2.5 Data quality issues</h3>
+<p>The existing data audit records examples of lost ingredient nouns, truncated brands and references
+to other recipes. For example, <code>recipenlg:1867895</code> maps a coconut-oil ingredient to <code>virgin</code> and
+<code>recipenlg:811009</code> maps Mountain Dew to <code>dew</code>. These illustrate representation noise; the earlier
+100-recipe inspection has no saved annotator provenance and its category counts are not used here
+as verified human judgments or an estimated error rate.</p>
+<p><strong>Measured at scale:</strong> NER lists fewer entries than the raw lines in 10,095 recipes (20.2%); 133 distinct
+names have 3 characters or fewer (most are real, such as <code>egg</code>, <code>oil</code>, <code>yam</code>); normalising an
+already-normalised name changes 198 of the 14,450 names (1.4%, in 387 recipes), e.g. <code>five spice powder</code>
+→ <code>spice powder</code>.</p>
+<p><strong>Consequences for modelling.</strong> (1) Noisy names add false matches and hide true ones, which caps what any
+lexical model can achieve; (2) because the same normaliser is applied to documents and queries the same
+number of times, retrieval stays consistent even though the normaliser is not idempotent; (3) the data has
+no images, cooking times or nutrition, and the API and UI must not invent them; (4) the fixes listed in
+<code>reports/data_audit.md</code> (drop modifier-only NER entries, parse lines that NER skipped, keep the first of
+&quot;X or Y&quot;) change the processed data, so they need the shared-file review and a re-published dataset.</p>
+<h2>3. Preprocessing and feature engineering</h2>
+<p>The pipeline runs from the raw CSV to the processed files with one command
+(<code>python -m src.data_collection --raw-path data/raw/RecipeNLG_dataset.csv</code>) and is checked with
+<code>python scripts/verify_data.py</code>, which compares file hashes with the manifest.</p>
+<h3>3.1 Parsing</h3>
+<p>The CSV is read in chunks of 200,000 rows. Each list column is parsed with <code>json.loads</code> and, if that
+fails, with <code>ast.literal_eval</code>, which only accepts literals and cannot execute code (<code>eval</code> is never used).
+A row is dropped when a list is missing, malformed or not a list of strings, and every drop is counted per
+reason in the manifest. Links get an <code>https://</code> scheme. Raw ingredient lines and directions are kept
+unchanged for display.</p>
+<h3>3.2 Ingredient normalisation (<code>src/normalize.py</code>)</h3>
+<p>One function, <code>normalize_ingredients</code>, is used for recipes, synthetic queries, manual queries and API
+requests, so a query and a document that name the same food produce the same tokens. For every name it:</p>
+<ol>
+<li>parses the line with <code>ingredient-parser-nlp</code>, which removes quantities, units and preparation words and
+splits &quot;salt and pepper&quot; into two names;</li>
+<li>lower-cases, replaces hyphens and non-letters with spaces and drops size/state words that do not change
+the food (<code>fresh</code>, <code>frozen</code>, <code>large</code>, <code>small</code>, <code>medium</code>, <code>optional</code>);</li>
+<li>singularises the last word with <code>inflect</code> (<code>eggs</code> → <code>egg</code>), except words such as <code>molasses</code>,
+<code>asparagus</code> or <code>hummus</code>;</li>
+<li>maps a small, conservative alias list (<code>scallion</code> → <code>green onion</code>, <code>garbanzo bean</code> → <code>chickpea</code>,
+<code>confectioners sugar</code> → <code>powdered sugar</code>, …) and removes unit or filler words left as names;</li>
+<li>removes duplicates while keeping the first-seen order.</li>
+</ol>
+<p>Multi-word names are kept: <code>chicken stock</code> and <code>chicken breast</code> stay different, and so do <code>baking powder</code>
+and <code>baking soda</code>. The NER column is the primary source because raw lines are noisier; the raw line is the
+fallback when NER is empty (4 recipes in the sample). A fingerprint of the rules and library versions is
+stored in every bundle manifest; a bundle built with another normaliser is refused at load time.</p>
+<h3>3.3 Deduplication and grouping</h3>
+<p>Exact duplicates (same normalised title key and same ingredient set) are removed before sampling stops, so
+the sample still reaches 50,000 recipes. Remaining near-duplicates are <strong>grouped, not removed</strong>: recipes
+sharing an ingredient set or a title key are joined with connected components (<code>scipy</code>), giving 39,869
+groups. Grouping by both keys catches most copies; near-duplicates with a different title <em>and</em> a different
+ingredient set stay apart (the manifest records this limitation, because all-pairs similarity over the
+corpus would be too expensive).</p>
+<h3>3.4 Group split and synthetic queries</h3>
+<p><code>GroupShuffleSplit</code> (seed 42) first takes 20% of the groups as test, then 10% of the remaining groups
+(0.08 / 0.80) as validation, which gives about 72/8/20 overall; because the fractions apply to groups, the
+recipe counts are 35,896 / 3,970 / 10,134. Queries are generated
+inside each split with the rules of section 1.3 and capped at 5,000 / 500 / 1,000. Query ids are stable
+(<code>q:&lt;raw id&gt;</code>), and a query whose normalised ingredient set appears in two splits is dropped (117 cases) so
+that a memorised training query cannot reappear as a held-out query.</p>
+<h3>3.5 scikit-learn pipelines (<code>src/pipeline.py</code>)</h3>
+<p>The course asks for preprocessing implemented as a scikit-learn <code>Pipeline</code> / <code>ColumnTransformer</code>. Three
+pipelines are defined, each fitted on train recipes only:</p>
+<ul>
+<li><strong>Text pipeline (TF-IDF):</strong> <code>FunctionTransformer(normalize_all)</code> → <code>TfidfVectorizer</code> whose tokens are whole
+normalised ingredient names (a custom analyzer, so &quot;olive oil&quot; is one token, not &quot;olive&quot; + &quot;oil&quot;).
+Cosine similarity between L2-normalised vectors ranks the candidates; recipes sharing no token with the
+query get no score and are not returned.</li>
+<li><strong>LSA pipeline:</strong> the same normalisation and TF-IDF, then <code>TruncatedSVD</code> (256 components, seed 42) and an
+L2 <code>Normalizer</code>, so that cosine similarity becomes a dot product in the reduced space.</li>
+<li><strong>Recipe feature table (<code>build_feature_pipeline</code>):</strong> a <code>ColumnTransformer</code> with a numeric branch
+(normalisation → the two features of section 3.7 → <code>StandardScaler</code>) and a categorical branch for
+<code>source</code> (<code>SimpleImputer(strategy=&quot;constant&quot;, fill_value=&quot;unknown&quot;)</code> → <code>OneHotEncoder(handle_unknown=&quot;ignore&quot;)</code>).</li>
+</ul>
+<p>Missing values: the data pipeline drops recipes whose list fields are missing or malformed, so after
+parsing only <code>source</code> could be missing; it gets an explicit <code>unknown</code> category instead of being imputed with
+the majority value, because a wrong source would be invisible later. Scaling: <code>StandardScaler</code>, because the
+two numeric features live on different scales (about 8 ingredients versus a mean IDF around 5) and are meant
+for distance-based reranking and analysis. Scaling is deliberately <strong>not</strong> applied to TF-IDF or embedding
+vectors, which are already L2-normalised. Encoding: one-hot for <code>source</code> (two known values, unordered).</p>
+<h3>3.6 Tokenisation choices tested with cross-validation</h3>
+<p>The token unit is a design choice with a direct effect on retrieval, so it was tuned rather than assumed
+(E02, <code>src/tune.py</code>, MLflow run <code>dac82cb580e8403082cd9d0fabb40448</code>). The grid, evaluated with
+<code>GroupKFold(5)</code> on the 35,896 outer-train recipes (28,705 groups, 5,000 train queries, MRR@10 scorer):</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Values</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tokens</td>
+<td>whole names; whole names + words inside multi-word names</td>
+<td>does &quot;chicken&quot; help to find &quot;chicken breast&quot; recipes? (<code>ngram_range</code> has no effect with a callable analyzer, and ingredient order carries no meaning)</td>
+</tr>
+<tr>
+<td><code>min_df</code></td>
+<td>1, 2, 5</td>
+<td>drop typo and fragment names (60% of names occur once)</td>
+</tr>
+<tr>
+<td><code>sublinear_tf</code></td>
+<td>false, true</td>
+<td>only matters when a token repeats inside a recipe</td>
+</tr>
+<tr>
+<td><code>norm</code></td>
+<td>l2, none</td>
+<td>whether length normalisation helps</td>
+</tr>
+</tbody>
+</table>
+<p>The scikit-learn defaults won: whole-name tokens, <code>min_df</code> 1, <code>norm</code> l2, CV MRR@10 <strong>0.6896 ± 0.0063</strong>.
+Splitting names into words lowered it to 0.638 (a query &quot;chicken&quot; then matches every &quot;chicken *&quot; recipe);
+<code>min_df</code> 2 lowered it to 0.656 (rare names are what identifies a recipe, noise included); <code>sublinear_tf</code>
+changed nothing, because whole names almost never repeat inside one recipe. The values are stored in
+<code>configs/default.yaml</code> (<code>baselines.tfidf_tuned</code>).</p>
+<h3>3.7 Engineered features (<code>src/features.py</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Definition</th>
+<th>Why</th>
+<th>Fitted on</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ingredient_count</code></td>
+<td>number of distinct normalised ingredients of a recipe</td>
+<td>a 3-ingredient and a 20-ingredient recipe overlap very differently with a short query; recipe size explains much of the ranking behaviour (MRR@10 of every model falls for large origin recipes, see the error analysis)</td>
+<td>nothing to fit</td>
+</tr>
+<tr>
+<td><code>mean_ingredient_rarity</code></td>
+<td>mean IDF of the recipe's ingredients; an ingredient unseen in training gets the maximum IDF instead of a value computed from held-out data</td>
+<td>separates &quot;salt, sugar, flour&quot; recipes from recipes built on rare ingredients, which is what a query with a rare ingredient pins down</td>
+<td>train recipes only</td>
+</tr>
+<tr>
+<td>matched / missing (query time)</td>
+<td>query ingredients present in / absent from the recipe, on the canonical names</td>
+<td>shown to the user; used by the missing-first rerank ablation (E06)</td>
+<td>nothing to fit</td>
+</tr>
+</tbody>
+</table>
+<p>Both recipe features are tested: their values on small hand-made inputs, and the fact that the rarity
+feature is fitted on train recipes only (<code>tests/test_features_pipeline.py</code>).</p>
+<h3>3.8 Document formats for the encoder</h3>
+<p>The transformer sees the ingredient list only (E04) or &quot;title. Ingredients: …&quot; (E05), with a maximum length
+of 128 tokens; 1 and 2 of the 50,000 documents are truncated. Directions are never encoded. On validation,
+the ingredients-only format is far better (MRR@10 0.434 vs 0.152), because queries are ingredient lists with
+no title, so the title moves documents away from queries in the embedding space.</p>
+<h3>3.9 Summary of the preprocessing decisions</h3>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Alternative rejected</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>seeded sample over all ids</td>
+<td>first 50,000 rows</td>
+<td>file sorted by source</td>
+</tr>
+<tr>
+<td>NER first, raw line as fallback</td>
+<td>raw lines only</td>
+<td>raw lines noisier (data audit)</td>
+</tr>
+<tr>
+<td>group split</td>
+<td>random recipe split</td>
+<td>groups of up to 141 near-identical recipes</td>
+</tr>
+<tr>
+<td>whole-name tokens</td>
+<td>words or n-grams</td>
+<td>CV MRR@10 0.690 vs 0.638</td>
+</tr>
+<tr>
+<td><code>unknown</code> category for <code>source</code></td>
+<td>mode imputation</td>
+<td>keeps missingness visible</td>
+</tr>
+<tr>
+<td>no scaling of TF-IDF / embeddings</td>
+<td>StandardScaler everywhere</td>
+<td>vectors are already L2-normalised</td>
+</tr>
+</tbody>
+</table>
+<p>Model development, results, deep learning, MLOps and the discussion follow in part 2 of the report.</p>
+<h2>4. Evidence and delivery status</h2>
+<p>Corpus counts and query multiplicity were recomputed for this revision in MLflow run
+<code>50b22eab28da441ab299b6f7e2c98c05</code>; see <code>reports/report_part1_provenance.json</code> for hashes and metrics.
+The raw-file structure table reproduces the earlier audit in <code>reports/data_audit.md</code>, saved as an
+artifact in that run; the full raw-file audit was not rerun in this revision. EDA figures are generated
+by <code>notebooks/01_eda.ipynb</code> from this corpus. Retrieval numbers are backed by the per-system
+MLflow IDs in <code>reports/comparison.csv</code>; the fine-tuned checkpoint's actual evaluation is described
+in <code>reports/e07_e08_finetune_main.md</code>.</p>
+<p>The refreshed dev pool contains 396 unique query-recipe pairs for 20 queries, with 484 assignments
+and 88 independent second labels. The three assignment files record intended annotators, not proof
+of completed annotation: every relevance field is still blank. Human relevance, agreement and
+pooled nDCG remain pending. The final manual pool and test retrieval metrics have not been run.</p>
+<p>The source, tests and release checklist for this stage are tracked in <code>docs/dev-evaluation-plan.md</code>.</p>
+</body></html>

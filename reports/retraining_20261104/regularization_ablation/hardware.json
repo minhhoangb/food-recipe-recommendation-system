@@ -1,0 +1,12 @@
+{
+  "colab": false,
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "libraries": {
+    "mlflow": "3.17.2",
+    "sentence-transformers": "5.1.2",
+    "torch": "2.9.1+cu128"
+  },
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.14.7"
+}

@@ -1,0 +1,69 @@
+{
+  "all_ok": true,
+  "verified_utc": "2026-11-03T11:17:49.937192+00:00",
+  "docker_client_version": "29.7.2",
+  "docker_server_version": "29.7.2",
+  "image": {
+    "tag": "food-recipe-api:cpu",
+    "id": "sha256:a934b170afe7d161d25d8ea94c0ec80e85e0dd756b22e97b7b17c0cba8218020",
+    "created": "2026-11-03T11:14:54.378803006Z",
+    "size_bytes": 752052796
+  },
+  "container": {
+    "id": "08cae0a54aac036c2408a4dfb3e34671d09eb8c41123174a8810b8b09b5a5143",
+    "name": "/food-recipe-recommendation-system-api-1",
+    "image_id": "sha256:a934b170afe7d161d25d8ea94c0ec80e85e0dd756b22e97b7b17c0cba8218020",
+    "state": {
+      "Status": "running",
+      "Running": true,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 862,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-11-03T11:17:13.515805403Z",
+      "FinishedAt": "0001-01-01T00:00:00Z",
+      "Health": {
+        "Status": "healthy",
+        "FailingStreak": 0,
+        "Log": [
+          {
+            "Start": "2026-11-03T11:17:18.719455314Z",
+            "End": "2026-11-03T11:17:19.075009428Z",
+            "ExitCode": 1,
+            "Output": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.12/urllib/request.py\", line 1357, in do_open\n    h.request(req.get_method(), req.selector, req.data, headers,\n  File \"/usr/local/lib/python3.12/http/client.py\", line 1386, in request\n    self._send_request(method, url, body, headers, encode_chunked)\n  File \"/usr/local/lib/python3.12/http/client.py\", line 1432, in _send_request\n    self.endheaders(body, encode_chunked=encode_chunked)\n  File \"/usr/local/lib/python3.12/http/client.py\", line 1381, in endheaders\n    self._send_output(message_body, encode_chunked=encode_chunked)\n  File \"/usr/local/lib/python3.12/http/client.py\", line 1141, in _send_output\n    self.send(msg)\n  File \"/usr/local/lib/python3.12/http/client.py\", line 1085, in send\n    self.connect()\n  File \"/usr/local/lib/python3.12/http/client.py\", line 1051, in connect\n    self.sock = self._create_connection(\n                ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/usr/local/lib/python3.12/urllib/request.py\", line 215, in urlopen\n    return opener.open(url, data, timeout)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/urllib/request.py\", line 515, in open\n    response = self._open(req, data)\n               ^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/urllib/request.py\", line 532, in _open\n    result = self._call_chain(self.handle_open, protocol, protocol +\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/urllib/request.py\", line 492, in _call_chain\n    result = func(*args)\n             ^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/urllib/request.py\", line 1386, in http_open\n    return self.do_open(http.client.HTTPConnection, req)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/urllib/request.py\", line 1360, in do_open\n    raise URLError(err)\nurllib.error.URLError: <urlopen error [Errno 111] Connection refused>\n"
+          },
+          {
+            "Start": "2026-11-03T11:17:24.076671067Z",
+            "End": "2026-11-03T11:17:24.403082563Z",
+            "ExitCode": 0,
+            "Output": ""
+          }
+        ]
+      }
+    },
+    "published_url": "http://127.0.0.1:8080"
+  },
+  "health": {
+    "status": "ok",
+    "model": "bm25",
+    "model_version": "1"
+  },
+  "container_smoke": "reports/docker_smoke.json",
+  "native_smoke": "reports/native_bm25_smoke.json",
+  "parity": "reports/parity.json",
+  "queries_passed": 5,
+  "max_score_difference": 0.0,
+  "source_hashes": {
+    "Dockerfile": "eefb3cc602a8e3cd33a49fa91a38846ea567614407210911b52b4b7210a25d45",
+    "requirements-serve.txt": "85f064b0406364279441e2e8a5cd4677e4e2fdc9ebfd23cb489df55c0b1fceaf",
+    "configs/default.yaml": "5c90ba2ef405096441808bec0e9c608e7ee18d97066b4d82bfa2aa0722d32d29",
+    "configs/production.yaml": "d339170498cbdb3c58324370c666a7094f8aad7f7a02bf4b7d06e4e32530724e",
+    "scripts/smoke_api.py": "02d9d4a2342aaa8a22d91730c02a5422899810aadef8d8ce2f29434ef1d43d00"
+  },
+  "build_log": "logs/docker-bm25-build.log",
+  "startup_log": "logs/docker-bm25-startup.log",
+  "scope": "Actual local Docker Linux engine and native Windows server; smoke/parity traffic is test traffic."
+}

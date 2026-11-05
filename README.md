@@ -66,14 +66,22 @@ The API needs two things on disk: the processed corpus and the serving bundle. B
 python scripts/fetch_artifacts.py      # or: python -m src.data_collection --raw-path <csv>
 python scripts/verify_data.py
 
-# 2. the serving bundle (the pretrained MiniLM encoder over the main corpus, E04)
-python -m src.embeddings --config configs/default.yaml --mode ingredients
+# 2. build the selected BM25 serving bundle (no encoder download)
+python -m src.baseline --config configs/default.yaml --model bm25
+
+# 3. serve the production config
+uvicorn api.app:app --host 127.0.0.1 --port 8000
 ```
 
-Step 2 writes `models/minilm_pretrained-E04-main-<corpus-sha8>/` (74 MB: `embeddings.npy`,
-`recipe_ids.json`, `manifest.json`). Without it the app still starts and serves TF-IDF over
-the corpus; with it, `configs/production.yaml` points at it and the API serves the dense
-backend.
+Step 2 writes `models/bm25-main-1f1f4ce5/`, which is selected by
+`configs/production.yaml`. The shared ZIP is hosted on GitHub Releases and checked
+against `artifacts.sha256` before extraction. `verify_data.py` then checks both
+profiles, file hashes and split/group isolation.
+
+The complete archived `models/` directory is also available as an optional
+[GitHub Release download](docs/shared_model_artifacts.md), with a SHA-256 and
+per-file inventory. The repository includes a versioned `mlflow.db` snapshot for
+viewing run history; `mlruns/` artifacts are separate.
 
 > **Windows note:** if pip fails with *"An Application Control policy has blocked this
 > file"*, the wheels were downloaded with the Mark-of-the-Web flag. Run
@@ -141,7 +149,7 @@ time). The bundles live under `models/` and are **not** committed to git.
 | --- | --- | --- |
 | `configs/default.yaml` | main (50.000 recipes) | none (the reference TF-IDF retriever) |
 | `configs/pilot.yaml` | pilot (5.000 recipes, a subset of main) | none |
-| `configs/production.yaml` | main (50.000 recipes) | `models/minilm_pretrained-E04-main-1f1f4ce5` (E04) |
+| `configs/production.yaml` | main (50.000 recipes) | `models/bm25-main-1f1f4ce5` (E03, selected) |
 
 `configs/default.yaml` is the base every other file is merged over. `configs/pilot.yaml`
 and `configs/production.yaml` only change what they need, so a new profile stays short.
@@ -185,7 +193,7 @@ locked in `tests/test_ranking_metrics.py`.
 
 - **Pilot Fine-Tuning**: `notebooks/02_finetune_colab.ipynb` runs pilot fine-tuning on Colab GPU with `SentenceTransformerTrainer` + `MultipleNegativesRankingLoss`, evaluates every epoch with `InformationRetrievalEvaluator` (MRR@10), demonstrates `save_steps` checkpointing and `resume_from_checkpoint`, and exports the model.
 - **Main CPU run (2026-10-29)**: `src/finetune.py` trained one epoch on 30,000 train pairs (batch 32, lr 2e-5). The checkpoint is `models/minilm_finetuned-main-cpu1ep`; measured validation results and MLflow IDs are in [reports/e07_e08_finetune_main.md](reports/e07_e08_finetune_main.md). The current training loader shuffles pairs; it does not use the available `NoDuplicateBatchSampler`.
-- **Main ablation notebook**: `notebooks/03_finetune_main_ablation.ipynb` provides a workflow for measured hyperparameter experiments and exports the checkpoint with the best validation MRR@10. A controlled weight-decay ablation is still pending; see [the experiment status](reports/ablation_regularization.md).
+- **Controlled ablation notebook**: `notebooks/04_regularization_controlled_colab.ipynb` compares weight decay 0.0 and 0.01 with otherwise identical settings. The measured Colab T4 run and its limits are recorded in [the ablation report](reports/ablation_regularization.md). The broader checkpoint-selection workflow remains in `03_finetune_main_ablation.ipynb`.
 
 #### Main validation: pretrained vs CPU one-epoch fine-tuned MiniLM
 
@@ -277,7 +285,7 @@ The FastAPI app lives in `api/app.py`. The retriever and the corpus metadata are
 **once** at startup (the lifespan), not per request.
 
 ```bash
-# the production bundle (the dense MiniLM backend over the main corpus)
+# the production bundle (BM25 over the main corpus)
 set API_CONFIG=configs/production.yaml
 uvicorn api.app:app --reload
 
@@ -332,7 +340,11 @@ A bad request returns **422** with the reason (e.g. `top_k` out of range, an ing
 list that normalises to nothing). `top_k` is an integer in `[1, 20]`, a batch holds at
 most 20 instances.
 
-### The endpoints, with real responses
+### Archived E04 endpoint examples
+
+The responses below were measured with the earlier MiniLM E04 deployment.
+The current production model is BM25; its verified responses are recorded in
+`reports/clean_clone_smoke.json`.
 
 `GET /health` — the liveness probe:
 
@@ -577,7 +589,7 @@ skipped instead of being timed on queries that do not belong to it.
 The image is CPU-only: torch comes from the CPU wheel index, so no CUDA is pulled in.
 
 ```bash
-docker compose up --build          # API on http://127.0.0.1:8000
+docker compose up --build          # API on http://127.0.0.1:8080
 docker compose --profile mlflow up  # optional MLflow UI on http://127.0.0.1:5000
 ```
 
@@ -610,11 +622,14 @@ API_BUNDLE=models/bm25-main-1f1f4ce5 \
 To rebuild the `bundles` volume from scratch (after changing the host's `models/`):
 
 ```bash
-docker compose down -v && docker compose up --build
+docker compose run --rm init-bundles
+docker compose up -d --build --force-recreate api
 ```
 
 The image size is reported in `reports/benchmark.md` after the build (torch CPU wheels are
 the bulk of it).
+
+The refresh command preserves request logs and other named volumes.
 
 ### Native vs Docker parity
 
@@ -628,8 +643,13 @@ ids (same order) and the scores (within a tolerance); the log of the check is
 API_CONFIG=configs/production.yaml uvicorn api.app:app --port 8010
 # container
 docker compose up -d --build
-python scripts/check_parity.py --native http://127.0.0.1:8010 --docker http://127.0.0.1:8000
+docker compose exec -T api python scripts/smoke_api.py --expected-model bm25
+python scripts/check_parity.py --native http://127.0.0.1:8010 --docker http://127.0.0.1:8080 --expected-model bm25
 ```
+
+Verified locally on 2026-11-03 with Docker 29.7.2: rebuilt image, healthy BM25
+container, internal endpoint smoke and 5/5 parity queries passed with zero score
+difference. Evidence and image ID: [Docker verification](reports/docker_verification.md).
 
 ## MLflow
 
@@ -641,6 +661,27 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db
 ```
 
 Experiments are recorded in `recipe-retrieval`. Serving bundles are saved as artifacts, and fine-tuned models are registered in the MLflow Model Registry under `minilm_finetuned` with aliases (`staging`, `production`).
+
+### Controlled regularization evidence
+
+`notebooks/04_regularization_controlled_colab.ipynb` runs the same base weights,
+seed, sampled train/validation pairs, full batches, batch order, learning rate,
+sequence limit and epoch count with AdamW `weight_decay=0.0` and `0.01`.
+It logs measured `optimization_loss`, `train_loss` and `val_loss` histories to
+`recipe-regularization-ablation`. The fixed train/validation loss probes run in
+eval mode with equal batch sizes and counts. It never reads the test split.
+
+```bash
+python -m scripts.run_regularization_ablation --device cpu
+mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000
+```
+
+Hardware, pair hashes, initial-weight hash, batch-schedule hash, run IDs and
+measurements are saved in `reports/regularization_ablation/summary.json`.
+This single-seed loss experiment does not establish a retrieval improvement or
+statistical significance. UI evidence is captured from the actual MLflow pages;
+`generate_mlflow_figures.py` can only plot measured histories and cannot create
+imitation UI screenshots.
 
 ## Repository structure
 
@@ -667,6 +708,18 @@ docker-compose.yml  api + the bundles volume + the optional MLflow UI
 
 ## Reproducibility
 
+GPU retraining (2026-11-04): [measured validation results and run evidence](reports/retraining_20261104/README.md).
+The [separate model release](https://github.com/minhhoangb/food-recipe-recommendation-system/releases/tag/model-artifacts-gpu-20261104)
+contains weights, embeddings, indexes and the MLflow snapshot, with SHA-256 in
+[`artifacts.json`](reports/retraining_20261104/artifacts.json). The frozen E10 and
+production selection are unchanged; another training run is not required to use these artifacts.
+
+The verified local GPU environment uses PyTorch 2.9.1 with CUDA 12.8 on an RTX 3060 Laptop.
+Install that build into the activated environment with
+`python -m pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cu128`.
+Check device availability with
+`python -c "import torch; print(torch.__version__, torch.cuda.is_available())"`.
+
 Khung 3 verification (2026-11-03):
 
 - Fine-tuned bundles include an `encoder/` directory. Every checkpoint file is hashed in
@@ -674,8 +727,12 @@ Khung 3 verification (2026-11-03):
   weights. Build a portable FT bundle with
   `python -m src.embeddings --config configs/default.yaml --model-path models/minilm_finetuned-main-cpu1ep`.
   Legacy FT bundles without a packaged encoder fail clearly; explicit evaluation encoders still work.
-- `src.train` verifies cached inputs and output hashes. Data/config mismatches in processed
-  artifacts stop the pipeline for verification; they do not silently overwrite shared data.
+- `src.train` supports both `python src/train.py` and `python -m src.train` and verifies
+  cached inputs and output hashes. Processed-data cache checks cover seed, data/query
+  settings, normalization and file hashes; download URLs, serving settings and paths do
+  not invalidate the data. New builds record `data_config_sha256`; shared legacy artifacts
+  are checked against the hash-verified original config in `configs/provenance/processed_v1.yaml`.
+  Data/config mismatches stop the pipeline instead of silently overwriting shared data.
   Checkpoint caches include pairs, hyperparameters and device. `train_summary.json` records actual
   training measurements; missing legacy measurements are omitted from MLflow.
 - API logs include one missing-ingredient count per returned recipe. Existing SQLite logs are

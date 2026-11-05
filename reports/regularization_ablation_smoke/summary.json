@@ -1,0 +1,85 @@
+{
+  "arms": [
+    {
+      "history": [
+        {
+          "step": 0,
+          "train_loss": 0.1696996334940195,
+          "val_loss": 0.20403000712394714
+        },
+        {
+          "step": 2,
+          "train_loss": 0.04534782096743584,
+          "val_loss": 0.07123356312513351
+        },
+        {
+          "step": 4,
+          "train_loss": 0.022853419184684753,
+          "val_loss": 0.030190449208021164
+        }
+      ],
+      "initial_weights_sha256": "c13c0900ac73c2de46340ec049fd09d33205a6a07265308320e79e283ece248d",
+      "run_id": "d0f17dedbe7f4c4da173470b44f2b029",
+      "train_seconds": 5.673417800018797,
+      "weight_decay": 0.0
+    },
+    {
+      "history": [
+        {
+          "step": 0,
+          "train_loss": 0.1696996334940195,
+          "val_loss": 0.20403000712394714
+        },
+        {
+          "step": 2,
+          "train_loss": 0.04534795135259628,
+          "val_loss": 0.07123363763093948
+        },
+        {
+          "step": 4,
+          "train_loss": 0.022853489965200424,
+          "val_loss": 0.03019062988460064
+        }
+      ],
+      "initial_weights_sha256": "c13c0900ac73c2de46340ec049fd09d33205a6a07265308320e79e283ece248d",
+      "run_id": "51fdfa929a0a4db9939a46a0ee7c5368",
+      "train_seconds": 6.73304960000678,
+      "weight_decay": 0.01
+    }
+  ],
+  "controls": {
+    "base_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "batch_schedule_sha256": "67ddbf39a57a422cc1604309ae85a82c52c6f1bc46083bcb9ad9740199a22d59",
+    "batch_size": 8,
+    "config": "configs/default.yaml",
+    "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
+    "device": "cpu",
+    "epochs": 1,
+    "eval_every": 2,
+    "loss": "MultipleNegativesRankingLoss",
+    "lr": 2e-05,
+    "max_seq_length": 128,
+    "optimizer": "AdamW",
+    "seed": 42,
+    "splits_sha256": "35abfe794e8cd840d103657dfb613b31034870960fb513cf85032c810524de0a",
+    "threads": 2,
+    "train_pairs": 32,
+    "train_pairs_sha256": "eea77f1f24681b6c7e12e78526b93de78fd2e1872bd09acecadc613f04878202",
+    "val_pairs": 16,
+    "validation_pairs_sha256": "59e8ec0e16c576f8b43b9b05e7dce22f819e3b74ae0b83be3a3dba58ac076a9f"
+  },
+  "hardware": {
+    "colab": false,
+    "device": "cpu",
+    "gpu": null,
+    "libraries": {
+      "mlflow": "3.17.2",
+      "sentence-transformers": "5.1.2",
+      "torch": "2.9.1"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.7"
+  },
+  "parent_run_id": "fc973c1a55e2439385cc5d8fa90c8032",
+  "scope": "Single-seed controlled loss experiment; no test-set evaluation."
+}

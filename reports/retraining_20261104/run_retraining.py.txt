@@ -1,0 +1,201 @@
+"""Rebuild the seven configured systems without changing the frozen E10 run."""
+import os
+os.environ.setdefault('MLFLOW_DISABLE_AGENT_HINT', '1')
+os.environ.setdefault('DISABLE_MLFLOW_INTEGRATION', 'TRUE')
+os.environ.setdefault('HF_HUB_OFFLINE', '1')
+os.environ.setdefault('TOKENIZERS_PARALLELISM', 'false')
+os.environ.setdefault('CUBLAS_WORKSPACE_CONFIG', ':4096:8')
+
+import csv
+import gc
+import json
+import platform
+import random
+import subprocess
+import sys
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path('D:/MDS301/food-recipe-recommendation-system')
+OUT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
+os.chdir(ROOT)
+
+import mlflow
+import numpy as np
+import torch
+from omegaconf import OmegaConf
+from transformers import set_seed
+from src.baseline import fit_retriever, save_bundle as save_lexical
+from src.build_pairs import build_pairs, save_pairs_and_manifest
+from src.config import load_config, processed_dir
+from src.embeddings import load_model, load_corpus, encode_corpus, save_bundle as save_dense
+from src.evaluate import load_split, run_retriever, score_run
+from src.finetune import finetune_model
+from src.retrieval import DenseRetriever
+from src.utils import read_json, read_jsonl, sha256_file, write_json
+
+
+def main():
+    assert torch.cuda.is_available(), 'A working CUDA PyTorch installation is required'
+    models = OUT / 'models'
+    assert not models.exists(), 'Use a new output folder rather than overwrite an earlier run'
+    models.mkdir()
+    random.seed(42)
+    np.random.seed(42)
+    set_seed(42)
+    torch.set_num_threads(8)
+    cfg = load_config()
+    data = processed_dir(cfg)
+    corpus_sha = sha256_file(data / 'corpus.jsonl')
+    manifest = read_json(data / 'dataset_manifest.json')
+    for filename, digest in manifest['files'].items():
+        assert sha256_file(data / filename) == digest, filename
+    frozen_path = ROOT / 'reports/final/e10_execution.json'
+    frozen_hash = sha256_file(frozen_path)
+    old_checkpoint = ROOT / 'models/minilm_finetuned-main-cpu1ep/model.safetensors'
+    old_hash = sha256_file(old_checkpoint)
+    tracked = subprocess.check_output(['git', 'ls-files', 'src', 'configs'], text=True).splitlines()
+    source_hashes = {p: sha256_file(ROOT / p) for p in tracked if (ROOT / p).is_file()}
+    state = {
+        'status': 'running', 'started_utc': datetime.now(timezone.utc).isoformat(),
+        'git_head': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+        'working_tree_status': subprocess.check_output(['git', 'status', '--short'], text=True),
+        'source_hashes': source_hashes, 'corpus_sha256': corpus_sha,
+        'hardware': {'platform': platform.platform(), 'python': platform.python_version(),
+                     'torch': torch.__version__, 'cuda': torch.version.cuda,
+                     'gpu': torch.cuda.get_device_name(0),
+                     'gpu_total_gb': torch.cuda.get_device_properties(0).total_memory / 1024**3,
+                     'cpu_threads': torch.get_num_threads()},
+        'protocol': {'seed': 42, 'profile': 'main', 'epochs': 1, 'batch_size': 32,
+                     'learning_rate': 2e-5, 'weight_decay': 0.01, 'warmup_steps': 50,
+                     'n_train_pairs': 30000, 'evaluation_split': 'validation',
+                     'test_rerun': False, 'top_k': 10,
+                     'note': 'Fresh fits with existing selected hyperparameters; no new CV search. '
+                             'Synthetic origin-recipe relevance, not human relevance. '
+                             'Existing finetune_model uses a shuffled loader and can contain same-group negatives.'},
+        'systems': []}
+    write_json(OUT / 'run_status.json', state)
+    OmegaConf.save(cfg, OUT / 'config_snapshot.yaml')
+    mlflow.set_tracking_uri('sqlite:///' + (OUT / 'mlflow.db').as_posix())
+    experiment = mlflow.set_experiment('recipe-retraining-20261104-gpu')
+    corpus = list(read_jsonl(data / 'corpus.jsonl'))
+    splits = read_json(data / 'splits.json')
+    train_ids = set(splits['train'])
+    split_ids = [set(splits[s]) for s in ('train', 'validation', 'test')]
+    group_sets = [{r['group_id'] for r in corpus if r['recipe_id'] in ids} for ids in split_ids]
+    assert not (group_sets[0] & group_sets[1] or group_sets[0] & group_sets[2]
+                or group_sets[1] & group_sets[2]), 'Group leakage'
+    queries, qrels = load_split(data, 'validation')
+    assert len(corpus) == 50000 and len(queries) == 500
+    base = read_json(ROOT / 'reports/final/frozen_config.json')['systems'][4]['encoder']
+    assert Path(base).is_dir()
+
+    def evaluate(label, retriever, bundle, seconds, operation, extra=None):
+        print(f'[{label}] evaluating {len(queries)} validation queries', flush=True)
+        rankings, latency = run_retriever(retriever, queries, 10)
+        metrics = score_run(rankings, qrels)
+        assert all(0 <= value <= 1 for value in metrics.values())
+        write_json(OUT / f'{label}_validation_rankings.json', rankings)
+        with mlflow.start_run(run_name=f'{label}-fresh-validation') as run:
+            mlflow.log_params({'system': label, 'bundle': str(bundle), 'seed': 42,
+                               'split': 'validation', 'n_queries': len(queries),
+                               'corpus_sha256': corpus_sha, 'operation': operation,
+                               'device': 'cuda' if label in ('E04','E05','FT') else 'cpu',
+                               **(extra or {})})
+            mlflow.log_metrics({k.replace('@','_at_'): v for k,v in metrics.items()})
+            mlflow.log_metrics({'build_seconds': seconds, 'mean_query_latency_ms': latency})
+            mlflow.log_artifact(str(bundle / 'manifest.json'))
+            run_id = run.info.run_id
+        row = {'label': label, 'bundle': str(bundle), **metrics, 'n_queries': len(queries),
+               'build_seconds': seconds, 'operation': operation,
+               'latency_ms': latency, 'mlflow_run_id': run_id}
+        state['systems'].append(row)
+        write_json(OUT / 'run_status.json', state)
+        print(f'[{label}] {json.dumps(row)}', flush=True)
+
+    for label, kind, params in [('E01','tfidf',None),
+                                 ('E02','tfidf',OmegaConf.to_container(cfg.baselines.tfidf_tuned)),
+                                 ('E03','bm25',None), ('LSA','lsa',None)]:
+        print(f'[{label}] fresh fit/index', flush=True)
+        retriever, info = fit_retriever(kind, corpus, train_ids, params)
+        bundle = save_lexical(retriever, info, cfg, models,
+                              prefix='tfidf_tuned' if label == 'E02' else None)
+        evaluate(label, retriever, bundle, info['fit_seconds'],
+                 'index all candidates' if kind == 'bm25' else 'fit train and transform corpus')
+        del retriever
+        gc.collect()
+
+    records = load_corpus(data)
+    encoder = load_model(device='cuda', model_name_or_path=base)
+    for label, mode in [('E04','ingredients'), ('E05','title_ingredients')]:
+        print(f'[{label}] fresh corpus encoding on CUDA', flush=True)
+        started = time.perf_counter()
+        vectors, ids, truncated = encode_corpus(encoder, records, mode, batch_size=32)
+        torch.cuda.synchronize()
+        seconds = time.perf_counter() - started
+        bundle = save_dense(vectors, ids, mode=mode, profile='main', cfg=cfg,
+                            corpus_sha256=corpus_sha, truncated=truncated,
+                            encode_seconds=seconds, out_dir=models)
+        retriever = DenseRetriever.from_bundle(bundle, model=encoder)
+        evaluate(label, retriever, bundle, seconds, 'encode pretrained corpus without training')
+        del retriever, vectors
+        gc.collect()
+    del encoder
+    gc.collect()
+    torch.cuda.empty_cache()
+
+    pairs, pair_stats = build_pairs(data, split='train', mode='ingredients', max_pairs=30000, seed=42)
+    assert len(pairs) == 30000 and all(p['recipe_id'] in train_ids for p in pairs)
+    assert {p['group_id'] for p in pairs}.isdisjoint(group_sets[1] | group_sets[2])
+    pairs_file, _ = save_pairs_and_manifest(pairs, pair_stats, data, out_dir=OUT / 'pairs', profile='main')
+    print('[FT] fresh CUDA fine-tuning on 30,000 train pairs, one epoch', flush=True)
+    set_seed(42)
+    torch.cuda.reset_peak_memory_stats()
+    checkpoint = models / 'minilm_finetuned-checkpoint'
+    model, summary = finetune_model(pairs, base_model_name=base, output_path=checkpoint,
+                                   epochs=1, batch_size=32, learning_rate=2e-5,
+                                   warmup_steps=50, weight_decay=0.01, device='cuda')
+    summary.update(peak_cuda_allocated_mb=torch.cuda.max_memory_allocated()/1024**2,
+                   peak_cuda_reserved_mb=torch.cuda.max_memory_reserved()/1024**2,
+                   checkpoint_sha256=sha256_file(checkpoint/'model.safetensors'),
+                   train_pairs_sha256=sha256_file(pairs_file))
+    assert summary['checkpoint_sha256'] != old_hash, 'Expected fresh model weights'
+    write_json(OUT / 'training_summary.json', summary)
+    model.max_seq_length = 128
+    print('[FT] encoding full corpus with fresh checkpoint', flush=True)
+    started = time.perf_counter()
+    vectors, ids, truncated = encode_corpus(model, records, 'ingredients', batch_size=32)
+    torch.cuda.synchronize()
+    seconds = time.perf_counter() - started
+    bundle = save_dense(vectors, ids, mode='ingredients', profile='main', cfg=cfg,
+                        corpus_sha256=corpus_sha, truncated=truncated,
+                        encode_seconds=seconds, model_name='minilm_finetuned',
+                        out_dir=models, encoder_path=checkpoint)
+    retriever = DenseRetriever.from_bundle(bundle, model=model)
+    evaluate('FT', retriever, bundle, summary['train_seconds'], 'CUDA fine-tuning only',
+             {'epochs': 1, 'batch_size': 32, 'learning_rate': 2e-5, 'weight_decay': 0.01,
+              'pairs': 30000, 'encoding_seconds': seconds})
+    state['training_summary'] = summary
+    state['selected_on_validation'] = max(state['systems'], key=lambda r:r['mrr@10'])['label']
+    state['status'] = 'complete'
+    state['completed_utc'] = datetime.now(timezone.utc).isoformat()
+    assert frozen_hash == sha256_file(frozen_path)
+    assert old_hash == sha256_file(old_checkpoint)
+    state['old_artifacts_unchanged'] = True
+    write_json(OUT / 'run_status.json', state)
+    with (OUT / 'comparison_validation.csv').open('w', newline='', encoding='utf-8-sig') as stream:
+        writer = csv.DictWriter(stream, fieldnames=state['systems'][0].keys())
+        writer.writeheader()
+        writer.writerows(state['systems'])
+    print('COMPLETE: seven fresh systems, validation only, frozen E10 preserved', flush=True)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception:
+        import traceback
+        (OUT/'failure.log').write_text(traceback.format_exc(), encoding='utf-8')
+        raise

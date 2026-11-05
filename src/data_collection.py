@@ -21,7 +21,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 from sklearn.model_selection import GroupShuffleSplit
@@ -36,6 +36,18 @@ from src.utils import sha256_file, sha256_obj, write_json, write_jsonl
 MANIFEST_SCHEMA = "1"
 ID_COLUMN = "Unnamed: 0"
 COLUMNS = [ID_COLUMN, "title", "ingredients", "directions", "link", "source", "NER"]
+
+
+def data_config_fingerprint(cfg: DictConfig) -> str:
+    """Hash data-generation settings; paths, serving and the selected consumer profile do not alter data."""
+    settings = OmegaConf.to_container(cfg, resolve=True)
+    return sha256_obj(
+        {
+            "seed": settings["seed"],
+            "data": {key: value for key, value in settings["data"].items() if key != "profile"},
+            "queries": settings["queries"],
+        }
+    )
 
 
 def read_all_ids(raw_csv: Path, chunk_rows: int) -> np.ndarray:
@@ -246,6 +258,7 @@ def build(cfg: DictConfig, raw_csv: Path, profiles: list[str]) -> dict[str, dict
         "created_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "seed": cfg.seed,
         "config_sha256": fingerprint(cfg),
+        "data_config_sha256": data_config_fingerprint(cfg),
         "normalization": {"version": NORMALIZATION_VERSION, "fingerprint": NORMALIZATION_FINGERPRINT},
         "raw": {
             "file": raw_csv.name,

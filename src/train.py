@@ -26,18 +26,24 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
 
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import mlflow
 from mlflow.tracking import MlflowClient
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 from src.build_pairs import build_pairs, load_pairs, save_pairs_and_manifest
 from src.config import fingerprint, load_config, processed_dir
 from src.contracts import BundleManifest, RecipeRecord
+from src.data_collection import data_config_fingerprint
 from src.finetune import finetune_model
 from src.memory import peak_rss_mb
+from src.normalize import NORMALIZATION_FINGERPRINT
 from src.utils import REPO_ROOT, read_json, read_jsonl, sha256_file, sha256_obj, write_json
 
 DEFAULT_MODELS_DIR = REPO_ROOT / "models"
+LEGACY_DATA_CONFIG = REPO_ROOT / "configs" / "provenance" / "processed_v1.yaml"
 DEFAULT_TRACKING_URI = "sqlite:///mlflow.db"
 DEFAULT_EXPERIMENT = "recipe-retrieval"
 MODEL_NAME = "all-MiniLM-L6-v2"
@@ -115,6 +121,20 @@ def run_stage_raw(cfg: DictConfig, raw_path: Path | None = None, force: bool = F
     return path
 
 
+def _processed_config_matches(cfg: DictConfig, manifest: dict) -> bool:
+    declared = manifest.get("data_config_sha256")
+    if declared is not None:
+        return declared == data_config_fingerprint(cfg)
+    if manifest.get("config_sha256") == fingerprint(cfg):
+        return True
+    # Shared v1 artifacts predate the data-only hash; verify their original config before reuse.
+    original = OmegaConf.load(LEGACY_DATA_CONFIG)
+    return (
+        fingerprint(original) == manifest.get("config_sha256")
+        and data_config_fingerprint(original) == data_config_fingerprint(cfg)
+    )
+
+
 def run_stage_processed(cfg: DictConfig, raw_path: Path | None = None, force: bool = False) -> Path:
     """Stage 2: Build processed dataset (corpus, splits, queries, qrels) with hash cache."""
     directory = processed_dir(cfg)
@@ -123,9 +143,14 @@ def run_stage_processed(cfg: DictConfig, raw_path: Path | None = None, force: bo
 
     if corpus_file.exists() and manifest_file.exists() and not force:
         manifest = read_json(manifest_file)
-        if manifest["config_sha256"] != fingerprint(cfg) or not all(
-            (directory / name).is_file() and sha256_file(directory / name) == digest
-            for name, digest in manifest["files"].items()
+        if (
+            not _processed_config_matches(cfg, manifest)
+            or manifest.get("profile") != str(cfg.data.profile)
+            or manifest.get("normalization", {}).get("fingerprint") != NORMALIZATION_FINGERPRINT
+            or not all(
+                (directory / name).is_file() and sha256_file(directory / name) == digest
+                for name, digest in manifest["files"].items()
+            )
         ):
             raise ValueError("Processed data/config hash mismatch; verify shared artifacts before --force")
         raw_source = raw_path or Path(cfg.paths.raw_csv)

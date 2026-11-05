@@ -61,3 +61,20 @@ def test_a_missing_result_is_a_difference():
     native = _answer(["r1", "r2"], [1.0, 0.5])
     docker = _answer(["r1"], [1.0])
     assert not compare(native, docker, 1e-6)["ok"]
+
+
+def test_parity_rejects_two_matching_but_stale_models(monkeypatch, tmp_path):
+    import json
+
+    from scripts import check_parity
+
+    monkeypatch.setattr(check_parity, "model_info", lambda url: {
+        "model": "minilm_pretrained", "bundle": "old", "corpus_sha256": "same",
+    })
+    monkeypatch.setattr(check_parity, "predict", lambda *a: _answer(["r1"], [1.0]))
+    out = tmp_path / "parity.json"
+    assert check_parity.main(["--expected-model", "bm25", "--top-k", "1", "--out", str(out)]) == 1
+    result = json.loads(out.read_text())
+    assert result["same_model_identity"]
+    assert not result["expected_model_served"]
+    assert not result["all_ok"]

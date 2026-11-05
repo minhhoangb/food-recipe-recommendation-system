@@ -13,24 +13,23 @@ Căn cứ vào kết quả đánh giá trên tập **Validation Split (500 queri
 - **Tên Checkpoint:** `models/minilm_finetuned-main-cpu1ep`
 - **Khóa Trọng số (Weights SHA-256):** `ecac4fdf79dce1a1e16fd1ace100d794103e4a1f15f9fe14da4f909f36a4cdd3`
 - **Serving Bundle:** `models/minilm_finetuned-E04-main-1f1f4ce5` (Corpus SHA-256: `1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46`)
-- **MLflow Run ID:** `0437841237734100a7c1a9b26725d908` (Nhập từ log CPU 1-epoch thật) & `9d465a30cc7141bfa089739eb0e756cc` (best-finetuned-e07-main)
+- **MLflow training run:** `0437841237734100a7c1a9b26725d908` (nhập từ log CPU 1-epoch thật); **validation evaluation run:** `0444aa538a9948f8aecc25d5c42bb365` theo `comparison.csv`. FT main là **E08**; E07 là pilot.
 
 ### Bảng So sánh Hiệu năng trên Main Validation Split (500 Queries)
 
 | Mã Thử nghiệm | Mô tả Hệ thống / Biểu diễn | Định dạng Corpus | Recall@5 | Recall@10 | MRR@10 | Chênh lệch MRR so với E04 |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: |
 | **E01** | TF-IDF Cổ điển | ingredients | 0.7760 | 0.8260 | 0.6567 | +0.2225 |
-| **E02** | Tuned TF-IDF (Sublinear TF) | ingredients | 0.7760 | 0.8260 | 0.6567 | +0.2225 |
+| **E02** | Tuned TF-IDF (GroupKFold CV5) | ingredients | 0.7760 | 0.8260 | 0.6567 | +0.2225 |
 | **E03** | BM25 Lexical Baseline | ingredients | 0.8560 | 0.9100 | **0.7583** | +0.3241 |
-| **LSA** | LSA Truncated SVD (100 dims) | ingredients | 0.4560 | 0.5360 | 0.3629 | -0.0713 |
+| **LSA** | LSA Truncated SVD (256 dims) | ingredients | 0.4560 | 0.5360 | 0.3629 | -0.0713 |
 | **E04** | Pretrained MiniLM-L6-v2 | ingredients | 0.5120 | 0.5760 | 0.4342 | Gốc (Baseline) |
 | **E05** | Pretrained MiniLM-L6-v2 | title + ingredients | 0.2140 | 0.2620 | 0.1519 | -0.2823 (-65.0%) |
-| **FT (E07)** | **Fine-tuned MiniLM (CPU 1-ep)** | **ingredients** | **0.7340** | **0.7980** | **0.6209** | **+0.1867 (+43.0%)** |
-| *E08 (Ablation)* | *FT MiniLM (Title + Ingredients)* | *title + ingredients* | *N/A* | *N/A* | *N/A* | *(Bị loại bỏ do Title Dilution)* |
+| **FT (E08)** | **Fine-tuned MiniLM (CPU 1-ep)** | **ingredients** | **0.7340** | **0.7980** | **0.6209** | **+0.1867 (+43.0%)** |
 
 ---
 
-## 2. Phân tích So sánh Chi tiết: Pretrained vs Fine-Tuned (E04 vs FT/E07 & E08)
+## 2. Phân tích So sánh Chi tiết: Pretrained vs Fine-Tuned (E04 vs FT/E08)
 
 ### 2.1. Cải tiến Vượt bậc so với Pretrained (E04)
 - **Độ tăng trưởng:** Việc tinh chỉnh mô hình MiniLM-L6-v2 bằng hàm mất mát **MultipleNegativesRankingLoss (MNRL)** trên 30,000 cặp `(query, positive_recipe)` đã giúp MRR@10 tăng vọt từ **0.4342 lên 0.6209**, tương ứng với mức tăng **+43.0% (+0.1867)**.
@@ -41,11 +40,11 @@ Căn cứ vào kết quả đánh giá trên tập **Validation Split (500 queri
 > [!IMPORTANT]
 > **Đúng theo tiêu chí DoD ("FT không thắng vẫn báo"):**
 > Mặc dù Fine-Tuned MiniLM đã thu hẹp đáng kể khoảng cách giữa Dense Retrieval và Sparse Retrieval, **FT (0.6209 MRR@10) vẫn không đánh bại được BM25 (0.7583 MRR@10)** trên tập dữ liệu tổng hợp này.
-> **Lý do bản chất:** Bộ dữ liệu kiểm thử validation sử dụng nhãn tổng hợp nguồn gốc (synthetic origin qrels), trong đó query được sinh ra bằng cách trích xuất trực tiếp danh sách nguyên liệu của công thức gốc. Do đó, thuật toán khớp từ khóa chính xác BM25 đạt điểm số áp đảo nhờ tính năng Exact Matching. Tuy nhiên, dense model (FT) vượt trội hơn hẳn khi người dùng nhập từ đồng nghĩa, từ viết tắt hoặc lỗi chính tả nhẹ.
+> **Giới hạn nhãn:** Validation dùng synthetic origin qrels: query được trích từ nguyên liệu recipe nguồn, phù hợp với khớp từ khóa. Ưu thế của FT với từ đồng nghĩa, từ viết tắt hoặc lỗi chính tả cần bộ đánh giá riêng, chưa được chứng minh bằng bảng này.
 
-### 2.3. Phân tích Thất bại của Định dạng Title + Ingredients (E05 và lý do loại bỏ E08)
+### 2.3. Định dạng Title + Ingredients của Baseline E05
 - Trong giai đoạn baseline, thử nghiệm **E05 (title + ingredients)** cho kết quả MRR@10 sụt giảm thảm hại xuống còn **0.1519** (giảm 65% so với E04).
-- **Hiện tượng Pha loãng Ngữ nghĩa (Title Dilution):** Khi ghép tên món ăn vào chuỗi văn bản nguyên liệu, các từ mang tính mỹ cảm, nguồn gốc địa lý (ví dụ: *"Grandma's Classic Southern..."*, *"Mom's Sunday Special..."*) chiếm dụng dung lượng vector embedding 384 chiều, làm suy yếu các tín hiệu cốt lõi của nguyên liệu nấu ăn. Do đó, cấu hình E08 (FT trên title + ingredients) bị hủy bỏ để tiết kiệm tài nguyên tính toán và tập trung tối đa vào cấu hình tối ưu `ingredients-only` (E07).
+- Chưa có đối chứng xác định cơ chế “title dilution”. Không có fine-tuned title + ingredients bundle được đánh giá trong lần chạy này; không thể suy ra chất lượng cấu hình đó từ E05. E08 là FT main ingredients, không phải thí nghiệm title bị loại bỏ.
 
 ---
 
@@ -60,16 +59,13 @@ Căn cứ vào kết quả đánh giá trên tập **Validation Split (500 queri
 
 ### Nhận định:
 1. Độ lệch khái quát hóa (**Generalization Gap**) của FT là **+0.0241** (+3.88%), gần như tương đồng hoàn toàn với độ lệch tự nhiên của mô hình pretrained gốc (+0.0233, +5.36%).
-2. Không ghi nhận hiện tượng ghi nhớ vẹt (catastrophic memorization). Sự ổn định này đạt được nhờ 3 yếu tố:
-   - Chiến lược dừng sớm ở 1 epoch duy nhất (938 optimizer steps).
-   - Tham số Regularization `weight_decay = 0.01` ngăn chặn trọng số bùng nổ.
-   - Batch size 32 đóng vai trò như in-batch negative regularization tự nhiên.
+2. Một checkpoint và chênh lệch giữa hai tập query không chứng minh mô hình không overfit hoặc xác định nguyên nhân do weight decay, batch size hay số epoch. Thí nghiệm đối chứng Colab riêng dùng 1,024 train / 256 validation pairs, batch 16, ba epoch, seed 42 cho final validation probe loss 0.0263719251 (wd=0.0) và 0.0263708937 (wd=0.01). Chênh lệch khoảng 0.00000103 không chứng minh lợi ích regularization đáng kể, ý nghĩa thống kê hoặc tăng retrieval MRR. Xem `reports/ablation_regularization.md` và `reports/regularization_ablation/summary.json`; không trộn loss này với optimization loss của checkpoint CPU 30k pairs.
 
 ---
 
 ## 4. Phân tích Các Ca FT Thua Pretrained (Failure Analysis)
 
-Thống kê đối đầu chi tiết trên từng query giữa Fine-Tuned (E07) và Pretrained (E04) qua tập 500 queries validation:
+Thống kê đối đầu chi tiết trên từng query giữa Fine-Tuned (E08) và Pretrained (E04) qua tập 500 queries validation:
 - **Số query FT cải thiện thứ hạng (Improved):** **196 queries** (39.2%)
 - **Số query FT và E04 hòa nhau (Tied):** **274 queries** (54.8%)
 - **Số query FT thụt lùi so với E04 (Regressed - FT thua):** **30 queries** (6.0%)

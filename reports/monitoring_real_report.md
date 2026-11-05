@@ -1,7 +1,7 @@
-# Báo cáo Giám sát API & Mô hình từ Nhật ký Thực tế (Production Log)
+# Báo cáo Giám sát API & Mô hình từ Workload Kiểm thử Có Ghi Log
 
 **Người thực hiện:** Hiếu (Person 3) - Fine-tune, MLflow & Monitoring  
-**Môi trường:** Production API Simulation (ASGI Lifespan)  
+**Môi trường:** Scripted API test (ASGI Lifespan), không phải traffic production tự nhiên<br>
 **Khoảng thời gian:** 2026-11-01 03:38:07 UTC đến 2026-11-01 03:38:09 UTC  
 **Tổng số requests thực hiện:** 50 requests  
 **Mô hình phục vụ (Active Model):** `bm25` (Version: `1`, Bundle: `bm25-pilot-031c1bc0`)  
@@ -13,7 +13,7 @@
 
 > [!IMPORTANT]
 > **Hạn chế cốt lõi (Không có nhãn relevance):**
-> 1. Dữ liệu request log được thu thập tự nhiên từ phía người dùng gửi lên API, do đó **hoàn toàn không có nhãn đánh giá mức độ liên quan (human relevance labels)** hay nhãn ground truth tại thời điểm inference.
+> 1. Dữ liệu request log được tạo bằng script kiểm thử có chủ đích, không phải traffic người dùng tự nhiên. Phiên này dùng BM25 pilot, không phải FT/E08. Không có human relevance labels hay ground truth tại thời điểm inference; các kết quả không chứng minh chất lượng production.
 > 2. Các chỉ số kiểm định thống kê Kolmogorov-Smirnov (KS-test), độ trễ, và OOV Rate phản ánh sự **dịch chuyển phân phối dữ liệu đầu vào (Data Drift / Input Drift)** và **chất lượng vận hành hệ thống (System Health)**, chứ **KHÔNG THỂ suy diễn trực tiếp thành sự suy giảm độ chính xác tìm kiếm (Relevance Decay / nDCG degradation)**.
 > 3. Để đo lường suy giảm chất lượng thực sự, hệ thống cần cơ chế thu thập phản hồi người dùng (implicit click-through rates, add-to-favorites) hoặc đánh giá thủ công định kỳ theo quy trình pool judging.
 
@@ -82,8 +82,8 @@ Generated UTC: 2026-11-01 03:38:09Z
 2. **Dịch chuyển Phân phối Từ vựng (Vocabulary & OOV Drift):**
    - Tỉ lệ nguyên liệu ngoài tập từ vựng chuẩn (OOV Rate) ghi nhận ở mức **50.0%**.
    - Các nguyên liệu OOV xuất hiện trong phiên: `chicken` (2), `beef` (2), `pasta` (2), `pepper` (2), `chocolate` (2), `cheese` (2), `salt` (2), `lemon` (2).
-   - Ngưỡng cảnh báo OOV là > 5.0%, việc người dùng tìm kiếm các nguyên liệu mới lạ (dragonfruit, matcha, spirulina) là tín hiệu cho đội ngũ data thu thập thêm công thức cho chu kỳ huấn luyện kế tiếp.
+   - Ngưỡng cảnh báo OOV là > 5.0%; cảnh báo ở phiên này phản ánh workload và vocab tham chiếu của bài kiểm thử, không chứng minh người dùng production đang tìm nguyên liệu mới lạ.
 
 3. **Kiểm định Độ dài Truy vấn (Query Length KS-Test):**
    - Độ dài query trung bình thực tế: **3.60 nguyên liệu/query**.
-   - Kiểm định Kolmogorov-Smirnov 2-sample so với phân phối query tham chiếu cho thấy p-value = 0.0, phản ánh đúng tính chất hành vi tìm kiếm đa dạng.
+   - Kiểm định Kolmogorov-Smirnov 2-sample so với phân phối query tham chiếu có p-value làm tròn 0.0000; sự khác biệt phản ánh workload script, không phải bằng chứng hành vi người dùng tự nhiên.
