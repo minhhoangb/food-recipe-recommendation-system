@@ -351,4 +351,3 @@ and 88 independent second labels. The three assignment files record intended ann
 of completed annotation: every relevance field is still blank. Human relevance, agreement and
 pooled nDCG remain pending. The final manual pool and test retrieval metrics have not been run.
 
-The source, tests and release checklist for this stage are tracked in `docs/dev-evaluation-plan.md`.

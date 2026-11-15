@@ -1,7 +1,7 @@
 # Hoàng khung 4 evidence
 
 Branch: `final-evaluation-report`. This work covers Hoàng's final evaluation,
-manual-study coordination, model-development report and rubric/PR review.
+manual-study coordination, and model-development report.
 Hưng's Docker work and Hiếu's training/report corrections are outside this branch.
 
 | Item | Status | Evidence |
@@ -9,7 +9,6 @@ Hưng's Docker work and Hiếu's training/report corrections are outside this br
 | a Frozen E10 and Master Table | Complete | frozen_config.json, e10_execution.json, comparison_test.csv, master_comparison.csv/.md |
 | b Blind final pool and scoring workflow | Prepared; independent labels/adjudication pending | ../manual_eval/final/, manual_eval_status.json, ../../docs/final_annotation_workflow.md |
 | c Model-development report >=6 pages | Complete: 7 pages | ../report_part2_models.md and ../report_part2_models.pdf |
-| d Hiếu PR review and rubric map | Complete | ../../docs/reviews/hieu-khung4-pr20.md and ../../docs/rubric_checklist.md |
 
 ## Final evaluation
 

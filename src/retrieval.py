@@ -15,8 +15,8 @@ of top_k, capped by the corpus size) and re-sorts them with the contract order
 (score descending, ties by recipe_id ascending).
 
 A query has no title, so it is always encoded as an ingredient list. With an E05 bundle
-(title + ingredients) the query text is therefore not formatted like the documents; see
-`docs/HUNG_IMPLEMENTATION_PLAN.md` for that known limitation.
+(title + ingredients) the query text is therefore not formatted like the documents, a
+known limitation.
 """
 
 from __future__ import annotations
