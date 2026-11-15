@@ -8,9 +8,9 @@ Type the ingredients you have, get recipes that use them, with what you already 
 
 | Member | Student ID | Role |
 | --- | --- | --- |
-| TODO | TODO | Person 1: baselines, evaluation, analysis |
-| TODO | TODO | Person 2: embeddings, API, UI, Docker |
-| TODO | TODO | Person 3: fine-tuning, MLflow, monitoring |
+| Bùi Minh Hoàng | TODO | Baselines, evaluation, analysis |
+| Trần Tuấn Hưng | TODO | Embeddings, API, UI, Docker |
+| Hồ Minh Hiếu | TODO | Fine-tuning, MLflow, monitoring |
 
 ## Installation
 
