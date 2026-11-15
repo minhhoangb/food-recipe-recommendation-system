@@ -8,9 +8,9 @@ Type the ingredients you have, get recipes that use them, with what you already 
 
 | Member | Student ID | Role |
 | --- | --- | --- |
-| Bùi Minh Hoàng | TODO | Baselines, evaluation, analysis |
-| Trần Tuấn Hưng | TODO | Embeddings, API, UI, Docker |
-| Hồ Minh Hiếu | TODO | Fine-tuning, MLflow, monitoring |
+| Bùi Minh Hoàng | SE193392 | Baselines, evaluation, analysis |
+| Trần Tuấn Hưng | SE183526 | Embeddings, API, UI, Docker |
+| Hồ Minh Hiếu | SE193051 | Fine-tuning, MLflow, monitoring |
 
 ## Installation
 
