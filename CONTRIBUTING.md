@@ -24,9 +24,6 @@ Data is built once by the data owner. Everyone else only reads it. Never regener
 
 | Owner | Files |
 | --- | --- |
-| Person 1 | `src/features.py`, `src/pipeline.py`, `src/baseline.py`, `src/evaluate.py`, EDA notebooks, comparison and error analysis, manual labels |
-| Person 2 | `src/embeddings.py`, `src/retrieval.py`, `src/predict.py`, `src/benchmark.py`, `api/`, `fe/`, `Dockerfile`, `docker-compose.yml`, README run/API/Docker sections |
-| Person 3 | `src/build_pairs.py`, `src/finetune.py`, `src/train.py`, MLflow registry/aliases, `src/monitor.py`, Colab fine-tune notebook |
 | Shared (needs both other reviews) | `src/contracts.py`, `src/config.py`, `src/normalize.py`, `configs/*`, `src/data_collection.py`, `src/queries.py`, `src/preprocess.py` |
 
 A shared file may be edited by anyone through a PR that the two other members approve. If a change alters data output (normalization, sampling, splits), the data owner rebuilds and republishes the artifacts, and the PR says so.

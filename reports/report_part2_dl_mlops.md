@@ -1,6 +1,5 @@
 # BÁO CÁO PHẦN 2: DEEP LEARNING & MLOPS CHO HỆ THỐNG GỢI Ý CÔNG THỨC NẤU ĂN
 
-**Tác giả:** Hiếu (Person 3) - Fine-Tuning + MLflow + Monitoring<br>
 **Trạng thái:** `FINAL` | `AI-labeled`<br>
 **Cập nhật đối chiếu bằng chứng:** 2026-11-04<br>
 **Ghi nhận AI:** Bản gốc được đồng phát triển với Antigravity AI (Gemini 2.5 Flash / DeepMind); bản hiệu chỉnh được đối chiếu với các hiện vật đo lường trong repository bằng Codex. Việc hiệu chỉnh báo cáo không huấn luyện lại mô hình hay tạo thêm kết quả thực nghiệm.

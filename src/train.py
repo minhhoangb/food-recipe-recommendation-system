@@ -652,7 +652,7 @@ def _log_and_register_mlflow(
                 },
                 "embedding_dim": manifest.embedding_dim,
                 "experiment": "E07_finetuned" if cfg.data.profile == "pilot" else "E08_finetuned",
-                "owner": "Person 3 (Hiếu)",
+                "owner": "Hiếu",
                 "sprint": "sprint3",
             }
         )
@@ -689,7 +689,7 @@ def _log_and_register_mlflow(
             "mrr@10",
             str(result["metrics"].get("mrr@10", 0.0)),
         )
-        client.set_model_version_tag(model_registry_name, version_num, "owner", "Person 3 (Hiếu)")
+        client.set_model_version_tag(model_registry_name, version_num, "owner", "Hiếu")
         client.set_model_version_tag(model_registry_name, version_num, "status", "dev")
     except Exception as e:
         print(f"warning: MLflow model registration failed: {e}", file=sys.stderr)

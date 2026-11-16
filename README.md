@@ -116,9 +116,9 @@ Current sizes are in `data/processed/<profile>/dataset_manifest.json`.
 
 ## ML pipeline and models
 
-**TODO(Person 1/2/3)**: preprocessing/feature description, model list (E01-E10), tuning, results. Interfaces are fixed in `src/contracts.py` (`Retriever.search(ingredients, top_k) -> list[SearchHit]`).
+**TODO**: preprocessing/feature description, model list (E01-E10), tuning, results. Interfaces are fixed in `src/contracts.py` (`Retriever.search(ingredients, top_k) -> list[SearchHit]`).
 
-### Pretrained MiniLM encoder and dense retriever (Person 2)
+### Pretrained MiniLM encoder and dense retriever
 
 `src/embeddings.py` encodes the corpus with `sentence-transformers/all-MiniLM-L6-v2` on CPU,
 in batches, with `max_seq_length=128` and L2-normalised vectors. Two document
@@ -183,11 +183,11 @@ python -m src.evaluation --mode both --config configs/pilot.yaml --split validat
 python -m src.evaluation --mode both --split validation --out reports/e04_e05_pilot.md
 ```
 
-MLflow runs are stored in `mlflow.db` (git-ignored); open them with `mlflow ui`. Person 1's
+MLflow runs are stored in `mlflow.db` (git-ignored); open them with `mlflow ui`.
 `src/evaluate.py` owns the shared baseline evaluation; the metric conventions are the ones
 locked in `tests/test_ranking_metrics.py`.
 
-### Fine-tuning and training pipeline (Person 3)
+### Fine-tuning and training pipeline
 
 `src/build_pairs.py` builds training pairs from `train` recipes using `src.queries.make_query_ingredients` across multiple seeds (up to 10,000 pairs for pilot, 30,000 for main, seed 42) and Hưng's document representation (`src.embeddings.format_document`), outputting a manifest with SHA256 hashes. It also provides `NoDuplicateBatchSampler` ensuring no batch contains duplicate recipes or duplicate groups.
 
@@ -219,7 +219,7 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db
 - **Experiment:** `recipe-retrieval`; per-system evaluation run IDs are in `reports/comparison.csv`.
 - **Checkpoint provenance:** [reports/finetune_cpu1ep_provenance.json](reports/finetune_cpu1ep_provenance.json). This evaluation does not register or promote a model alias.
 
-#### Hand-off to Person 2 (Hưng): Indexing with Fine-Tuned Checkpoint
+#### Indexing with Fine-Tuned Checkpoint
 
 Pass the exported fine-tuned checkpoint bundle via `--model-path`:
 
@@ -231,7 +231,7 @@ python -m src.build_pairs --config configs/default.yaml --split train --mode ing
 python -m src.embeddings --config configs/default.yaml --model-path models/minilm_finetuned-main-cpu1ep
 ```
 
-### Production API & Model Monitoring (Person 3)
+### Production API & Model Monitoring
 
 `src/monitor.py` calculates statistical drift via SciPy Kolmogorov-Smirnov (KS 2-sample test, $\alpha=0.05$) and operational metrics over `RequestLogRecord` entries from API request logs:
 - **Query Length & Token Drift:** KS test comparing query length distributions against reference queries.
@@ -686,20 +686,20 @@ imitation UI screenshots.
 ## Repository structure
 
 ```
-api/            FastAPI app, request_log.py                    (Person 2)
+api/            FastAPI app, request_log.py
 configs/        default.yaml, pilot.yaml, production.yaml
 data/raw/       original CSV, never modified (git-ignored)
 data/processed/ corpus.jsonl, splits.json, queries.jsonl, qrels.jsonl, manifest per profile
-fe/             static web UI (index.html)                    (Person 2)
+fe/             static web UI (index.html)
 models/         serving bundles (git-ignored)
 notebooks/      00_colab_bootstrap.ipynb, 02_finetune_colab.ipynb, EDA
 reports/        figures, final report, monitoring_report.md, benchmark.json
                 manual_eval/  the dev judging pool and the annotation logs
 scripts/        verify_data.py, package_artifacts.py, fetch_artifacts.py
-                shoot_ui.py, check_parity.py, apply_labels.py  (Person 2)
+                shoot_ui.py, check_parity.py, apply_labels.py
 src/            contracts, config, utils, normalize, preprocess, data_collection, queries, reference
-                embeddings, retrieval, evaluation, memory, serving, benchmark  (Person 2)
-                build_pairs, finetune, train, monitor        (Person 3)
+                embeddings, retrieval, evaluation, memory, serving, benchmark
+                build_pairs, finetune, train, monitor
 tests/          pytest suite, tests/fixtures (hand-written, not RecipeNLG)
 docs/           implementation plans per owner
 Dockerfile      CPU-only image of the API

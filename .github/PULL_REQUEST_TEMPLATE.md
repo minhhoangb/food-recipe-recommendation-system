@@ -1,6 +1,6 @@
 ## What and why
 
-<!-- One or two sentences. Link the task row in the allocation sheet (e.g. "Person 2 / Task 4b"). -->
+<!-- One or two sentences. Link the task row in the allocation sheet (e.g. "Task 4b"). -->
 
 ## Evidence (real, not mocked)
 

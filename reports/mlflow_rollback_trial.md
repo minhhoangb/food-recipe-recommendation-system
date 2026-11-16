@@ -1,6 +1,5 @@
 # MLflow Model Registry: Aliases, Rollback Trial & Offline Serving
 
-**Thực hiện:** Hiếu (Person 3) - Fine-tune, MLflow & Monitoring
 **Mô hình:** `minilm_finetuned`
 **Backend Store:** `sqlite:///mlflow.db`
 **Thời gian thử nghiệm:** 2026-11-03 05:49:18 UTC
@@ -20,7 +19,7 @@ hai model có chất lượng khác nhau. Các revision tham chiếu snapshot bu
 | `@staging` | Model ứng viên (candidate) đang trong giai đoạn QA / kiểm thử tích hợp. | Staging (Version 1) |
 
 > **Quy ước nhãn (Tags) nộp bài:**
-> - `owner`: `Person 3 (Hiếu)`
+> - `owner`: `Hiếu`
 > - `environment`: `dev`
 > - `status`: `validated`
 

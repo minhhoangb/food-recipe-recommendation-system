@@ -4,7 +4,7 @@ DoD:
 - Alias staging and production clearly defined.
 - Rollback trial executed and recorded in reports/mlflow_rollback_trial.md.
 - Verifies offline API serving runs when MLflow tracking server is off.
-- Tags tagged with 'dev' and Person 3 ownership.
+- Tags tagged with 'dev' and owner tags.
 """
 
 from __future__ import annotations
@@ -52,9 +52,9 @@ def run_trial(bootstrap: bool = False) -> Path:
     rm = client.get_registered_model(model_name)
     versions = client.search_model_versions(f"name='{model_name}'")
 
-    # Ensure Person 3 tags are present
+    # Ensure owner tags are present
     for v in versions:
-        client.set_model_version_tag(model_name, v.version, "owner", "Person 3 (Hiếu)")
+        client.set_model_version_tag(model_name, v.version, "owner", "Hiếu")
         client.set_model_version_tag(model_name, v.version, "environment", "dev")
         client.set_model_version_tag(model_name, v.version, "status", "validated")
 
@@ -109,7 +109,6 @@ def run_trial(bootstrap: bool = False) -> Path:
     report_path = REPO_ROOT / "reports" / "mlflow_rollback_trial.md"
     content = f"""# MLflow Model Registry: Aliases, Rollback Trial & Offline Serving
 
-**Thực hiện:** Hiếu (Person 3) - Fine-tune, MLflow & Monitoring  
 **Mô hình:** `{model_name}`  
 **Backend Store:** `sqlite:///mlflow.db`  
 **Thời gian thử nghiệm:** {rollback_time}  
@@ -129,7 +128,7 @@ hai model có chất lượng khác nhau. Các revision tham chiếu snapshot bu
 | `@staging` | Model ứng viên (candidate) đang trong giai đoạn QA / kiểm thử tích hợp. | Staging (Version {v_staging_initial}) |
 
 > **Quy ước nhãn (Tags) nộp bài:**
-> - `owner`: `Person 3 (Hiếu)`
+> - `owner`: `Hiếu`
 > - `environment`: `dev`
 > - `status`: `validated`
 

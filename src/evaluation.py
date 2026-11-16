@@ -7,7 +7,7 @@ queries, qrels, model checkpoint, retrieval settings) is identical so the two nu
 comparable. Metrics come from `ranx` (Recall@5, Recall@10, MRR@10) with the conventions
 locked in `tests/test_ranking_metrics.py`.
 
-`src/evaluate.py` belongs to Person 1 (Hoàng). When it is merged this module delegates to
+When `src/evaluate.py` is merged this module delegates to
 it (`evaluate_retriever`, `load_split` keep the same signatures), so the two implementations
 cannot drift apart.
 """
@@ -37,7 +37,7 @@ MODES = ("ingredients", "title_ingredients")
 
 
 def _shared() -> Any | None:
-    """Person 1's `src.evaluate` when it is merged; None otherwise.
+    """The `src.evaluate` when it is merged; None otherwise.
 
     Both modules implement the same metric conventions, so the shared one is preferred as
     soon as it exists and the local copy is only the fallback until then.

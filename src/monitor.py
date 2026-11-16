@@ -585,7 +585,6 @@ def format_html_report(metrics: dict[str, Any]) -> str:
                 <h1>Hệ Thống Giám Sát API & Phát Hiện Data Drift</h1>
                 <div class="timestamp">
                     Sinh lúc UTC: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%SZ')}
-                    | Vai trò: Hiếu (Person 3)
                 </div>
             </div>
             <div>

@@ -1,6 +1,5 @@
 # Báo cáo Phân tích Fine-Tuning & Khóa Model Manifest
 
-**Người thực hiện:** Hiếu (Person 3) - Fine-tune, MLflow & Monitoring  
 **Trạng thái nhãn:** `FINAL` | `AI-labeled`  
 **Ghi chú nguồn gốc AI:** Bản báo cáo được soạn thảo với sự cộng tác của Antigravity AI (Gemini 2.5 Flash / DeepMind). Mọi số liệu thực nghiệm được truy nguyên trực tiếp từ log và MLflow registry nội bộ.  
 **Ngày khóa:** 2026-11-01  

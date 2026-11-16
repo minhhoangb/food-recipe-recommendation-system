@@ -87,7 +87,7 @@ The rerank is still useful for the product: "you have chicken and rice, here are
 recipes you can cook tonight" is a different question from "here is the recipe this
 query came from". It is therefore **off by default** (`rerank="none"` in
 `src/predict.py`, `MissingFirstRetriever` is opt-in) and the metrics above document
-what it costs. The final ranking should be judged with manual labels (Person 1), not
+what it costs. The final ranking should be judged with manual labels, not
 with the origin-recipe proxy.
 
 ## (d) Docker

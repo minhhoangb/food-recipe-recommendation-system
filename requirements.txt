@@ -1,8 +1,8 @@
 # Pinned and tested together in a clean venv (Python 3.14.7). Python 3.11/3.12 also fine.
 # We prefer a library over hand-written code: metrics=ranx, split=scikit-learn, groups=scipy,
 # config=omegaconf, ingredient parsing=ingredient-parser-nlp, plurals=inflect, download=pooch.
-# Owners append their own pinned lines after testing them (Person 1 already added rank-bm25 and matplotlib;
-# Person 2: sentence-transformers, torch (CPU), fastapi, uvicorn, joblib; Person 3: training extras).
+# Owners append their own pinned lines after testing them (rank-bm25 and matplotlib;
+# sentence-transformers, torch (CPU), fastapi, uvicorn, joblib; training extras).
 numpy==2.5.3
 pandas==3.0.5
 pydantic==2.13.5
@@ -22,7 +22,7 @@ pytest==9.1.1
 pytest-cov==7.0.0
 ruff==0.17.0
 
-# Person 2 (Hưng): pretrained MiniLM encoder + dense retrieval + the API.
+# Pretrained MiniLM encoder + dense retrieval + the API.
 # torch is the CPU build; install it from the CPU index (see README, Installation):
 #   pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu
 # The line below installs the default (CUDA) wheel on Linux; the CPU index is only needed
@@ -33,7 +33,7 @@ fastapi==0.162.0
 uvicorn==0.54.0
 httpx==0.28.1
 
-# Person 3 (Hiếu): fine-tuning, Trainer and dataset utilities (only needed for training).
+# Fine-tuning, Trainer and dataset utilities (only needed for training).
 # datasets stays below 5: datasets>=5.1 needs huggingface-hub>=1.31 while transformers 4.x
 # (required by sentence-transformers 5.1.2) needs <1.0. 4.8.5 + transformers 4.57.6 + hub 0.36.2
 # was used for the CPU fine-tuning run (sentence-transformers' fit() imports datasets).

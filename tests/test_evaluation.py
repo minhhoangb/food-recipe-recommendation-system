@@ -104,7 +104,7 @@ def test_comparison_table_contains_the_measured_numbers():
 
 
 def test_evaluation_module_does_not_shadow_hoangs_module():
-    """src.evaluate belongs to Person 1; this module must not replace it."""
+    """src.evaluate is a separate module; this module must not replace it."""
     import src.evaluation as evaluation
 
     assert evaluation.__name__ == "src.evaluation"

@@ -1,6 +1,6 @@
 # Demo runbook — 5 phút
 
-Bài thuyết trình của Hưng (Person 2): Docker từ clone sạch, API, UI và kiểm chứng.
+Bài thuyết trình: Docker từ clone sạch, API, UI và kiểm chứng.
 
 Mọi lệnh trong runbook này **đã chạy thật** trên máy dự án (Windows, PowerShell). Trên
 Linux/macOS thay `set X=...` bằng `export X=...` và dùng `\` thay vì dấu gạch nối dòng.

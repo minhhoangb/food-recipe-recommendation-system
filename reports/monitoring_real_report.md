@@ -1,6 +1,5 @@
 # Báo cáo Giám sát API & Mô hình từ Workload Kiểm thử Có Ghi Log
 
-**Người thực hiện:** Hiếu (Person 3) - Fine-tune, MLflow & Monitoring  
 **Môi trường:** Scripted API test (ASGI Lifespan), không phải traffic production tự nhiên<br>
 **Khoảng thời gian:** 2026-11-01 03:38:07 UTC đến 2026-11-01 03:38:09 UTC  
 **Tổng số requests thực hiện:** 50 requests  

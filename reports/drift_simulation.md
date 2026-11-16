@@ -1,6 +1,5 @@
 # Báo Cáo Kịch Bản Mô Phỏng Giám Sát & Data Drift (Simulation)
 
-**Người thực hiện:** Hiếu (Person 3) - Vai trò: Fine-tune + MLflow + Monitoring  
 **Mục tiêu:** Kiểm nghiệm năng lực phát hiện dịch chuyển dữ liệu (Data Drift) của `src/monitor.py` qua 2 kịch bản độc lập (có dịch chuyển và không dịch chuyển).
 
 > **LƯU Ý QUAN TRỌNG VỀ PHẠM VI:**  

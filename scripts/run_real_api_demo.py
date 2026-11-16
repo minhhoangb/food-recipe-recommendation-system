@@ -212,7 +212,6 @@ def run_demo() -> None:
 
     full_md = f"""# Báo cáo Giám sát API & Mô hình từ Nhật ký Thực tế (Production Log)
 
-**Người thực hiện:** Hiếu (Person 3) - Fine-tune, MLflow & Monitoring  
 **Môi trường:** Production API Simulation (ASGI Lifespan)  
 **Khoảng thời gian:** {time_str}  
 **Tổng số requests thực hiện:** {len(records)} requests  

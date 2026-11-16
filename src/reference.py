@@ -3,7 +3,7 @@
 Not one of the compared models. It exists so the API, UI, evaluator and monitor can be built and
 tested against REAL data from day one, and as the executable example of the Retriever contract.
 IDF is fit on the whole candidate corpus (transductive), which is fine for a reference; the
-tuned, train-only baseline is Person 1's `src/baseline.py`.
+tuned, train-only baseline is `src/baseline.py`.
 """
 
 from __future__ import annotations

@@ -2,7 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "manifest_version": "1.0.0",
   "locked_utc": "2026-11-01T03:40:00Z",
-  "author": "Hiếu (Person 3) - Fine-tune + MLflow + Monitoring",
   "ai_attribution": "Co-authored with Antigravity AI (Gemini 2.5 Flash / DeepMind)",
   "checkpoint": {
     "name": "minilm_finetuned-main-cpu1ep",
