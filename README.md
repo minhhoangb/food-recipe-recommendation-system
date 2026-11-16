@@ -2,7 +2,7 @@
 
 Type the ingredients you have, get recipes that use them, with what you already have and what is still missing. Ingredient-list retrieval on the RecipeNLG corpus (English only), comparing TF-IDF / BM25 / LSA baselines with a pretrained and a fine-tuned `all-MiniLM-L6-v2` encoder, served by a FastAPI app with a small web UI.
 
-> Status: the shared foundation (data, contracts, metrics, tooling) is done. Sections marked **TODO(owner)** are filled in by their owner as the work lands. Do not put numbers here that do not come from an MLflow run.
+**Production model:** BM25 (E03), selected on validation before the final test run (E10). Test MRR@10 0.7766, Recall@10 0.909 on 1,000 test queries.
 
 ## Team
 
@@ -12,747 +12,170 @@ Type the ingredients you have, get recipes that use them, with what you already 
 | Trần Tuấn Hưng | SE183526 | Embeddings, API, UI, Docker |
 | Hồ Minh Hiếu | SE193051 | Fine-tuning, MLflow, monitoring |
 
-## Installation
+## Quick start
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate          # Windows; Linux/macOS: source .venv/bin/activate
+.venv\Scripts\activate                 # Linux/macOS: source .venv/bin/activate
 pip install -r requirements.txt
 python -m pytest
-```
 
-`requirements.txt` has everything, the training stack included. `requirements-serve.txt` is
-the same list without the training extras (`accelerate`, `datasets`): those two cannot be
-installed next to `transformers` — `datasets>=5.1` needs `huggingface-hub>=1.31` while
-`transformers` needs `<1.0` — so the Docker image installs the serving list instead.
-
-```bash
-pip install -r requirements-serve.txt     # only what the API needs
-```
-
-Python 3.11 or 3.12 is recommended for the model work. Serving and training dependencies are appended to `requirements.txt` by their owners after testing (**TODO(owner)**).
-
-### CPU-only torch (needed for the MiniLM encoder)
-
-`requirements.txt` pins `torch` and `sentence-transformers`. On Linux the default `torch`
-wheel bundles CUDA; to keep the environment small and CPU-only, install torch from the CPU
-index **before** the rest of the requirements:
-
-```bash
-pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu
-pip install -r requirements.txt
-```
-
-On Windows and macOS the default torch wheel is already CPU-only, so `pip install -r
-requirements.txt` is enough. Everything in this project runs on CPU; CUDA is never
-required. Google Colab works the same way:
-
-```bash
-%pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu
-%pip install -r requirements.txt
-```
-
-The first run downloads the pretrained weights (~90 MB) into the Hugging Face cache; after
-that the pipeline is offline. `src/embeddings.py` and `src/retrieval.py` never ask for
-CUDA (`device="cpu"`), so Colab's CPU runtime is enough.
-
-### Getting the data and the serving bundle
-
-The API needs two things on disk: the processed corpus and the serving bundle. Both are
-**not** in git, so a clean clone starts without them.
-
-```bash
-# 1. the processed corpus (see the Dataset section below)
-python scripts/fetch_artifacts.py      # or: python -m src.data_collection --raw-path <csv>
+python scripts/fetch_artifacts.py      # processed corpus (GitHub Release, sha256-checked)
 python scripts/verify_data.py
-
-# 2. build the selected BM25 serving bundle (no encoder download)
-python -m src.baseline --config configs/default.yaml --model bm25
-
-# 3. serve the production config
-uvicorn api.app:app --host 127.0.0.1 --port 8000
+python -m src.baseline --config configs/default.yaml --model bm25   # builds models/bm25-main-1f1f4ce5/
+uvicorn api.app:app --host 127.0.0.1 --port 8000                    # UI on http://127.0.0.1:8000/
 ```
 
-Step 2 writes `models/bm25-main-1f1f4ce5/`, which is selected by
-`configs/production.yaml`. The shared ZIP is hosted on GitHub Releases and checked
-against `artifacts.sha256` before extraction. `verify_data.py` then checks both
-profiles, file hashes and split/group isolation.
-
-The complete archived `models/` directory is also available as an optional
-[GitHub Release download](docs/shared_model_artifacts.md), with a SHA-256 and
-per-file inventory. The repository includes a versioned `mlflow.db` snapshot for
-viewing run history; `mlruns/` artifacts are separate.
-
-> **Windows note:** if pip fails with *"An Application Control policy has blocked this
-> file"*, the wheels were downloaded with the Mark-of-the-Web flag. Run
-> `Get-ChildItem .venv -Recurse -Include *.pyd,*.dll | Unblock-File` once after the install.
+- Python 3.11 or 3.12. Everything runs on CPU; CUDA is never required.
+- `requirements.txt` is the full stack (serving + training: `torch` 2.9.1, `sentence-transformers` 5.1.2, `fastapi`, `mlflow`, `rank-bm25`, `accelerate`, `datasets`). `requirements-serve.txt` is the serving subset used by the Docker image.
+- On Linux, install the CPU torch wheel first to avoid pulling CUDA: `pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu`. The default wheel on Windows/macOS is already CPU-only.
+- The first MiniLM use downloads ~90 MB of weights into the Hugging Face cache.
+- The full `models/` directory is available as an optional [GitHub Release download](docs/shared_model_artifacts.md).
+- **Windows:** if pip reports *"An Application Control policy has blocked this file"*, run `Get-ChildItem .venv -Recurse -Include *.pyd,*.dll | Unblock-File`.
 
 ## Dataset
 
-- **RecipeNLG** (Bien et al., INLG 2020), about 2.23 million recipes, 7 columns: `title, ingredients, directions, link, source, NER` plus an index. Project page: https://recipenlg.cs.put.poznan.pl/ (also mirrored on Kaggle). Read the dataset's own terms of use before redistributing anything; this repository does not redistribute the raw file and no licence has been assumed here.
-- The raw CSV (2.2 GB) goes to `data/raw/RecipeNLG_dataset.csv` and is never modified. You can also point to it with `--raw-path` or the `RECIPENLG_RAW` environment variable.
-- We use a seeded random subset: **50,000 recipes** (`main`) and its first **5,000** (`pilot`, a nested subset with identical splits). Sampling is a seeded permutation of every raw id over the *whole* file; the file is sorted by source, so taking the first rows would be biased.
+- **RecipeNLG** (Bien et al., INLG 2020), ~2.23M recipes: https://recipenlg.cs.put.poznan.pl/. The raw CSV (2.2 GB) goes to `data/raw/RecipeNLG_dataset.csv` (or `--raw-path` / `RECIPENLG_RAW`) and is never modified or redistributed.
+- Seeded random subsets: **main** (50,000 recipes) and **pilot** (its first 5,000, same splits).
+- Rebuild from the raw CSV instead of downloading (about 1 minute, identical hashes): `python -m src.data_collection --raw-path data/raw/RecipeNLG_dataset.csv`.
 
-Get the processed data one of two ways:
+Pipeline (`src/data_collection.py`, `src/normalize.py`):
 
-```bash
-# A) download the shared zip (URL + sha256 are set in configs/default.yaml by the data owner)
-python scripts/fetch_artifacts.py
-# B) build it yourself from the raw CSV (about 1 minute); corpus/splits/queries/qrels are identical
-#    (compare the file hashes in dataset_manifest.json; only its created_utc differs)
-python -m src.data_collection --raw-path data/raw/RecipeNLG_dataset.csv
-python scripts/verify_data.py
-```
+1. Safe parsing of stringified lists (JSON, then `ast.literal_eval`); dropped rows are counted per reason in `dataset_manifest.json`.
+2. Ingredient normalisation with `ingredient-parser-nlp` + `inflect` (quantities, units and preparation words removed; multi-word names kept).
+3. Exact duplicates removed; recipes with the same ingredient set or title are grouped, and groups never cross splits.
+4. `GroupShuffleSplit` (seed 42): ~72% train, 8% validation, 20% test.
+5. Synthetic queries: 2–6 ingredients from a recipe, at least one hidden. The only positive is the origin recipe, so Recall/MRR are an *origin-recipe retrieval proxy*, not human relevance.
 
-### What the pipeline does
+## Models and experiments
 
-1. Safe parsing of the stringified lists (JSON, then `ast.literal_eval`; never `eval`). Rows with missing or malformed fields are dropped and counted per reason in `dataset_manifest.json`.
-2. Ingredient normalisation (`src/normalize.py`): `ingredient-parser-nlp` removes quantities, units and preparation words, `inflect` singularises, multi-word names are kept (`chicken stock` is not `chicken breast`). The NER column is the primary source, raw lines are the fallback. First import downloads one small NLTK resource (needs internet once; in Docker run `python -c "import ingredient_parser"` at build time).
-3. Exact duplicate removal, then grouping recipes with an identical ingredient set or identical title (scipy connected components). Groups never cross splits. Limitation: no all-pairs similarity, so near-duplicates with different titles and ingredients stay separate.
-4. Group-wise split with scikit-learn `GroupShuffleSplit`: about 20% test, 8% validation, 72% train (seed 42; fractions apply to groups, so recipe shares are approximate).
-5. Synthetic queries: 2-6 ingredients sampled from a recipe with at least one hidden, always containing at least one non-common ingredient (document frequency <= 2%). The only known positive is the origin recipe, so Recall/MRR on these queries are an *origin-recipe retrieval proxy*, not a relevance score.
+All retrievers implement `Retriever.search(ingredients, top_k) -> list[SearchHit]` (`src/contracts.py`). Metrics are computed with `ranx` and logged to MLflow (experiment `recipe-retrieval`).
 
-Current sizes are in `data/processed/<profile>/dataset_manifest.json`.
-
-## ML pipeline and models
-
-**TODO**: preprocessing/feature description, model list (E01-E10), tuning, results. Interfaces are fixed in `src/contracts.py` (`Retriever.search(ingredients, top_k) -> list[SearchHit]`).
-
-### Pretrained MiniLM encoder and dense retriever
-
-`src/embeddings.py` encodes the corpus with `sentence-transformers/all-MiniLM-L6-v2` on CPU,
-in batches, with `max_seq_length=128` and L2-normalised vectors. Two document
-representations are supported:
-
-| Mode | Label | Embedded text |
+| ID | System | How it is built |
 | --- | --- | --- |
-| `ingredients` | E04 | `"garlic, rice, olive oil"` |
-| `title_ingredients` | E05 | `"Garlic Chicken. Ingredients: garlic, rice, olive oil"` |
+| E01 | TF-IDF | `python -m src.baseline --model tfidf` (sklearn defaults, ingredient tokens) |
+| E02 | TF-IDF tuned | `python -m src.tune` — GridSearchCV + GroupKFold(5), 24 grid points; the best point equals the E01 defaults |
+| E03 | **BM25** (selected) | `python -m src.baseline --model bm25` (`rank-bm25`) |
+| LSA | TF-IDF + TruncatedSVD | `python -m src.baseline --model lsa` (up to 256 components) |
+| E04 | MiniLM pretrained, ingredients | `python -m src.embeddings --mode ingredients` |
+| E05 | MiniLM pretrained, title + ingredients | `python -m src.embeddings --mode title_ingredients` |
+| E06 | Missing-first rerank (ablation) | off by default; costs 34% relative Recall@10 on main ([report](reports/e04_e05_main_benchmark.md)) |
+| E07 | Fine-tuning on pilot | `notebooks/02_finetune_colab.ipynb` (MultipleNegativesRankingLoss, Colab GPU) |
+| E08 / FT | Fine-tuning on main | `python -m src.finetune` — 30,000 pairs, 1 epoch, batch 32, lr 2e-5 on CPU ([report](reports/e07_e08_finetune_main.md)) |
+| E09 | Regularisation ablation | weight decay 0.0 vs 0.01 ([report](reports/ablation_regularization.md)) |
+| E10 | Final test evaluation | one frozen run over all seven systems, 1,000 test queries ([evidence](reports/final)) |
+
+### Results (main corpus, MRR@10)
+
+| Model | Train | Validation | Test | CV (GroupKFold 5) |
+|---|---:|---:|---:|---|
+| E01 TF-IDF | 0.6998 | 0.6567 | 0.6649 | 0.6896 ± 0.0063 |
+| E02 TF-IDF tuned | 0.6998 | 0.6567 | 0.6649 | 0.6896 ± 0.0063 |
+| **E03 BM25** | 0.7687 | **0.7583** | **0.7766** | N/A (no fitting) |
+| LSA | 0.3402 | 0.3629 | 0.3424 | 0.3560 ± 0.0095 |
+| E04 MiniLM pretrained | 0.4575 | 0.4342 | 0.4752 | N/A (pretrained) |
+| E05 MiniLM title + ingr. | 0.1808 | 0.1519 | 0.1989 | N/A (pretrained) |
+| FT MiniLM fine-tuned | 0.6450 | 0.6209 | 0.6368 | N/A (one checkpoint) |
+
+- Fine-tuning lifts MiniLM by +43% MRR@10 on validation (0.434 → 0.621), but BM25 stays ahead on this proxy.
+- Recall, run IDs and timings: [reports/comparison.csv](reports/comparison.csv) and [reports/final/master_comparison.csv](reports/final/master_comparison.csv). Significance tests: [reports/final/significance_test_export.json](reports/final/significance_test_export.json). Error analysis: [reports/error_analysis.md](reports/error_analysis.md).
+- The human relevance study (388 query–recipe pairs, 20 queries) is prepared but the labels are still pending; see [docs/final_annotation_workflow.md](docs/final_annotation_workflow.md).
+
+### Dense retrieval and fine-tuning
+
+- `src/embeddings.py` encodes the corpus on CPU (`max_seq_length=128`, L2-normalised) into a bundle: `embeddings.npy`, `recipe_ids.json`, `manifest.json`. Loading a bundle checks every hash and invariant and raises `BundleError` on a mismatch.
+- `src/build_pairs.py` builds training pairs from `train` recipes only. Fine-tuned bundles package their `encoder/`, so the API and the evaluator load the fine-tuned weights:
 
 ```bash
-# E04 bundle -> models/minilm_pretrained-E04-main-<corpus-sha8>/  (the production bundle)
-python -m src.embeddings --config configs/default.yaml --mode ingredients
-# E05 bundle
-python -m src.embeddings --config configs/default.yaml --mode title_ingredients
-# the pilot corpus instead
-python -m src.embeddings --config configs/pilot.yaml --mode ingredients
+python -m src.build_pairs --config configs/default.yaml --split train --mode ingredients --max-pairs 30000 --seed 42
+python -m src.embeddings --config configs/default.yaml --model-path models/minilm_finetuned-main-cpu1ep
+python -m src.evaluation --mode both --split validation
 ```
 
-Each bundle holds `embeddings.npy` (float32, one row per recipe, L2-normalised),
-`recipe_ids.json` (the same order) and `manifest.json` (a `BundleManifest` plus the
-embedding mode, `max_seq_length`, the truncated-document count and the measured encode
-time). The bundles live under `models/` and are **not** committed to git.
+- End-to-end training with caching: `python src/train.py --config configs/pilot.yaml` (`--stage`, `--from-stage`, `--force`, `--device cpu`).
 
-### The config profiles
+## Configs
 
 | File | Corpus | Serving bundle |
 | --- | --- | --- |
-| `configs/default.yaml` | main (50.000 recipes) | none (the reference TF-IDF retriever) |
-| `configs/pilot.yaml` | pilot (5.000 recipes, a subset of main) | none |
-| `configs/production.yaml` | main (50.000 recipes) | `models/bm25-main-1f1f4ce5` (E03, selected) |
+| `configs/default.yaml` | main | none (reference TF-IDF) |
+| `configs/pilot.yaml` | pilot | none |
+| `configs/production.yaml` | main | `models/bm25-main-1f1f4ce5` (E03) |
 
-`configs/default.yaml` is the base every other file is merged over. `configs/pilot.yaml`
-and `configs/production.yaml` only change what they need, so a new profile stays short.
+`default.yaml` is the base; the other profiles only override what changes. Seed 42 everywhere.
 
-`src/retrieval.py` loads a bundle and searches it by cosine similarity
-(`sentence_transformers.util.semantic_search` over normalised vectors). The corpus is
-never re-encoded: only the query goes through the model. Results follow the Retriever
-contract: at most `top_k` hits, score descending, ties broken by `recipe_id` ascending.
+## API
 
-```python
-from src.retrieval import DenseRetriever
-
-retriever = DenseRetriever.from_bundle("models/minilm_pretrained-E04-pilot-<sha8>")
-for hit in retriever.search(["chicken", "rice"], 5):
-    print(hit.recipe_id, hit.score)
-```
-
-Loading a bundle verifies every invariant the manifest declares (file hashes, recipe id
-order, vector count, embedding dimension, normalisation) and raises a `BundleError` that
-names the broken invariant.
-
-### E04 / E05 evaluation
-
-`src/evaluation.py` embeds (or reuses a bundle), retrieves and scores the validation split
-with `ranx` (Recall@5, Recall@10, MRR@10), then logs the run to MLflow with the model,
-the embedding mode, the corpus id, the measured encode time, the CPU cold-load time and
-the peak RAM.
-
-```bash
-python -m src.evaluation --mode both --config configs/pilot.yaml --split validation
-python -m src.evaluation --mode both --split validation --out reports/e04_e05_pilot.md
-```
-
-MLflow runs are stored in `mlflow.db` (git-ignored); open them with `mlflow ui`.
-`src/evaluate.py` owns the shared baseline evaluation; the metric conventions are the ones
-locked in `tests/test_ranking_metrics.py`.
-
-### Fine-tuning and training pipeline
-
-`src/build_pairs.py` builds training pairs from `train` recipes using `src.queries.make_query_ingredients` across multiple seeds (up to 10,000 pairs for pilot, 30,000 for main, seed 42) and Hưng's document representation (`src.embeddings.format_document`), outputting a manifest with SHA256 hashes. It also provides `NoDuplicateBatchSampler` ensuring no batch contains duplicate recipes or duplicate groups.
-
-- **Pilot Fine-Tuning**: `notebooks/02_finetune_colab.ipynb` runs pilot fine-tuning on Colab GPU with `SentenceTransformerTrainer` + `MultipleNegativesRankingLoss`, evaluates every epoch with `InformationRetrievalEvaluator` (MRR@10), demonstrates `save_steps` checkpointing and `resume_from_checkpoint`, and exports the model.
-- **Main CPU run (2026-10-29)**: `src/finetune.py` trained one epoch on 30,000 train pairs (batch 32, lr 2e-5). The checkpoint is `models/minilm_finetuned-main-cpu1ep`; measured validation results and MLflow IDs are in [reports/e07_e08_finetune_main.md](reports/e07_e08_finetune_main.md). The current training loader shuffles pairs; it does not use the available `NoDuplicateBatchSampler`.
-- **Controlled ablation notebook**: `notebooks/04_regularization_controlled_colab.ipynb` compares weight decay 0.0 and 0.01 with otherwise identical settings. The measured Colab T4 run and its limits are recorded in [the ablation report](reports/ablation_regularization.md). The broader checkpoint-selection workflow remains in `03_finetune_main_ablation.ipynb`.
-
-#### Main validation: pretrained vs CPU one-epoch fine-tuned MiniLM
-
-Measured on `main` validation (500 queries over 50,000 recipes) using synthetic origin-recipe qrels. FT queries and corpus vectors use the same checkpoint. No test retrieval metrics were computed.
-
-| Exp ID | Pipeline Description | Recall@5 | Recall@10 | MRR@10 | Delta vs Baseline |
-|---|---|---|---|---|---|
-| **E04** | Pretrained MiniLM, ingredients | 0.5120 | 0.5760 | 0.4342 | Baseline |
-| **FT (E08)** | Fine-tuned MiniLM on main, ingredients, CPU one epoch | **0.7340** | **0.7980** | **0.6209** | **+43.0% MRR@10 (+0.1867)** |
-| **E05** | Pretrained MiniLM, title + ingredients | 0.2140 | 0.2620 | 0.1519 | Different representation |
-
-Experiment ids follow the team contract (E07 = pilot fine-tuning, E08 = main fine-tuning). No fine-tuned title + ingredients bundle and no hybrid pipeline were evaluated in this run. BM25 remains above FT on this proxy (MRR@10 0.7583). See [the full comparison](reports/comparison.csv), [error analysis](reports/error_analysis.md) and [dev judging assignments](reports/manual_eval/README.md).
-
-#### MLflow Tracking & Model Registry
-
-Evaluation runs, the imported historical training log, and report artifacts are stored in the local SQLite backend:
-
-```bash
-# Launch MLflow UI to inspect runs and model registry
-mlflow ui --backend-store-uri sqlite:///mlflow.db
-```
-
-- **Experiment:** `recipe-retrieval`; per-system evaluation run IDs are in `reports/comparison.csv`.
-- **Checkpoint provenance:** [reports/finetune_cpu1ep_provenance.json](reports/finetune_cpu1ep_provenance.json). This evaluation does not register or promote a model alias.
-
-#### Indexing with Fine-Tuned Checkpoint
-
-Pass the exported fine-tuned checkpoint bundle via `--model-path`:
-
-```bash
-# 1. Build training pairs on main (30,000 pairs, seed 42)
-python -m src.build_pairs --config configs/default.yaml --split train --mode ingredients --max-pairs 30000 --seed 42
-
-# 2. Build index bundle using the CPU one-epoch checkpoint (FT / E08)
-python -m src.embeddings --config configs/default.yaml --model-path models/minilm_finetuned-main-cpu1ep
-```
-
-### Production API & Model Monitoring
-
-`src/monitor.py` calculates statistical drift via SciPy Kolmogorov-Smirnov (KS 2-sample test, $\alpha=0.05$) and operational metrics over `RequestLogRecord` entries from API request logs:
-- **Query Length & Token Drift:** KS test comparing query length distributions against reference queries.
-- **OOV (Out-Of-Vocabulary) Ingredients:** Percentage of requested ingredients not in training vocabulary (drift threshold > 5%).
-- **Missing Ingredients & Latency:** p50/p95/p99 latency (ms), zero-hit rate, and system error rate (threshold > 5%).
-- **Sample Sufficiency:** Returns `INSUFFICIENT_DATA` if sample size < `min_samples` (default: 10) instead of false positives.
-- **HTML & Markdown Reporting:** Generates a standalone, dark-themed HTML report with simulation disclaimers:
-
-```bash
-# Monitor drift against reference queries and export HTML report
-python -m src.monitor --reference data/processed/pilot/queries.jsonl --requests logs/simulated_requests_drift.jsonl --out reports/monitoring_report.html
-
-# Run simulated drift scenarios (no-drift vs drifted)
-python scripts/simulate_drift.py
-```
-
-*See simulation reports and analysis in [reports/drift_simulation.md](reports/drift_simulation.md), [reports/monitoring_nodrift_simulation.html](reports/monitoring_nodrift_simulation.html), and [reports/monitoring_drift_simulation.html](reports/monitoring_drift_simulation.html).*
-
-#### MLflow Model Registry & Instant Rollback
-
-The model registry uses aliases to manage deployments cleanly without redeploying code:
-- `@production`: Active model serving live user traffic (Version 2).
-- `@staging`: Candidate model undergoing validation/QA (Version 1).
-- **Offline Serving Decoupling:** Serving bundles (`models/<bundle_name>`) hold static `embeddings.npy` and `manifest.json`. The API (`src.serving` / `api.app`) runs independently without requiring an active MLflow tracking server.
-- **Single-command Rollback:**
-  ```bash
-  # Rollback @production alias to Version 1
-  python -m src.train --rollback 1 --alias production
-  ```
-*Detailed trial execution and SOP documented in [reports/mlflow_rollback_trial.md](reports/mlflow_rollback_trial.md).*
-
-## Experiment results (Master Comparison Table)
-
-| Model | Train MRR@10 | Test MRR@10 | CV MRR@10 | Training/index s | Tuned? | Notes |
-|---|---:|---:|---|---:|---|---|
-| E01 tfidf | 0.6998 | 0.6649 | 0.6896 ± 0.0063 | 28.024 | no |  |
-| E02 tfidf | 0.6998 | 0.6649 | 0.6896 ± 0.0063 | 33.988 | yes (GroupKFold CV5) |  |
-| E03* bm25 | 0.7687 | 0.7766 | N/A | 25.658 | no | Selected before test; N/A: rank-bm25 indexes every candidate (transductive IDF), nothing is fitted on train |
-| LSA lsa | 0.3402 | 0.3424 | 0.3560 ± 0.0095 | 51.638 | no |  |
-| E04 minilm_pretrained | 0.4575 | 0.4752 | N/A | 0.000 | no | N/A: pretrained encoder, nothing is fitted on our data |
-| E05 minilm_pretrained | 0.1808 | 0.1989 | N/A | 0.000 | no | N/A: pretrained encoder, nothing is fitted on our data |
-| FT minilm_finetuned | 0.6450 | 0.6368 | N/A | 871.336 | fine-tuned (MNRL) | N/A: one fixed one-epoch checkpoint, not cross-validated |
-
-* = selected for deployment using validation before E10. Train and test are origin-recipe retrieval proxies, not human relevance. Train/Validation/Test, training-time and CV run IDs are in `master_comparison.csv`. Training/index/encoding times have different meanings and hardware; do not rank their speed.
-
-Frozen protocol and one-run ledger: [reports/final](reports/final). Final human labels and agreement remain pending; see [the judging instructions](docs/final_annotation_workflow.md).
-
-## API usage
-
-The FastAPI app lives in `api/app.py`. The retriever and the corpus metadata are loaded
-**once** at startup (the lifespan), not per request.
-
-```bash
-# the production bundle (BM25 over the main corpus)
-set API_CONFIG=configs/production.yaml
-uvicorn api.app:app --reload
-
-# the reference backend (TF-IDF over the processed corpus; no model download)
-set API_BACKEND=reference
-uvicorn api.app:app --reload
-
-# the env var overrides the config
-set API_BUNDLE=models/bm25-main-1f1f4ce5
-uvicorn api.app:app --reload
-```
+`api/app.py` loads the retriever and corpus metadata once at startup. The bundle folder decides the loader (`model.joblib` = lexical, `embeddings.npy` = dense); a bundle from another corpus or with a wrong hash stops the startup.
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `API_BACKEND` | from the config | `reference` (TF-IDF) or `bundle` (the bundle of `serving.bundle`) |
-| `API_CONFIG` | `configs/production.yaml` | which config (and so which corpus and bundle) to serve |
-| `API_BUNDLE` | - | bundle folder; overrides `serving.bundle` from the config |
+| `API_CONFIG` | `configs/production.yaml` | config (corpus + bundle) to serve |
+| `API_BUNDLE` | - | overrides `serving.bundle` |
+| `API_BACKEND` | from config | `reference` (TF-IDF) or `bundle` |
 | `API_REQUEST_LOG` | `logs/requests.db` | SQLite request log (`""` disables it) |
-
-### Choosing the model with the config
-
-`serving.bundle` in the config (or in any profile file) says which bundle the
-API serves. The folder decides the loader: `model.joblib` is a lexical bundle (tfidf, bm25,
-lsa, written by `src.baseline`), `embeddings.npy` is a dense one (MiniLM, written by
-`src.embeddings`). Both are checked against their manifest before the app answers a single
-request, so a bundle with a wrong hash stops the startup instead of serving wrong results.
-
-```yaml
-serving:
-  bundle: models/bm25-main-1f1f4ce5
-```
-
-`/model-info` then reports the model, the bundle, the corpus hash and the validation
-metrics of the run that produced the bundle (read from the manifest or from MLflow).
-
-The bundle must come from the same corpus the app serves: the result ids of a bundle are
-positions in its own corpus, so the API refuses to start when the two do not match.
-
-Endpoints (`src/contracts.py` owns the request/response schemas):
 
 | Endpoint | Method | What it does |
 | --- | --- | --- |
-| `/health` | GET | `{"status": "ok", ...}` — used by the Docker health check |
-| `/model-info` | GET | the serving model, the bundle, the corpus hash and the metrics |
-| `/predict` | POST | one ingredient list -> `top_k` recipes with matched/missing ingredients |
-| `/batch-predict` | POST | up to 20 instances; the order of the input is preserved |
-| `/` | GET | the web UI (`fe/index.html`) |
-| `/docs` | GET | the interactive OpenAPI documentation (Swagger UI) |
-| `/openapi.json` | GET | the OpenAPI schema itself |
-
-A bad request returns **422** with the reason (e.g. `top_k` out of range, an ingredient
-list that normalises to nothing). `top_k` is an integer in `[1, 20]`, a batch holds at
-most 20 instances.
-
-### Archived E04 endpoint examples
-
-The responses below were measured with the earlier MiniLM E04 deployment.
-The current production model is BM25; its verified responses are recorded in
-`reports/clean_clone_smoke.json`.
-
-`GET /health` — the liveness probe:
-
-```json
-{"status":"ok","model":"minilm_pretrained","model_version":"1"}
-```
-
-`GET /model-info` — which model serves, and how it scored:
-
-```json
-{
-  "model": "minilm_pretrained",
-  "model_version": "1",
-  "backend": "dense",
-  "config": "configs/production.yaml",
-  "corpus_recipes": 50000,
-  "bundle": "models/minilm_pretrained-E04-main-1f1f4ce5",
-  "corpus_sha256": "1f1f4ce50525727ba5242972dac8c93dc32e9555207cbf8b4ebb0f31f0409b46",
-  "metrics": {
-    "recall@5": 0.292,
-    "recall@10": 0.38,
-    "mrr@10": 0.22871746031746035,
-    "n_queries": 500.0,
-    "latency_ms": 58.23839660000522,
-    "wall_seconds": 29.24
-  }
-}
-```
-
-`POST /predict`:
+| `/health` | GET | liveness, used by the Docker health check |
+| `/model-info` | GET | model, bundle, corpus hash and validation metrics |
+| `/predict` | POST | one ingredient list → `top_k` recipes (1–20) with matched/missing ingredients |
+| `/batch-predict` | POST | up to 20 instances, order preserved |
+| `/` | GET | web UI |
+| `/docs` | GET | Swagger UI |
 
 ```bash
 curl -X POST http://127.0.0.1:8000/predict \
   -H "Content-Type: application/json" \
-  -d '{"ingredients": ["chicken", "rice", "garlic"], "top_k": 2}'
+  -d '{"ingredients": ["chicken", "rice", "garlic"], "top_k": 3}'
 ```
 
-```json
-{
-  "model": "minilm_pretrained",
-  "model_version": "1",
-  "latency_ms": 845.99,
-  "results": [
-    {
-      "recipe_id": "recipenlg:7642",
-      "title": "Chicken And Rice",
-      "score": 0.8863415718078613,
-      "matched_ingredients": ["chicken", "rice", "garlic"],
-      "missing_ingredients": ["onion", "salt"],
-      "directions": [
-        "Boil chicken with skin on until done when it is done remove from broth and take off bone.",
-        "Cut up onion put into broth.",
-        "Add minced garlic; cook for 5 minutes.",
-        "Add rice and",
-        "cook until done. Add the chicken to the ingredients add salt to taste.",
-        "Serve with pears or bread."
-      ],
-      "link": "https://www.cookbooks.com/Recipe-Details.aspx?id=709588"
-    },
-    {
-      "recipe_id": "recipenlg:1553265",
-      "title": "Tastier Brown Rice Pilaf",
-      "score": 0.8497336506843567,
-      "matched_ingredients": ["chicken", "garlic"],
-      "missing_ingredients": ["butter", "onion", "brown rice", "salt"],
-      "directions": [
-        "Melt butter in a large sauce pan. Saute onion and garlic (roasted and fresh) in butter over medium heat, stirring frequently, until onion is translucent. Add rice and cook, stirring frequently, until a brown fond has formed on the bottom of the pan.",
-        "Add stock and some salt, stir, and bring to a boil. Reduce to simmer (low) and cover to cook, about 15-20 minutes with regular rice, 10 minutes for the faster cooking rice.",
-        "When rice is cooked, turn off heat, add parmigiano and green onions and fluff with a fork.",
-        "Yum!"
-      ],
-      "link": "https://tastykitchen.com/recipes/sidedides/tastier-brown-rice-pilaf/"
-    }
-  ],
-  "note": null
-}
-```
+Invalid input returns **422** with the reason. Verified BM25 responses: [reports/clean_clone_smoke.json](reports/clean_clone_smoke.json).
 
-`POST /batch-predict` — the order of the input is preserved:
+**Web UI** (`fe/index.html`): static page, no build step; keyboard accessible, `?q=chicken,rice&k=3` links straight to a search. Screenshots: `reports/figures/ui_390.png`, `ui_1440.png`.
 
-```bash
-curl -X POST http://127.0.0.1:8000/batch-predict \
-  -H "Content-Type: application/json" \
-  -d '{"instances": [{"ingredients": ["chicken", "rice"], "top_k": 1}, {"ingredients": ["tomato", "basil"], "top_k": 1}]}'
-```
+## Monitoring and MLflow
 
-```json
-{
-  "predictions": [
-    {
-      "model": "minilm_pretrained",
-      "model_version": "1",
-      "latency_ms": 203.56,
-      "results": [
-        {
-          "recipe_id": "recipenlg:2199670",
-          "title": "Shaun the Sheep Character Bento",
-          "score": 0.7940338850021362,
-          "matched_ingredients": ["rice"],
-          "missing_ingredients": ["cheese"],
-          "directions": [
-            "Make 2 bento sized rice balls.",
-            "Add your choice of filling.",
-            "Set aside a small amount of rice.",
-            "Cut the nori into Shaun's face with scissors, and for the pupils, use a hole puncher to punch them out or cut them out freehand.",
-            "For the eyeballs, use the tip of a straw to punch out the cheese .",
-            "Attach the facial features to the rice ball, place the remaining rice as the fluffy wool on the forehead and there you have Shaun!"
-          ],
-          "link": "https://cookpad.com/us/recipes/151775-shaun-the-sheep-character-bento"
-        }
-      ],
-      "note": null
-    },
-    {
-      "model": "minilm_pretrained",
-      "model_version": "1",
-      "latency_ms": 128.63,
-      "results": [
-        {
-          "recipe_id": "recipenlg:2116245",
-          "title": "My Best Sandwich Ever",
-          "score": 0.845429003238678,
-          "matched_ingredients": ["tomato", "basil"],
-          "missing_ingredients": ["salad"],
-          "directions": [
-            "On a frying pan, cook the steak a few minutes on each side, according to your taste.",
-            "(Rare for me, Im a meat-eater.)",
-            "Split the baguette in half lengthwise.",
-            "Spread the bottom part of the baguette with the pesto rosso.",
-            "Top with basil, tomato, steak and Romaine leaves.",
-            "Cap with the baguette top.",
-            "Close your eyes, take a bite and enjoy!"
-          ],
-          "link": "https://tastykitchen.com/recipes/main-courses/my-best-sandwich-ever/"
-        }
-      ],
-      "note": null
-    }
-  ]
-}
-```
-
-A bad request, answered with **422** and the reason:
-
-```bash
-curl -X POST http://127.0.0.1:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{"ingredients": [], "top_k": 3}'
-```
-
-```json
-{"detail":[{"type":"too_short","loc":["body","ingredients"],"msg":"List should have at least 1 item after validation, not 0","input":[],"ctx":{"field_type":"List","min_length":1,"actual_length":0}}]}
-```
-
-In Python:
-
-```python
-import requests
-
-response = requests.post(
-    "http://127.0.0.1:8000/predict",
-    json={"ingredients": ["chicken", "rice"], "top_k": 3},
-    timeout=30,
-)
-response.raise_for_status()
-for result in response.json()["results"]:
-    print(result["title"], result["matched_ingredients"], result["missing_ingredients"])
-```
-
-Every request is appended to the SQLite request log
-(`RequestLogRecord` from `src/contracts.py`): request id, timestamp, endpoint, model,
-normalised ingredients, `top_k`, result ids, scores, latency and status code. SQLite is
-used because it is safe with several workers writing at the same time (WAL mode + a busy
-timeout). `src/monitor.py` reads that log:
+- Every request is logged to SQLite (`RequestLogRecord`). `src/monitor.py` reports KS-test drift on query length, OOV ingredient rate, zero-hit rate, error rate and p50/p95/p99 latency, and returns `INSUFFICIENT_DATA` for small samples.
 
 ```bash
 python -m src.monitor --log-path logs/requests.db --out reports/monitoring_report.md
-```
-
-### recommend() and the E06 rerank
-
-`src/predict.py` holds the recommendation logic used by the API:
-
-```python
-from src.predict import load_corpus_metadata, recommend
-
-metadata = load_corpus_metadata("data/processed/main/corpus.jsonl")
-results = recommend(["chicken", "rice"], 5, retriever=retriever, metadata=metadata)
-```
-
-`matched_ingredients` are the query ingredients the recipe uses, `missing_ingredients`
-the recipe ingredients the user does not have (both on the normalised ingredient sets).
-
-The **missing-first rerank** (E06 ablation) ranks the top 100 candidates by the number
-of missing ingredients (fewest first). It is **off by default**; `reports/e04_e05_main_benchmark.md`
-shows that it costs 34% of the relative Recall@10 on the main corpus (0.576 -> 0.380),
-because the synthetic label is the origin recipe, which is exactly the recipe with the
-most missing ingredients.
-
-## Web UI
-
-`fe/index.html` is a static page (HTML/CSS/JS, no build step, no dependency) that the API
-serves through `StaticFiles`. It asks for ingredients and a number of results, and shows for
-every recipe the title, the ingredients you have, the ones you are missing, the directions
-(behind a toggle) and the link to the source recipe.
-
-- The page is in English, works with the keyboard only (labels, visible focus, `aria-live`
-  status) and shows a loading, empty, error and retry state.
-- Recipe content is written with `textContent`, never with `innerHTML`, and a link only
-  becomes clickable when its protocol is `http:` or `https:`.
-- `?q=chicken,rice,garlic&k=3` fills the form and searches, so a result page can be linked.
-
-```bash
-uvicorn api.app:app --reload
-# open http://127.0.0.1:8000/
-```
-
-The screenshots of the task (390 px and 1440 px, real results from the API) are in
-`reports/figures/ui_390.png` and `reports/figures/ui_1440.png`. They are taken with
-headless Chrome:
-
-```bash
-python scripts/shoot_ui.py --url http://127.0.0.1:8000/ --ingredients "chicken, rice, garlic"
-```
-
-## Benchmark
-
-`src/benchmark.py` measures the serving bundles: p50/p95 latency, peak RAM, startup time
-and bundle size. Every bundle is measured in its **own process** (peak RSS is a process
-high-water mark), with 20 warmup queries and 100 measured queries, one after the other.
-
-```bash
-python -m src.benchmark --config configs/default.yaml --out reports/benchmark.json
-```
-
-It writes `reports/benchmark.json` (the numbers plus the CPU and the RAM of the machine) and
-`reports/benchmark.md` (the same numbers as a table). A bundle built from another corpus is
-skipped instead of being timed on queries that do not belong to it.
-
-## Docker
-
-The image is CPU-only: torch comes from the CPU wheel index, so no CUDA is pulled in.
-
-```bash
-docker compose up --build          # API on http://127.0.0.1:8080
-docker compose --profile mlflow up  # optional MLflow UI on http://127.0.0.1:5000
-```
-
-What happens on the first `up`:
-
-1. The `init-bundles` service copies the host's `models/` folder into the named volume
-   `bundles` (a no-op when the volume already holds them).
-2. The `api` service starts only after that copy is done (`service_completed_successfully`),
-   and reads the bundle from the volume, read-only.
-3. `data/` is bind-mounted read-only; the request log goes to the `api_logs` volume, so it
-   survives `docker compose down`.
-
-So a clean clone needs the repository, `data/processed/` and `models/` on the host, but
-nothing else: no bundle has to be baked into the image.
-
-- The health check (`HEALTHCHECK` in the `Dockerfile`) calls `/health` every 30 s; the
-  container is only "healthy" once the bundle has loaded.
-- The served model comes from the config (`configs/production.yaml` by default). To serve
-  another bundle, point the config at it or set `API_BUNDLE`:
-
-```bash
-API_BUNDLE=models/bm25-main-1f1f4ce5 \
-  API_CONFIG=configs/production.yaml docker compose up --build
-```
-
-- The image bakes in the ingredient-parser NLTK resource **and** the MiniLM weights, so the
-  dense backend also starts without network access. The corpus and the bundles are still
-  mounted at runtime, never baked in.
-
-To rebuild the `bundles` volume from scratch (after changing the host's `models/`):
-
-```bash
-docker compose run --rm init-bundles
-docker compose up -d --build --force-recreate api
-```
-
-The image size is reported in `reports/benchmark.md` after the build (torch CPU wheels are
-the bulk of it).
-
-The refresh command preserves request logs and other named volumes.
-
-### Native vs Docker parity
-
-The same bundle must give the same answers on the host and in the container.
-`scripts/check_parity.py` sends the same queries to both servers and compares the recipe
-ids (same order) and the scores (within a tolerance); the log of the check is
-`reports/parity.json`.
-
-```bash
-# native
-API_CONFIG=configs/production.yaml uvicorn api.app:app --port 8010
-# container
-docker compose up -d --build
-docker compose exec -T api python scripts/smoke_api.py --expected-model bm25
-python scripts/check_parity.py --native http://127.0.0.1:8010 --docker http://127.0.0.1:8080 --expected-model bm25
-```
-
-Verified locally on 2026-11-03 with Docker 29.7.2: rebuilt image, healthy BM25
-container, internal endpoint smoke and 5/5 parity queries passed with zero score
-difference. Evidence and image ID: [Docker verification](reports/docker_verification.md).
-
-## MLflow
-
-MLflow tracks all baseline runs, pretrained evaluations, and fine-tuning experiments under `mlflow.db`:
-
-```bash
-# Launch the MLflow UI
+python scripts/simulate_drift.py        # no-drift vs drift scenarios, see reports/drift_simulation.md
 mlflow ui --backend-store-uri sqlite:///mlflow.db
 ```
 
-Experiments are recorded in `recipe-retrieval`. Serving bundles are saved as artifacts, and fine-tuned models are registered in the MLflow Model Registry under `minilm_finetuned` with aliases (`staging`, `production`).
+- The repository includes an `mlflow.db` snapshot. Fine-tuned models are registered as `minilm_finetuned` with `staging` / `production` aliases; the API serves from bundles and does not need a tracking server.
+- Rollback in one command: `python -m src.train --rollback 1 --alias production` ([trial](reports/mlflow_rollback_trial.md)).
 
-### Controlled regularization evidence
-
-`notebooks/04_regularization_controlled_colab.ipynb` runs the same base weights,
-seed, sampled train/validation pairs, full batches, batch order, learning rate,
-sequence limit and epoch count with AdamW `weight_decay=0.0` and `0.01`.
-It logs measured `optimization_loss`, `train_loss` and `val_loss` histories to
-`recipe-regularization-ablation`. The fixed train/validation loss probes run in
-eval mode with equal batch sizes and counts. It never reads the test split.
+## Benchmark and Docker
 
 ```bash
-python -m scripts.run_regularization_ablation --device cpu
-mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000
+python -m src.benchmark --config configs/default.yaml --out reports/benchmark.json   # p50/p95 latency, peak RAM, startup, size
+docker compose up --build              # API on http://127.0.0.1:8080
+docker compose --profile mlflow up     # optional MLflow UI on :5000
 ```
 
-Hardware, pair hashes, initial-weight hash, batch-schedule hash, run IDs and
-measurements are saved in `reports/regularization_ablation/summary.json`.
-This single-seed loss experiment does not establish a retrieval improvement or
-statistical significance. UI evidence is captured from the actual MLflow pages;
-`generate_mlflow_figures.py` can only plot measured histories and cannot create
-imitation UI screenshots.
+- CPU-only image. `init-bundles` copies the host `models/` into a named volume; `data/` is mounted read-only; request logs persist in `api_logs`.
+- Native vs Docker parity: `scripts/check_parity.py` — 5/5 queries identical, zero score difference ([verification](reports/docker_verification.md), 2026-11-03).
+
+## Reproducibility
+
+- `python -m src.data_collection` reproduces the processed files exactly (hashes in the manifest).
+- `python -m pytest` runs offline in seconds; tests that need real data skip when it is absent.
+- GPU retraining run (2026-11-04, RTX 3060, CUDA 12.8): [results](reports/retraining_20261104/README.md) and [model release](https://github.com/minhhoangb/food-recipe-recommendation-system/releases/tag/model-artifacts-gpu-20261104).
+- Collaboration rules: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Repository structure
 
 ```
-api/            FastAPI app, request_log.py
-configs/        default.yaml, pilot.yaml, production.yaml
-data/raw/       original CSV, never modified (git-ignored)
-data/processed/ corpus.jsonl, splits.json, queries.jsonl, qrels.jsonl, manifest per profile
-fe/             static web UI (index.html)
-models/         serving bundles (git-ignored)
-notebooks/      00_colab_bootstrap.ipynb, 02_finetune_colab.ipynb, EDA
-reports/        figures, final report, monitoring_report.md, benchmark.json
-                manual_eval/  the dev judging pool and the annotation logs
-scripts/        verify_data.py, package_artifacts.py, fetch_artifacts.py
-                shoot_ui.py, check_parity.py, apply_labels.py
-src/            contracts, config, utils, normalize, preprocess, data_collection, queries, reference
-                embeddings, retrieval, evaluation, memory, serving, benchmark
-                build_pairs, finetune, train, monitor
-tests/          pytest suite, tests/fixtures (hand-written, not RecipeNLG)
-docs/           implementation plans per owner
-Dockerfile      CPU-only image of the API
-docker-compose.yml  api + the bundles volume + the optional MLflow UI
+api/        FastAPI app and request log
+configs/    default, pilot, production
+data/       raw (git-ignored) and processed corpus, splits, queries, qrels
+fe/         static web UI
+models/     serving bundles (git-ignored)
+notebooks/  EDA, Colab fine-tuning, ablations
+reports/    results, final evaluation, monitoring, benchmarks, figures
+scripts/    data fetch/verify, smoke and parity checks, report builders
+src/        data pipeline, retrievers, evaluation, fine-tuning, serving, monitoring
+tests/      pytest suite
 ```
-
-## Reproducibility
-
-GPU retraining (2026-11-04): [measured validation results and run evidence](reports/retraining_20261104/README.md).
-The [separate model release](https://github.com/minhhoangb/food-recipe-recommendation-system/releases/tag/model-artifacts-gpu-20261104)
-contains weights, embeddings, indexes and the MLflow snapshot, with SHA-256 in
-[`artifacts.json`](reports/retraining_20261104/artifacts.json). The frozen E10 and
-production selection are unchanged; another training run is not required to use these artifacts.
-
-The verified local GPU environment uses PyTorch 2.9.1 with CUDA 12.8 on an RTX 3060 Laptop.
-Install that build into the activated environment with
-`python -m pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cu128`.
-Check device availability with
-`python -c "import torch; print(torch.__version__, torch.cuda.is_available())"`.
-
-Khung 3 verification (2026-11-03):
-
-- Fine-tuned bundles include an `encoder/` directory. Every checkpoint file is hashed in
-  `manifest.json`; the API, benchmark and evaluator load that encoder instead of pretrained
-  weights. Build a portable FT bundle with
-  `python -m src.embeddings --config configs/default.yaml --model-path models/minilm_finetuned-main-cpu1ep`.
-  Legacy FT bundles without a packaged encoder fail clearly; explicit evaluation encoders still work.
-- `src.train` supports both `python src/train.py` and `python -m src.train` and verifies
-  cached inputs and output hashes. Processed-data cache checks cover seed, data/query
-  settings, normalization and file hashes; download URLs, serving settings and paths do
-  not invalidate the data. New builds record `data_config_sha256`; shared legacy artifacts
-  are checked against the hash-verified original config in `configs/provenance/processed_v1.yaml`.
-  Data/config mismatches stop the pipeline instead of silently overwriting shared data.
-  Checkpoint caches include pairs, hyperparameters and device. `train_summary.json` records actual
-  training measurements; missing legacy measurements are omitted from MLflow.
-- API logs include one missing-ingredient count per returned recipe. Existing SQLite logs are
-  migrated; missing fields in old records remain unknown. Monitoring excludes test/final
-  reference queries and does not invent reference latencies.
-- `python -m scripts.record_rollback_trial --bootstrap` creates trial registry revisions only when
-  the local registry is empty, checks a rollback, restores the original production alias and sends
-  real HTTP requests to a fresh API with an unavailable tracking endpoint. Both initial trial
-  revisions use the same locked FT checkpoint; this tests registry operations, not quality changes.
-  Evidence: `reports/mlflow_rollback_trial.json` and `reports/offline_api_verification.json`.
-- `reports/benchmark.json` includes FT with 20 warmup and 100 measured validation queries per bundle.
-  `reports/ui_viewports.json` records actual 390px/1440px CSS viewports, overflow and keyboard checks.
-
-- Seed 42 everywhere; `configs/default.yaml` holds every data parameter and is hashed into each manifest.
-- `python -m src.data_collection` reproduces the processed files exactly (hashes are in the manifest; `tests/test_data_collection.py::test_build_is_reproducible` checks it on a fixture).
-- `python -m pytest` runs offline in seconds. Tests that read the real processed data skip themselves if it is absent.
-- Training from scratch: run `python src/train.py --config configs/pilot.yaml`. Supports multi-stage orchestration (`raw`, `processed`, `baseline`, `embeddings`, `pairs`, `finetune`, `evaluate`) with hash-based caching to avoid redundant computation.
-  - `--stage <name>`: Execute a single stage (e.g., `--stage pairs`).
-  - `--from-stage <name>`: Run sequentially starting from a specific stage.
-  - `--force`: Bypass hash caching and force re-computation.
-  - `--device cpu`: Guaranteed CPU pathway for environments without GPU.
-  - Missing raw dataset: Exits cleanly with clear data acquisition instructions (never performs silent background downloads).
-- Collaboration rules and file ownership: [CONTRIBUTING.md](CONTRIBUTING.md).
